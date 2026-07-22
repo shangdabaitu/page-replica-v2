@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面复刻结果浏览</title>
+    <style>
+        :root {
+            --bg: #f6f8fa;
+            --surface: #ffffff;
+            --ink: #1f2328;
+            --muted: #656d76;
+            --rule: #d0d7de;
+            --accent: #0969da;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+        }
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--rule);
+            padding: 1rem 1.5rem;
+        }
+        header h1 { margin: 0; font-size: 1.2rem; }
+        header p { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.85rem; }
+        main { display: flex; height: calc(100vh - 70px); }
+        aside {
+            width: 360px;
+            background: var(--surface);
+            border-right: 1px solid var(--rule);
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        .date-section { margin-bottom: 1.5rem; }
+        .date-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+            cursor: pointer;
+        }
+        .match-list { list-style: none; padding: 0; margin: 0; }
+        .match-list li {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--rule);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .match-list li:hover { background: var(--bg); }
+        .match-list .teams { font-weight: 600; }
+        .match-list .meta { color: var(--muted); font-size: 0.8rem; }
+        .preview {
+            flex: 1;
+            padding: 0;
+            background: #fff;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--muted);
+        }
+        @media (max-width: 768px) {
+            main { flex-direction: column; }
+            aside { width: 100%; height: 40%; }
+            .preview { height: 60%; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>页面复刻结果浏览</h1>
+    <p>静态展示已复刻的日期与比赛，点击左侧比赛可在右侧查看对应详情页。</p>
+</header>
+<main>
+    <aside id="sidebar">
+        <div class="empty">加载中…</div>
+    </aside>
+    <div class="preview" id="preview">
+        <div class="empty">请在左侧选择日期或比赛</div>
+    </div>
+</main>
+
+<script>
+async function loadDates() {
+    const resp = await fetch('dates.json');
+    const dates = await resp.json();
+    const sidebar = document.getElementById('sidebar');
+    sidebar.innerHTML = '';
+
+    dates.forEach(d => {
+        const section = document.createElement('div');
+        section.className = 'date-section';
+
+        const title = document.createElement('div');
+        title.className = 'date-title';
+        title.textContent = d.date;
+        title.onclick = () => loadPage(d.list_page);
+        section.appendChild(title);
+
+        const ul = document.createElement('ul');
+        ul.className = 'match-list';
+        d.matches.forEach(m => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div class="teams">${m.home_team} vs ${m.away_team}</div>
+                <div class="meta">${m.league} · ${m.match_time} · ${m.status}</div>
+            `;
+            li.onclick = () => loadPage(`${d.date}/analysis/${m.match_id}.htm`);
+            ul.appendChild(li);
+        });
+        section.appendChild(ul);
+        sidebar.appendChild(section);
+    });
+}
+
+function loadPage(path) {
+    const preview = document.getElementById('preview');
+    preview.innerHTML = `<iframe src="${path}" sandbox="allow-scripts allow-same-origin"></iframe>`;
+}
+
+loadDates();
+</script>
+</body>
+</html>
