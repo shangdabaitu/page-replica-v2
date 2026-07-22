@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面复刻系统 v2</title>
+    <style>
+        :root {
+            --bg: #f6f8fa;
+            --surface: #ffffff;
+            --ink: #1f2328;
+            --muted: #656d76;
+            --rule: #d0d7de;
+            --accent: #0969da;
+            --accent2: #1f883d;
+            --danger: #cf222e;
+            --warning: #9a6700;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            line-height: 1.6;
+        }
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--rule);
+            padding: 1.2rem 1.5rem;
+        }
+        header h1 { margin: 0; font-size: 1.25rem; }
+        header p { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.9rem; }
+        main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; }
+        label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.3rem; }
+        input[type="date"], input[type="number"] {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            min-width: 160px;
+        }
+        button {
+            padding: 0.55rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            margin-right: 0.4rem;
+            background: #ddf4ff;
+            color: var(--accent);
+            cursor: pointer;
+        }
+        .badge:hover { background: #b6e3ff; }
+        #log {
+            height: 260px;
+            overflow-y: auto;
+            background: #0d1117;
+            color: #c9d1d9;
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 0.82rem;
+            white-space: pre-wrap;
+        }
+        #log .ok { color: #3fb950; }
+        #log .warn { color: #d29922; }
+        #log .err { color: #f85149; }
+        #log .info { color: #58a6ff; }
+        iframe {
+            width: 100%;
+            height: 720px;
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            background: var(--surface);
+        }
+        .status { font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>页面复刻系统 v2</h1>
+    <p>数据源：竞彩足球列表页，按日期复刻并自动进行视觉对比</p>
+</header>
+<main>
+    <div class="card">
+        <div class="row">
+            <div>
+                <label for="dateInput">选择日期</label>
+                <input type="date" id="dateInput" value="2026-07-21">
+            </div>
+            <div>
+                <label for="levelInput">最大层级（默认 3）</label>
+                <input type="number" id="levelInput" value="3" min="1" max="5">
+            </div>
+            <button id="startBtn">开始复刻</button>
+        </div>
+        <div class="status" id="dateStatus"></div>
+    </div>
+
+    <div class="card">
+        <strong>已复刻日期</strong>
+        <div id="datesList" style="margin-top:0.5rem;">加载中…</div>
+    </div>
+
+    <div class="card">
+        <strong>复刻进度</strong>
+        <div id="log"></div>
+        <div class="status" id="progressStatus"></div>
+    </div>
+
+    <div class="card hidden" id="previewCard">
+        <strong>复刻结果预览（第一层列表页）</strong>
+        <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+</main>
+
+<script>
+const dateInput = document.getElementById('dateInput');
+const levelInput = document.getElementById('levelInput');
+const startBtn = document.getElementById('startBtn');
+const logEl = document.getElementById('log');
+const progressStatus = document.getElementById('progressStatus');
+const datesList = document.getElementById('datesList');
+const dateStatus = document.getElementById('dateStatus');
+const previewCard = document.getElementById('previewCard');
+const previewFrame = document.getElementById('previewFrame');
+
+function log(msg, cls='info') {
+    const line = document.createElement('div');
+    line.className = cls;
+    const t = new Date().toLocaleTimeString();
+    line.textContent = `[${t}] ${msg}`;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+}
+
+async function loadDates() {
+    try {
+        const res = await fetch('/api/dates');
+        const data = await res.json();
+        datesList.innerHTML = '';
+        if (data.dates.length === 0) {
+            datesList.textContent = '暂无';
+            return;
+        }
+        data.dates.forEach(d => {
+            const span = document.createElement('span');
+            span.className = 'badge';
+            span.textContent = d;
+            span.onclick = () => {
+                dateInput.value = d.replace(/(\d+)-(\d+)-(\d+)/, (m,y,mo,day) => `${y}-${mo.padStart(2,'0')}-${day.padStart(2,'0')}`);
+                previewDate(d);
+            };
+            datesList.appendChild(span);
+        });
+    } catch (e) {
+        datesList.textContent = '加载失败';
+    }
+}
+
+async function previewDate(date) {
+    try {
+        const res = await fetch('/api/status?date=' + encodeURIComponent(date));
+        const data = await res.json();
+        if (data.list_page_url) {
+            previewCard.classList.remove('hidden');
+            previewFrame.src = data.list_page_url;
+            dateStatus.textContent = `已加载 ${date} 的列表页`;
+        } else {
+            dateStatus.textContent = `${date} 尚未生成列表页`;
+        }
+    } catch (e) {
+        dateStatus.textContent = '查询状态失败';
+    }
+}
+
+startBtn.addEventListener('click', () => {
+    const rawDate = dateInput.value;
+    if (!rawDate) {
+        alert('请选择日期');
+        return;
+    }
+    // 保持与 URL 参数一致的格式：2026-7-21
+    const date = rawDate.replace(/-0/g, '-');
+    const maxLevel = parseInt(levelInput.value, 10) || 3;
+
+    logEl.innerHTML = '';
+    previewCard.classList.add('hidden');
+    startBtn.disabled = true;
+    progressStatus.textContent = '复刻中…';
+    log(`开始复刻日期：${date}`, 'info');
+
+    const es = new EventSource(`/api/replicate?date=${encodeURIComponent(date)}&max_level=${maxLevel}`);
+    es.onmessage = (ev) => {
+        let data;
+        try { data = JSON.parse(ev.data); } catch { data = { type: 'raw', message: ev.data }; }
+        switch (data.type) {
+            case 'start':
+                log(`最大递归层级：${data.max_level}`, 'info');
+                break;
+            case 'progress':
+                log(`[L${data.level}] 处理 ${shortUrl(data.url)}`, 'info');
+                break;
+            case 'page_done':
+                log(`[L${data.level}] ${data.status} | 差异 ${fmtDiff(data.diff_ratio)} | ${shortUrl(data.url)}`, data.status === 'ok' ? 'ok' : (data.status === 'error' ? 'err' : 'warn'));
+                break;
+            case 'warning':
+                log(`警告：${data.message}`, 'warn');
+                break;
+            case 'error':
+                log(`错误：${data.message}`, 'err');
+                break;
+            case 'finish':
+                log(`复刻完成，共 ${data.report.pages_total} 个页面，成功 ${data.report.pages_ok}，需修复 ${data.report.pages_fix}，失败 ${data.report.pages_error}，耗时 ${data.report.elapsed_seconds}s`, 'ok');
+                es.close();
+                startBtn.disabled = false;
+                progressStatus.textContent = '已完成';
+                previewDate(data.date || date);
+                loadDates();
+                break;
+        }
+    };
+    es.onerror = () => {
+        log('SSE 连接中断', 'warn');
+        startBtn.disabled = false;
+        progressStatus.textContent = '连接已断开';
+    };
+});
+
+function shortUrl(url) {
+    try { return url.replace(/^https?:\/\/[^/]+/, ''); } catch { return url; }
+}
+function fmtDiff(v) {
+    if (v === undefined || v === null) return 'N/A';
+    return (v * 100).toFixed(2) + '%';
+}
+
+loadDates();
+</script>
+</body>
+</html>
