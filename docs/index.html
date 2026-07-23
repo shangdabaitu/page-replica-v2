@@ -61,24 +61,31 @@
         button.secondary { background: var(--accent2); }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
         .status { font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem; }
-        .preview-wrapper {
-            min-width: 1100px;
-            overflow-x: auto;
+        .actions { margin-bottom: 1rem; }
+        .actions a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        th, td {
             border: 1px solid var(--rule);
-            border-radius: 6px;
-            background: var(--surface);
+            padding: 0.6rem 0.8rem;
+            text-align: center;
         }
-        iframe {
-            width: 1100px;
-            height: 800px;
-            border: none;
-            display: block;
-        }
+        th { background: var(--bg); font-weight: 600; }
+        td.left { text-align: left; }
+        tr:hover { background: #f6f8fa; }
+        .score { color: #d1242f; font-weight: 700; }
+        .league { color: var(--muted); }
+        .detail-link { color: var(--accent); text-decoration: none; }
+        .detail-link:hover { text-decoration: underline; }
         .empty {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 300px;
+            height: 200px;
             color: var(--muted);
         }
     </style>
@@ -107,9 +114,8 @@
 
     <div class="card">
         <strong>复刻结果预览（第一层列表页）</strong>
-        <div class="preview-wrapper" id="previewWrapper">
-            <div class="empty" id="emptyMsg">请选择日期并点击查看数据</div>
-        </div>
+        <div class="actions" id="actions"></div>
+        <div id="preview"></div>
     </div>
 </main>
 
@@ -136,14 +142,52 @@ async function loadDates() {
 
 function showDate(date) {
     const item = dates.find(d => d.date === date);
-    const wrapper = document.getElementById('previewWrapper');
+    const preview = document.getElementById('preview');
     const status = document.getElementById('status');
+    const actions = document.getElementById('actions');
     if (!item) {
-        wrapper.innerHTML = '<div class="empty">未找到该日期数据</div>';
+        preview.innerHTML = '<div class="empty">未找到该日期数据</div>';
         status.textContent = '';
+        actions.innerHTML = '';
         return;
     }
-    wrapper.innerHTML = `<iframe src="${item.list_page}" sandbox="allow-scripts allow-same-origin"></iframe>`;
+
+    actions.innerHTML = `<a href="${item.list_page}" target="_blank">在新标签页打开原始复刻列表页 ↗</a>`;
+
+    let html = `
+        <table>
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>联赛</th>
+                    <th>比赛时间</th>
+                    <th>主队</th>
+                    <th>比分</th>
+                    <th>客队</th>
+                    <th>状态</th>
+                    <th>详情</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    item.matches.forEach((m, idx) => {
+        const detailUrl = `${date}/analysis/${m.match_id}.htm`;
+        html += `
+            <tr>
+                <td>${idx + 1}</td>
+                <td class="league">${m.league}</td>
+                <td>${m.match_time}</td>
+                <td class="left">${m.home_team}</td>
+                <td class="score">-</td>
+                <td class="left">${m.away_team}</td>
+                <td>${m.status}</td>
+                <td><a class="detail-link" href="${detailUrl}" target="_blank">查看</a></td>
+            </tr>
+        `;
+    });
+    html += '</tbody></table>';
+
+    preview.innerHTML = html;
     status.textContent = `已加载 ${date}，共 ${item.matches.length} 场比赛`;
 }
 
