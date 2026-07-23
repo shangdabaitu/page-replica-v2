@@ -30,7 +30,10 @@ def get_owner_id():
         owners = owners.get("owners", owners)
     if not owners:
         raise RuntimeError("No Render owners found")
-    return owners[0]["id"]
+    first = owners[0]
+    if "owner" in first:
+        return first["owner"]["id"]
+    return first["id"]
 
 
 def find_service():
