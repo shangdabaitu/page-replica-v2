@@ -17,18 +17,20 @@ TOKEN = os.environ["HUGGINGFACE_TOKEN"]
 def main():
     api = HfApi(token=TOKEN)
 
-    # 创建 Space（如果不存在）
-    try:
-        api.create_repo(
-            repo_id=REPO_ID,
-            repo_type="space",
-            space_sdk=SDK,
-            private=False,
-            exist_ok=True,
-        )
-        print(f"Space ready: https://huggingface.co/spaces/{REPO_ID}")
-    except Exception as e:
-        print("create_repo warning:", e)
+    # 先确认 token 对应的用户
+    me = api.whoami()
+    print("Authenticated as:", me)
+
+    # 创建 Space（如果不存在）；失败直接抛异常看原因
+    print(f"Creating space {REPO_ID} ...")
+    result = api.create_repo(
+        repo_id=REPO_ID,
+        repo_type="space",
+        space_sdk=SDK,
+        private=False,
+        exist_ok=True,
+    )
+    print("create_repo result:", result)
 
     # 把需要上传的文件复制到临时目录
     with tempfile.TemporaryDirectory() as tmp:
