@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 import config
 from core.fetcher import fetch_url, normalize_url, decode_html
 from core.inliner import inline_page
+from core.renderer import render_html
 from core.simplifier import simplify_html
 from core.watermark import inject_watermark
 from core.extractor import (
@@ -77,6 +78,28 @@ def _patch_analysis_opener(html: str) -> str:
     return html
 
 
+def _freeze_rendered_page(html: str) -> str:
+    """
+    对渲染后的 DOM 做冻结处理：删除会重新初始化/清空的脚本，
+    只保留 openAnalysisPage 的最小本地实现，确保页面以静态方式展示。
+    """
+    soup = BeautifulSoup(html, "lxml")
+    for tag in list(soup.find_all("script")):
+        text = tag.string or ""
+        if "openAnalysisPage" in text:
+            new_tag = soup.new_tag("script")
+            new_tag.string = "function openAnalysisPage(scheduleID){ window.open('./analysis/' + scheduleID + '.htm'); }"
+            tag.replace_with(new_tag)
+        else:
+            tag.decompose()
+    # 移除可能依赖已删除脚本的事件属性（保留 openAnalysisPage 的 onclick）
+    for tag in soup.find_all(attrs={"onmouseover": True, "onmouseout": True}):
+        if "openAnalysisPage" not in (tag.get("onclick") or ""):
+            del tag["onmouseover"]
+            del tag["onmouseout"]
+    return str(soup)
+
+
 def _rewrite_links(html: str, base_url: str, source_path: Path, url_map: dict[str, str]) -> str:
     """把已复刻的链接替换成相对于当前文件的本地路径。"""
     soup = BeautifulSoup(html, "lxml")
@@ -129,11 +152,19 @@ def _process_single_page(
             if data is None:
                 raise RuntimeError(f"第 {attempt + 1} 次抓取失败")
             raw_html = decode_html(data, ct)
-            inlined = inline_page(raw_html, url)
-            simplified = simplify_html(inlined)
+
+            # 用 Headless Chromium 渲染，拿到 JS 执行后的 DOM（表格、按钮等）
+            try:
+                rendered_html = render_html(url)
+            except Exception as e:
+                print(f"[WARN] 页面渲染失败，回退到原始 HTML: {url} -> {e}")
+                rendered_html = raw_html
+
+            inlined = inline_page(rendered_html, url)
+            frozen = _freeze_rendered_page(inlined)
+            simplified = simplify_html(frozen)
             marked = inject_watermark(simplified)
-            patched = _patch_analysis_opener(marked)
-            final_html = _rewrite_links(patched, url, output_path, url_map)
+            final_html = _rewrite_links(marked, url, output_path, url_map)
             best_html = final_html
 
             output_path.write_text(final_html, encoding="utf-8")

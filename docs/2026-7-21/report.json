@@ -182,7 +182,7 @@
       "level": 2,
       "rel_path": "AsianOdds_n/2999991.html",
       "status": "ok",
-      "attempt": 1,
+      "attempt": 2,
       "diff_ratio": null,
       "message": "无法启动浏览器，跳过视觉对比",
       "output_path": "2026-7-21/AsianOdds_n/2999991.html"
@@ -228,5 +228,5 @@
       "output_path": "2026-7-21/oddslist/3033092.htm"
     }
   ],
-  "elapsed_seconds": 157.17
+  "elapsed_seconds": 412.63
 }

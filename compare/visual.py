@@ -26,12 +26,20 @@ def _playwright_ok() -> bool:
 
 
 def _launch_browser(p):
-    """启动 Chromium，优先使用已安装的系统浏览器。"""
-    try:
-        return p.chromium.launch()
-    except Exception as e:
-        print(f"[WARN] 启动 Chromium 失败: {e}")
-        return None
+    """启动 Chromium，优先使用系统已安装的 Chrome/Chromium。"""
+    import shutil
+    for name in ("google-chrome-stable", "google-chrome", "chromium", "chromium-browser"):
+        exe = shutil.which(name)
+        if exe:
+            try:
+                return p.chromium.launch(
+                    executable_path=exe,
+                    args=["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"],
+                )
+            except Exception as e:
+                print(f"[WARN] 用 {name} 启动 Chromium 失败: {e}")
+    print("[WARN] 未找到可用的系统 Chrome/Chromium")
+    return None
 
 
 def screenshot_page(url: str, width: int = 1440, height: int = 900) -> Image.Image | None:
@@ -146,7 +154,15 @@ def compare_pages(source_url: str, replica_path: Path, output_dir: Path | None =
             "message": "无法启动浏览器，跳过视觉对比",
         }
 
-    replica_img = Image.open(replica_path)
+    replica_img = screenshot_page(f"file://{replica_path.resolve()}")
+    if replica_img is None:
+        return {
+            "source_url": source_url,
+            "replica_path": str(replica_path),
+            "diff_ratio": None,
+            "status": "skipped",
+            "message": "无法对复刻结果截图，跳过视觉对比",
+        }
     ratio, diff_img = compute_diff(source_img, replica_img)
 
     diff_path = None
