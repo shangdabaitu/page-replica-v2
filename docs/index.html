@@ -12,6 +12,7 @@
             --muted: #656d76;
             --rule: #d0d7de;
             --accent: #0969da;
+            --accent2: #1f883d;
         }
         * { box-sizing: border-box; }
         body {
@@ -27,107 +28,124 @@
         }
         header h1 { margin: 0; font-size: 1.2rem; }
         header p { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.85rem; }
-        main { display: flex; height: calc(100vh - 70px); }
-        aside {
-            width: 360px;
+        main { padding: 1rem 1.5rem; max-width: 1200px; margin: 0 auto; }
+        .card {
             background: var(--surface);
-            border-right: 1px solid var(--rule);
-            overflow-y: auto;
+            border: 1px solid var(--rule);
+            border-radius: 8px;
             padding: 1rem;
+            margin-bottom: 1rem;
         }
-        .date-section { margin-bottom: 1.5rem; }
-        .date-title {
-            font-weight: 600;
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-            color: var(--accent);
-            cursor: pointer;
-        }
-        .match-list { list-style: none; padding: 0; margin: 0; }
-        .match-list li {
+        .row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; }
+        label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.3rem; }
+        select, input[type="number"] {
             padding: 0.5rem 0.75rem;
-            border-bottom: 1px solid var(--rule);
-            font-size: 0.9rem;
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            min-width: 160px;
+        }
+        button {
+            padding: 0.55rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 0.95rem;
             cursor: pointer;
         }
-        .match-list li:hover { background: var(--bg); }
-        .match-list .teams { font-weight: 600; }
-        .match-list .meta { color: var(--muted); font-size: 0.8rem; }
-        .preview {
-            flex: 1;
-            padding: 0;
-            background: #fff;
-        }
+        button.secondary { background: var(--accent2); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .status { font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem; }
         iframe {
             width: 100%;
-            height: 100%;
-            border: none;
+            height: 720px;
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            background: var(--surface);
         }
         .empty {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100%;
+            height: 300px;
             color: var(--muted);
-        }
-        @media (max-width: 768px) {
-            main { flex-direction: column; }
-            aside { width: 100%; height: 40%; }
-            .preview { height: 60%; }
         }
     </style>
 </head>
 <body>
 <header>
     <h1>页面复刻结果浏览</h1>
-    <p>静态展示已复刻的日期与比赛，点击左侧比赛可在右侧查看对应详情页。</p>
+    <p>选择已复刻日期查看第一层列表页；需要新增日期请在 Trae 里告诉我。</p>
 </header>
 <main>
-    <aside id="sidebar">
-        <div class="empty">加载中…</div>
-    </aside>
-    <div class="preview" id="preview">
-        <div class="empty">请在左侧选择日期或比赛</div>
+    <div class="card">
+        <div class="row">
+            <div>
+                <label for="dateSelect">选择日期</label>
+                <select id="dateSelect"></select>
+            </div>
+            <div>
+                <label for="levelInput">最大层级</label>
+                <input type="number" id="levelInput" value="3" min="1" max="5" disabled title="仅后端服务可调整">
+            </div>
+            <button id="viewBtn">查看数据</button>
+            <button id="replicateBtn" class="secondary" title="后端服务在本地运行，点击后请告诉我你要复刻的日期">开始复刻</button>
+        </div>
+        <div class="status" id="status"></div>
+    </div>
+
+    <div class="card">
+        <strong>复刻结果预览（第一层列表页）</strong>
+        <div id="preview">
+            <div class="empty">请选择日期并点击查看数据</div>
+        </div>
     </div>
 </main>
 
 <script>
+let dates = [];
+
 async function loadDates() {
     const resp = await fetch('dates.json');
-    const dates = await resp.json();
-    const sidebar = document.getElementById('sidebar');
-    sidebar.innerHTML = '';
-
+    dates = await resp.json();
+    const select = document.getElementById('dateSelect');
+    select.innerHTML = '';
+    if (dates.length === 0) {
+        select.innerHTML = '<option>暂无数据</option>';
+        return;
+    }
     dates.forEach(d => {
-        const section = document.createElement('div');
-        section.className = 'date-section';
-
-        const title = document.createElement('div');
-        title.className = 'date-title';
-        title.textContent = d.date;
-        title.onclick = () => loadPage(d.list_page);
-        section.appendChild(title);
-
-        const ul = document.createElement('ul');
-        ul.className = 'match-list';
-        d.matches.forEach(m => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <div class="teams">${m.home_team} vs ${m.away_team}</div>
-                <div class="meta">${m.league} · ${m.match_time} · ${m.status}</div>
-            `;
-            li.onclick = () => loadPage(`${d.date}/analysis/${m.match_id}.htm`);
-            ul.appendChild(li);
-        });
-        section.appendChild(ul);
-        sidebar.appendChild(section);
+        const opt = document.createElement('option');
+        opt.value = d.date;
+        opt.textContent = d.date;
+        select.appendChild(opt);
     });
+    // 默认显示第一个日期的数据
+    showDate(dates[0].date);
 }
 
-function loadPage(path) {
+function showDate(date) {
+    const item = dates.find(d => d.date === date);
     const preview = document.getElementById('preview');
-    preview.innerHTML = `<iframe src="${path}" sandbox="allow-scripts allow-same-origin"></iframe>`;
+    const status = document.getElementById('status');
+    if (!item) {
+        preview.innerHTML = '<div class="empty">未找到该日期数据</div>';
+        return;
+    }
+    preview.innerHTML = `<iframe src="${item.list_page}" sandbox="allow-scripts allow-same-origin"></iframe>`;
+    status.textContent = `已加载 ${date}，共 ${item.matches.length} 场比赛`;
 }
+
+document.getElementById('viewBtn').onclick = () => {
+    showDate(document.getElementById('dateSelect').value);
+};
+
+document.getElementById('replicateBtn').onclick = () => {
+    const date = document.getElementById('dateSelect').value;
+    const level = document.getElementById('levelInput').value;
+    alert(`请告诉后端操作员：帮我复刻 ${date}，最大层级 ${level}`);
+};
 
 loadDates();
 </script>
