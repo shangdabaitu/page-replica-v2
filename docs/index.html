@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=1200">
     <title>页面复刻结果浏览</title>
     <style>
         :root {
@@ -15,8 +15,12 @@
             --accent2: #1f883d;
         }
         * { box-sizing: border-box; }
-        body {
+        html, body {
             margin: 0;
+            min-width: 1200px;
+            overflow-x: auto;
+        }
+        body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
             background: var(--bg);
             color: var(--ink);
@@ -28,7 +32,7 @@
         }
         header h1 { margin: 0; font-size: 1.2rem; }
         header p { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.85rem; }
-        main { padding: 1rem 1.5rem; max-width: 1200px; margin: 0 auto; }
+        main { padding: 1rem 1.5rem; min-width: 1200px; margin: 0 auto; }
         .card {
             background: var(--surface);
             border: 1px solid var(--rule);
@@ -57,12 +61,18 @@
         button.secondary { background: var(--accent2); }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
         .status { font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem; }
-        iframe {
-            width: 100%;
-            height: 720px;
+        .preview-wrapper {
+            min-width: 1100px;
+            overflow-x: auto;
             border: 1px solid var(--rule);
             border-radius: 6px;
             background: var(--surface);
+        }
+        iframe {
+            width: 1100px;
+            height: 800px;
+            border: none;
+            display: block;
         }
         .empty {
             display: flex;
@@ -97,8 +107,8 @@
 
     <div class="card">
         <strong>复刻结果预览（第一层列表页）</strong>
-        <div id="preview">
-            <div class="empty">请选择日期并点击查看数据</div>
+        <div class="preview-wrapper" id="previewWrapper">
+            <div class="empty" id="emptyMsg">请选择日期并点击查看数据</div>
         </div>
     </div>
 </main>
@@ -121,19 +131,19 @@ async function loadDates() {
         opt.textContent = d.date;
         select.appendChild(opt);
     });
-    // 默认显示第一个日期的数据
     showDate(dates[0].date);
 }
 
 function showDate(date) {
     const item = dates.find(d => d.date === date);
-    const preview = document.getElementById('preview');
+    const wrapper = document.getElementById('previewWrapper');
     const status = document.getElementById('status');
     if (!item) {
-        preview.innerHTML = '<div class="empty">未找到该日期数据</div>';
+        wrapper.innerHTML = '<div class="empty">未找到该日期数据</div>';
+        status.textContent = '';
         return;
     }
-    preview.innerHTML = `<iframe src="${item.list_page}" sandbox="allow-scripts allow-same-origin"></iframe>`;
+    wrapper.innerHTML = `<iframe src="${item.list_page}" sandbox="allow-scripts allow-same-origin"></iframe>`;
     status.textContent = `已加载 ${date}，共 ${item.matches.length} 场比赛`;
 }
 
