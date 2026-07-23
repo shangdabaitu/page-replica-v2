@@ -14,9 +14,10 @@ import config
 def extract_schedule_ids(html: str, base_url: str) -> list[str]:
     """从列表页提取所有比赛 ID（优先返回能打开详情页的真实 matchID）。"""
     ids = set()
-    # 方法1：从亚盘/欧赔/盘路/分析弹窗链接中提取真实 matchID
+    # 方法1：从亚盘/欧赔/盘路/大小球/分析弹窗链接中提取真实 matchID
     match_patterns = [
         r'AsianOdds_n\.aspx\?id=(\d+)',
+        r'OverDown_n\.aspx\?id=(\d+)',
         r'oddslist/(\d+)\.htm',
         r'panlu/(\d+)\.htm',
         r'openAnalysisPage\((\d+)\)',
@@ -55,12 +56,16 @@ def extract_match_data(html: str, base_url: str) -> list[dict]:
         if len(cells) < 9:
             continue
 
-        # 从行内亚盘链接提取真实 match_id
+        # 从行内亚/欧/析/大链接提取真实 match_id
         match_id = ""
         for a in row.find_all("a", href=True):
-            m = re.search(r'AsianOdds_n\.aspx\?id=(\d+)', a["href"], re.I)
+            m = re.search(
+                r'(?:AsianOdds_n|OverDown_n)\.aspx\?id=(\d+)|oddslist/(\d+)\.htm|analysis/(\d+)\.htm',
+                a["href"],
+                re.I,
+            )
             if m:
-                match_id = m.group(1)
+                match_id = m.group(1) or m.group(2) or m.group(3)
                 break
 
         # 主队、客队分别带链接，过滤掉只取球队名
@@ -115,11 +120,20 @@ def extract_links(html: str, base_url: str, current_level: int, max_level: int) 
             href = normalize_url(raw, base_url)
             if not href or href in seen:
                 continue
-            # 只抓同源或已知的详情域
             if not _is_interesting_url(href):
                 continue
             if _has_empty_param(href):
                 continue
+            # 按层级过滤，避免把全站导航都抓进来导致数量爆炸。
+            # L1 只提取进入 L2 的入口（赛事类型页、单场亚/欧/析/大详情页），
+            # 不提取 L1 列表页中零散的球队资料链接，避免数量失控。
+            # L2 中仅单场分析页（析）里的主队/客队资料库链接需要继续下钻到 L3。
+            if current_level == 1:
+                if not _is_l2_url(href):
+                    continue
+            elif current_level == 2:
+                if not (_is_analysis_page(base_url) and _is_l3_url(href)):
+                    continue
             seen.add(href)
             links.append({
                 "url": href,
@@ -128,30 +142,52 @@ def extract_links(html: str, base_url: str, current_level: int, max_level: int) 
                 "level": current_level + 1,
             })
 
-    # 提取 onclick 中打开窗口/跳转的 URL（第一层列表页不提取，避免导航噪声）
-    if current_level > 1:
-        onclick_pattern = re.compile(
-            r"(?:window\.open\(|location\.href\s*=|window\.location\s*=)\s*[\"']([^\"']+)[\"']",
-            re.I,
-        )
-        for m in onclick_pattern.finditer(html):
-            raw = html_module.unescape(m.group(1))
-            href = normalize_url(raw, base_url)
-            if not href or href in seen:
-                continue
-            if not _is_interesting_url(href):
-                continue
-            if _has_empty_param(href):
-                continue
-            seen.add(href)
-            links.append({
-                "url": href,
-                "type": "onclick",
-                "text": "",
-                "level": current_level + 1,
-            })
-
     return links
+
+
+def _is_l2_url(url: str) -> bool:
+    """L2 入口：赛事类型页、单场亚/欧/析/大详情页。"""
+    parsed = urlparse(url)
+    path = parsed.path.lower()
+    qs = parse_qs(parsed.query)
+
+    if parsed.netloc.lower() == "info.titan007.com" and re.match(r"/cn/CupMatch/\d+\.html", path, re.I):
+        return True
+
+    if "id" in qs and re.match(r"\d+$", qs["id"][0]):
+        if "AsianOdds_n.aspx" in path or "OverDown_n.aspx" in path:
+            return True
+
+    if re.match(r"/oddslist/\d+\.htm", path, re.I):
+        return True
+
+    if re.match(r"/analysis/\d+cn\.htm", path, re.I) or re.match(r"/analysis/\d+\.htm", path, re.I):
+        return True
+
+    return False
+
+
+def _is_l3_url(url: str) -> bool:
+    """L3 入口：球队资料库页。"""
+    parsed = urlparse(url)
+    path = parsed.path.lower()
+
+    # 球队资料汇总页
+    if re.search(r"/team/Summary/\d+\.html", path, re.I):
+        return True
+
+    # info 域名的球队/联赛资料页
+    if parsed.netloc.lower() == "info.titan007.com" and re.match(r"/cn/team/\d+\.html", path, re.I):
+        return True
+
+    return False
+
+
+def _is_analysis_page(url: str) -> bool:
+    """判断 URL 是否为单场分析页（析）。"""
+    parsed = urlparse(url)
+    path = parsed.path.lower()
+    return "/analysis/" in path and path.endswith(".htm")
 
 
 def _is_interesting_url(url: str) -> bool:
@@ -160,14 +196,7 @@ def _is_interesting_url(url: str) -> bool:
     host = parsed.netloc.lower()
     path = parsed.path.lower()
 
-    allowed_hosts = {
-        "cp.titan007.com",
-        "zq.titan007.com",
-        "vip.titan007.com",
-        "op1.titan007.com",
-        "data.titan007.com",
-    }
-    if host not in allowed_hosts:
+    if host not in config.ALLOWED_HOSTS:
         return False
 
     # 排除纯资源文件和已知非页面路径

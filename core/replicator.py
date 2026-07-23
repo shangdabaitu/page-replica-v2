@@ -48,6 +48,26 @@ def _url_to_relative_path(url: str) -> str:
             return "index.html"
         return "JingCai/empty_date.html"
 
+    # info.titan007.com 资料库页
+    if parsed.netloc.lower() == "info.titan007.com":
+        # /cn/CupMatch/103.html -> league/103.html
+        # /cn/team/1234.html    -> team/1234.html
+        m = re.match(r"cn/CupMatch/(\d+)\.html", path, re.I)
+        if m:
+            return f"league/{m.group(1)}.html"
+        m = re.match(r"cn/team/(\d+)\.html", path, re.I)
+        if m:
+            return f"team/{m.group(1)}.html"
+
+    # zq.titan007.com 球队资料汇总页
+    if parsed.netloc.lower() == "zq.titan007.com":
+        m = re.match(r"cn/team/Summary/(\d+)\.html", path, re.I)
+        if m:
+            return f"team/{m.group(1)}.html"
+        m = re.match(r"big/team/Summary/(\d+)\.html", path, re.I)
+        if m:
+            return f"team/big_{m.group(1)}.html"
+
     # 详情页：按已知模式分类目录
     if path.endswith(".htm") or path.endswith(".html"):
         parts = Path(path).parts
@@ -169,12 +189,21 @@ def _process_single_page(
 
             output_path.write_text(final_html, encoding="utf-8")
 
-            # 视觉对比
-            compare_result = visual.compare_pages(
-                url,
-                output_path,
-                output_dir=base_dir / "diff",
-            )
+            # 视觉对比：仅对 L1 执行，避免 L2/L3 页面过多导致内存与时间爆炸
+            if level == 1:
+                compare_result = visual.compare_pages(
+                    url,
+                    output_path,
+                    output_dir=base_dir / "diff",
+                )
+            else:
+                compare_result = {
+                    "source_url": url,
+                    "replica_path": str(output_path),
+                    "diff_ratio": None,
+                    "status": "skipped",
+                    "message": "非 L1 页面跳过视觉对比",
+                }
             best_diff = compare_result
 
             # 视觉对比被跳过（如浏览器未安装）也视为成功
@@ -345,6 +374,13 @@ def replicate_date(date: str, max_level: int | None = None):
 
     report["elapsed_seconds"] = round(time.time() - start_time, 2)
     data_store.save_report(date, report)
+
+    # 同步到 docs/ 并更新 dates.json，供 GitHub Pages 直接访问
+    try:
+        data_store.sync_output_to_docs()
+        yield {"type": "progress", "url": "__sync_docs__", "level": 0, "status": "synced"}
+    except Exception as e:
+        yield {"type": "warning", "message": f"同步到 docs/ 失败: {e}"}
 
     # 最终输出：列表页相对路径
     list_rel = url_map.get(list_url, f"{date}/index.html")

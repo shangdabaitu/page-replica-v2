@@ -1,1 +1,71 @@
-[{"date": "2026-7-21", "matches": [{"schedule_id": "5468201", "match_id": "2929663", "league": "韩K联", "match_time": "2026-07-21 18:30", "home_team": "济州SK", "away_team": "江原FC", "status": "完场"}, {"schedule_id": "5468202", "match_id": "2929664", "league": "韩K联", "match_time": "2026-07-21 18:30", "home_team": "全北现代", "away_team": "大田市民", "status": "完场"}, {"schedule_id": "5468203", "match_id": "2929665", "league": "韩K联", "match_time": "2026-07-21 18:30", "home_team": "蔚山现代", "away_team": "仁川联", "status": "完场"}, {"schedule_id": "5468205", "match_id": "3033092", "league": "欧冠杯", "match_time": "2026-07-22 00:00", "home_team": "萨巴赫", "away_team": "库奥皮奥", "status": "完场"}, {"schedule_id": "5468206", "match_id": "2999989", "league": "欧冠杯", "match_time": "2026-07-22 01:00", "home_team": "奥胡斯", "away_team": "波兹南", "status": "完场"}, {"schedule_id": "5468207", "match_id": "2999991", "league": "欧冠杯", "match_time": "2026-07-22 02:30", "home_team": "格风暴", "away_team": "哈茨", "status": "完场"}, {"schedule_id": "5468204", "match_id": "2910807", "league": "巴西甲", "match_time": "2026-07-22 06:30", "home_team": "米竞技", "away_team": "巴伊亚", "status": "完场"}], "list_page": "2026-7-21/index.html"}]
+[
+  {
+    "date": "2026-7-21",
+    "matches": [
+      {
+        "schedule_id": "5468201",
+        "match_id": "2929663",
+        "league": "韩K联",
+        "match_time": "2026-07-21 18:30",
+        "home_team": "济州SK",
+        "away_team": "江原FC",
+        "status": "完场"
+      },
+      {
+        "schedule_id": "5468202",
+        "match_id": "2929664",
+        "league": "韩K联",
+        "match_time": "2026-07-21 18:30",
+        "home_team": "全北现代",
+        "away_team": "大田市民",
+        "status": "完场"
+      },
+      {
+        "schedule_id": "5468203",
+        "match_id": "2929665",
+        "league": "韩K联",
+        "match_time": "2026-07-21 18:30",
+        "home_team": "蔚山现代",
+        "away_team": "仁川联",
+        "status": "完场"
+      },
+      {
+        "schedule_id": "5468205",
+        "match_id": "3033092",
+        "league": "欧冠杯",
+        "match_time": "2026-07-22 00:00",
+        "home_team": "萨巴赫",
+        "away_team": "库奥皮奥",
+        "status": "完场"
+      },
+      {
+        "schedule_id": "5468206",
+        "match_id": "2999989",
+        "league": "欧冠杯",
+        "match_time": "2026-07-22 01:00",
+        "home_team": "奥胡斯",
+        "away_team": "波兹南",
+        "status": "完场"
+      },
+      {
+        "schedule_id": "5468207",
+        "match_id": "2999991",
+        "league": "欧冠杯",
+        "match_time": "2026-07-22 02:30",
+        "home_team": "格风暴",
+        "away_team": "哈茨",
+        "status": "完场"
+      },
+      {
+        "schedule_id": "5468204",
+        "match_id": "2910807",
+        "league": "巴西甲",
+        "match_time": "2026-07-22 06:30",
+        "home_team": "米竞技",
+        "away_team": "巴伊亚",
+        "status": "完场"
+      }
+    ],
+    "list_page": "2026-7-21/index.html"
+  }
+]

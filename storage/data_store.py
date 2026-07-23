@@ -100,3 +100,54 @@ def get_list_page_path(date: str) -> Path | None:
     if path.exists():
         return path
     return None
+
+
+def build_dates_catalog() -> list[dict]:
+    """构建供前端导航使用的 dates.json 数据。"""
+    catalog = []
+    for date in list_replicated_dates():
+        meta = load_meta(date)
+        catalog.append({
+            "date": date,
+            "matches": meta.get("matches", []),
+            "list_page": f"{date}/index.html",
+        })
+    return catalog
+
+
+def save_dates_json(docs_dir: Path | str | None = None) -> Path:
+    """把已复刻日期汇总写入 dates.json。"""
+    if docs_dir is None:
+        docs_dir = config.BASE_DIR / "docs"
+    else:
+        docs_dir = Path(docs_dir)
+    docs_dir.mkdir(parents=True, exist_ok=True)
+    catalog = build_dates_catalog()
+    path = docs_dir / "dates.json"
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(catalog, f, ensure_ascii=False, indent=2)
+    return path
+
+
+def sync_output_to_docs(docs_dir: Path | str | None = None) -> Path:
+    """把 output/ 下所有日期目录同步到 docs/，并更新 dates.json。"""
+    if docs_dir is None:
+        docs_dir = config.BASE_DIR / "docs"
+    else:
+        docs_dir = Path(docs_dir)
+    docs_dir.mkdir(parents=True, exist_ok=True)
+
+    if not config.OUTPUT_DIR.exists():
+        return docs_dir
+
+    import shutil
+    for date_dir in config.OUTPUT_DIR.iterdir():
+        if not date_dir.is_dir():
+            continue
+        target = docs_dir / date_dir.name
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.copytree(date_dir, target)
+
+    save_dates_json(docs_dir)
+    return docs_dir

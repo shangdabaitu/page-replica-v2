@@ -43,7 +43,7 @@ def _launch_browser(p):
 
 
 def screenshot_page(url: str, width: int = 1440, height: int = 900) -> Image.Image | None:
-    """对指定 URL 进行整页截图并返回 PIL Image。"""
+    """对指定 URL 进行截图并返回 PIL Image。只截取可视区域，避免长页面占用过大内存。"""
     if not _playwright_ok():
         print("[WARN] Playwright 不可用，跳过截图")
         return None
@@ -76,12 +76,12 @@ def screenshot_page(url: str, width: int = 1440, height: int = 900) -> Image.Ima
                 page.wait_for_selector("body", timeout=10000)
             except Exception:
                 pass
-            # 滚动到底部触发懒加载
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            page.wait_for_timeout(800)
-            png_bytes = page.screenshot(full_page=True, type="png")
+            png_bytes = page.screenshot(full_page=False, type="png")
             browser.close()
-            return Image.open(io.BytesIO(png_bytes))
+            img = Image.open(io.BytesIO(png_bytes))
+            # 避免 PIL 反压缩炸弹警告阻塞流程
+            Image.MAX_IMAGE_PIXELS = max(Image.MAX_IMAGE_PIXELS, img.width * img.height * 2)
+            return img
     except Exception as e:
         print(f"[WARN] 截图 {url} 失败: {e}")
         return None
