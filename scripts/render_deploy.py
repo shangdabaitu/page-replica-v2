@@ -19,22 +19,18 @@ HEADERS = {
 }
 
 
-def get_user_id():
-    resp = requests.get("https://api.render.com/v1/users", headers=HEADERS, timeout=30)
-    print("users response status:", resp.status_code)
-    print("users response body:", resp.text[:500])
+def get_owner_id():
+    # /v1/owners 返回当前用户/团队列表，包含 owner id
+    resp = requests.get("https://api.render.com/v1/owners?limit=20", headers=HEADERS, timeout=30)
+    print("owners response status:", resp.status_code)
+    print("owners response body:", resp.text[:500])
     resp.raise_for_status()
-    users = resp.json()
-    # Render may return a list or a dict under a key
-    if isinstance(users, dict):
-        if "user" in users:
-            return users["user"]["id"]
-        if "id" in users:
-            return users["id"]
-        raise RuntimeError(f"Unexpected users response shape: {users.keys()}")
-    if not users:
-        raise RuntimeError("No Render users found")
-    return users[0]["id"]
+    owners = resp.json()
+    if isinstance(owners, dict):
+        owners = owners.get("owners", owners)
+    if not owners:
+        raise RuntimeError("No Render owners found")
+    return owners[0]["id"]
 
 
 def find_service():
@@ -113,7 +109,7 @@ def main():
         print("RENDER_API_KEY missing")
         sys.exit(1)
 
-    owner_id = get_user_id()
+    owner_id = get_owner_id()
     print(f"ownerId: {owner_id}")
 
     svc = find_service()
