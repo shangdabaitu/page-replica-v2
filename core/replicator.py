@@ -20,6 +20,7 @@ from core.extractor import (
     extract_schedule_ids,
     extract_match_data,
     extract_links,
+    extract_team_ids_from_analysis,
     get_detail_urls,
 )
 from storage import data_store
@@ -333,6 +334,26 @@ def replicate_date(date: str, max_level: int | None = None):
                 "attempt": result.get("attempt", 1),
                 "message": result.get("message"),
             })
+
+            # 对单场分析页（析）提取主队/客队资料库 ID 并写入 meta.matches，
+            # 供前端按比赛统计 L3 复刻/视觉对比情况。
+            if level == 2 and page_type == "detail_analysis":
+                m = re.search(r"/analysis/(\d+)cn\.htm", url, re.I)
+                if m:
+                    match_id = m.group(1)
+                    try:
+                        saved_path = base_dir / result["output_path"]
+                        analysis_html = saved_path.read_text(encoding="utf-8")
+                        team_ids = extract_team_ids_from_analysis(analysis_html)
+                        if team_ids:
+                            meta = data_store.load_meta(date)
+                            for match in meta.get("matches", []):
+                                if str(match.get("match_id")) == match_id:
+                                    match.update(team_ids)
+                                    break
+                            data_store.save_meta(date, meta)
+                    except Exception as e:
+                        yield {"type": "warning", "url": url, "message": f"提取球队资料 ID 失败: {e}"}
 
         if result["status"] == "ok":
             report["pages_ok"] += 1

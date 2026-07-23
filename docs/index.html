@@ -13,6 +13,7 @@
             --rule: #d0d7de;
             --accent: #0969da;
             --accent2: #1f883d;
+            --warn: #d1242f;
         }
         * { box-sizing: border-box; }
         html, body {
@@ -61,6 +62,26 @@
         button.secondary { background: var(--accent2); }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
         .status { font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem; }
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        .stats-table th, .stats-table td {
+            border: 1px solid var(--rule);
+            padding: 0.55rem 0.65rem;
+            text-align: left;
+        }
+        .stats-table th {
+            background: #f3f4f6;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .stats-table tr:hover { background: #f6f8fa; }
+        .stats-table .num { text-align: center; white-space: nowrap; }
+        .stats-table .ok { color: var(--accent2); font-weight: 600; }
+        .stats-table .warn { color: var(--warn); font-weight: 600; }
         .preview-wrapper {
             min-width: 1100px;
             overflow-x: auto;
@@ -76,12 +97,15 @@
         }
         .actions { margin-bottom: 0.75rem; }
         .actions a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+        .empty { padding: 2rem; color: var(--muted); text-align: center; }
+        .section-title { font-weight: 600; margin-bottom: 0.5rem; display: block; }
+        .hint { color: var(--muted); font-size: 0.8rem; margin-top: 0.25rem; }
     </style>
 </head>
 <body>
 <header>
     <h1>页面复刻结果浏览</h1>
-    <p>选择已复刻日期，下方直接展示对应原始列表页（含样式、按钮）。</p>
+    <p>选择已复刻日期，查看每场比赛的复刻/视觉对比统计，并在下方预览列表页。</p>
 </header>
 <main>
     <div class="card">
@@ -100,8 +124,14 @@
         <div class="status" id="status"></div>
     </div>
 
+    <div class="card" id="statsCard" style="display:none;">
+        <span class="section-title">比赛复刻统计</span>
+        <div id="statsTableWrap"></div>
+        <div class="hint">说明：L1 为整站列表页（1 面），L2 为单场的亚/欧/析/大（4 面），L3 为单场析页面进入的主队/客队资料库（2 面）。视觉对比目前仅对 L1 执行，L2/L3 跳过，因此对应“已视觉对比”显示为 0。</div>
+    </div>
+
     <div class="card">
-        <strong>复刻结果预览（第一层列表页）</strong>
+        <span class="section-title">复刻结果预览（第一层列表页）</span>
         <div class="actions" id="actions"></div>
         <div class="preview-wrapper" id="previewWrapper">
             <div class="empty" id="emptyMsg">加载中…</div>
@@ -111,14 +141,20 @@
 
 <script>
 let dates = [];
+let currentMeta = null;
 
 async function loadDates() {
-    const resp = await fetch('dates.json');
-    dates = await resp.json();
+    try {
+        const resp = await fetch('dates.json');
+        dates = await resp.json();
+    } catch (e) {
+        dates = [];
+    }
     const select = document.getElementById('dateSelect');
     select.innerHTML = '';
     if (dates.length === 0) {
         select.innerHTML = '<option>暂无数据</option>';
+        document.getElementById('emptyMsg').textContent = '暂无已复刻日期数据';
         return;
     }
     dates.forEach(d => {
@@ -130,17 +166,126 @@ async function loadDates() {
     showDate(dates[0].date);
 }
 
-function showDate(date) {
+async function loadMeta(date) {
+    try {
+        const resp = await fetch(`${date}/meta.json`);
+        if (!resp.ok) return null;
+        return await resp.json();
+    } catch (e) {
+        return null;
+    }
+}
+
+function isCompared(page) {
+    return page && page.diff_ratio !== null && page.diff_ratio !== undefined && !isNaN(page.diff_ratio);
+}
+
+function calcMatchStats(match, pages) {
+    const matchId = String(match.match_id || '');
+    const homeId = String(match.home_team_id || '');
+    const awayId = String(match.away_team_id || '');
+
+    // L1: 整站 1 个列表页
+    const l1Pages = pages.filter(p => p.level === 1);
+    const l1Compared = l1Pages.filter(isCompared).length;
+
+    // L2: 单场亚/欧/析/大，URL 中包含 match_id
+    const l2Pages = pages.filter(p => {
+        if (p.level !== 2) return false;
+        return matchId && p.url && p.url.includes(matchId);
+    });
+    const l2Compared = l2Pages.filter(isCompared).length;
+
+    // L3: 主队/客队资料库页
+    const l3Pages = pages.filter(p => {
+        if (p.level !== 3) return false;
+        const m = p.url && p.url.match(/team\/(?:Summary\/)?(\d+)\.html/i);
+        if (!m) return false;
+        const tid = m[1];
+        return tid === homeId || tid === awayId;
+    });
+    const l3Compared = l3Pages.filter(isCompared).length;
+
+    return {
+        l1: { expected: 1, compared: l1Compared },
+        l2: { expected: 4, compared: l2Compared },
+        l3: { expected: 2, compared: l3Compared },
+    };
+}
+
+function renderStats(item, meta) {
+    const pages = (meta && meta.pages) || [];
+    const matches = item.matches || [];
+    const wrap = document.getElementById('statsTableWrap');
+    const card = document.getElementById('statsCard');
+
+    if (!matches.length) {
+        card.style.display = 'none';
+        wrap.innerHTML = '';
+        return;
+    }
+
+    let html = `<table class="stats-table">
+        <thead>
+            <tr>
+                <th>联赛</th>
+                <th>开赛时间</th>
+                <th>主队</th>
+                <th>客队</th>
+                <th>状态</th>
+                <th class="num">L1 应复刻 / 已视觉对比</th>
+                <th class="num">L2 应复刻 / 已视觉对比</th>
+                <th class="num">L3 应复刻 / 已视觉对比</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    for (const match of matches) {
+        const s = calcMatchStats(match, pages);
+        const l1Cls = s.l1.compared >= s.l1.expected ? 'ok' : 'warn';
+        const l2Cls = s.l2.compared >= s.l2.expected ? 'ok' : 'warn';
+        const l3Cls = s.l3.compared >= s.l3.expected ? 'ok' : 'warn';
+        html += `<tr>
+            <td>${escapeHtml(match.league || '-')}</td>
+            <td>${escapeHtml(match.match_time || '-')}</td>
+            <td>${escapeHtml(match.home_team || '-')}</td>
+            <td>${escapeHtml(match.away_team || '-')}</td>
+            <td>${escapeHtml(match.status || '-')}</td>
+            <td class="num ${l1Cls}">${s.l1.expected} / ${s.l1.compared}</td>
+            <td class="num ${l2Cls}">${s.l2.expected} / ${s.l2.compared}</td>
+            <td class="num ${l3Cls}">${s.l3.expected} / ${s.l3.compared}</td>
+        </tr>`;
+    }
+
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+    card.style.display = 'block';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+async function showDate(date) {
     const item = dates.find(d => d.date === date);
     const wrapper = document.getElementById('previewWrapper');
     const status = document.getElementById('status');
     const actions = document.getElementById('actions');
+    const statsCard = document.getElementById('statsCard');
+
     if (!item) {
         wrapper.innerHTML = '<div class="empty">未找到该日期数据</div>';
         status.textContent = '';
         actions.innerHTML = '';
+        statsCard.style.display = 'none';
         return;
     }
+
+    currentMeta = await loadMeta(date);
+    renderStats(item, currentMeta);
+
     actions.innerHTML = `<a href="${item.list_page}" target="_blank">在新标签页打开原始复刻列表页 ↗</a>`;
     wrapper.innerHTML = `<iframe src="${item.list_page}" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>`;
     status.textContent = `已加载 ${date}，共 ${item.matches.length} 场比赛`;

@@ -190,6 +190,30 @@ def _is_analysis_page(url: str) -> bool:
     return "/analysis/" in path and path.endswith(".htm")
 
 
+def extract_team_ids_from_analysis(html: str) -> dict:
+    """从单场分析页（析）提取主队/客队资料库 ID。
+
+    页面中主队、客队链接通常形如：
+      <a href="//zq.titan007.com/cn/team/Summary/4075.html">济州SK(主)</a>
+      <a href="//zq.titan007.com/cn/team/Summary/9945.html">江原FC</a>
+    链接重写后也可能变成 ../team/4075.html。这里按顺序取前两个
+    team/Summary/{id}.html 或 team/{id}.html 链接，第一个为主队，第二个为客队。
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    ids = []
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        m = re.search(r"team/(?:Summary/)?(\d+)\.html", href, re.I)
+        if not m:
+            continue
+        ids.append(m.group(1))
+        if len(ids) >= 2:
+            break
+    if len(ids) < 2:
+        return {}
+    return {"home_team_id": ids[0], "away_team_id": ids[1]}
+
+
 def _is_interesting_url(url: str) -> bool:
     """判断 URL 是否属于需要复刻的范围。"""
     parsed = urlparse(url)
