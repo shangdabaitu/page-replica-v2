@@ -57,8 +57,10 @@ def create_service(owner_id: str):
             "runtime": "python",
             "region": "oregon",
             "plan": "free",
-            "buildCommand": "pip install -r requirements.txt",
-            "startCommand": "python api/replicate.py",
+            "envSpecificDetails": {
+                "buildCommand": "pip install -r requirements.txt",
+                "startCommand": "python api/replicate.py",
+            },
         },
         "envVars": [
             {"key": "PYTHON_VERSION", "value": "3.10"},
