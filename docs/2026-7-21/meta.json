@@ -9,19 +9,19 @@
       "type": "list",
       "rel_path": "2026-7-21/index.html",
       "status": "needs_fix",
-      "diff_ratio": 0.392118,
+      "diff_ratio": 0.24555,
       "attempt": 4,
-      "message": "差异 39.21%，超过 10% 阈值，需要人工修复"
+      "message": "差异 24.56%，超过 10% 阈值，需要人工修复"
     },
     {
       "url": "https://zq.titan007.com/analysis/2910807.htm",
       "level": 2,
       "type": "detail_analysis",
       "rel_path": "2026-7-21/analysis/2910807.htm",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 2,
-      "message": "无法启动浏览器，跳过视觉对比"
+      "status": "ok_with_diff",
+      "diff_ratio": 0.039537,
+      "attempt": 4,
+      "message": "差异 3.95%，超过 2% 阈值，需要重试"
     },
     {
       "url": "https://vip.titan007.com/AsianOdds_n.aspx?id=2910807",

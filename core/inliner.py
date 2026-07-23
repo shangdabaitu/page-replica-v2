@@ -11,8 +11,8 @@ import config
 
 
 def inline_page(html: str, base_url: str) -> str:
-    """把页面中的外部 CSS/JS/图片资源内联。"""
-    soup = BeautifulSoup(html, "lxml")
+    """把页面中的外部 CSS/图片资源内联；脚本不内联，后续由 freeze 阶段删除。"""
+    soup = BeautifulSoup(html, "html.parser")
 
     # 1. 内联 <link rel="stylesheet">
     for tag in soup.find_all("link", rel="stylesheet", href=True):
@@ -29,17 +29,7 @@ def inline_page(html: str, base_url: str) -> str:
         style_tag.string = css
         tag.replace_with(style_tag)
 
-    # 2. 内联 <script src="...">
-    for tag in soup.find_all("script", src=True):
-        src = normalize_url(tag["src"], base_url)
-        if not src:
-            continue
-        data, ct = fetch_resource(src)
-        if data is None:
-            continue
-        js = decode_html(data, ct)
-        del tag["src"]
-        tag.string = js
+    # 2. 脚本不再内联，避免 </script> 截断导致脚本源码泄漏到正文。
 
     # 3. 内联 <img src="...">
     for tag in soup.find_all("img", src=True):

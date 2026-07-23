@@ -80,23 +80,23 @@ def _patch_analysis_opener(html: str) -> str:
 
 def _freeze_rendered_page(html: str) -> str:
     """
-    对渲染后的 DOM 做冻结处理：删除会重新初始化/清空的脚本，
-    只保留 openAnalysisPage 的最小本地实现，确保页面以静态方式展示。
+    对渲染后的 DOM 做冻结处理：删除所有脚本，
+    只注入 openAnalysisPage 的最小本地实现，确保页面以静态方式展示。
     """
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
     for tag in list(soup.find_all("script")):
-        text = tag.string or ""
-        if "openAnalysisPage" in text:
-            new_tag = soup.new_tag("script")
-            new_tag.string = "function openAnalysisPage(scheduleID){ window.open('./analysis/' + scheduleID + '.htm'); }"
-            tag.replace_with(new_tag)
-        else:
-            tag.decompose()
-    # 移除可能依赖已删除脚本的事件属性（保留 openAnalysisPage 的 onclick）
+        tag.decompose()
+    # 注入本地 openAnalysisPage
+    new_tag = soup.new_tag("script")
+    new_tag.string = "function openAnalysisPage(scheduleID){ window.open('./analysis/' + scheduleID + '.htm'); }"
+    if soup.head:
+        soup.head.append(new_tag)
+    else:
+        soup.body.insert(0, new_tag)
+    # 移除依赖已删除脚本的悬停事件，保留 onclick
     for tag in soup.find_all(attrs={"onmouseover": True, "onmouseout": True}):
-        if "openAnalysisPage" not in (tag.get("onclick") or ""):
-            del tag["onmouseover"]
-            del tag["onmouseout"]
+        del tag["onmouseover"]
+        del tag["onmouseout"]
     return str(soup)
 
 
