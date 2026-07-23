@@ -21,8 +21,17 @@ HEADERS = {
 
 def get_user_id():
     resp = requests.get("https://api.render.com/v1/users", headers=HEADERS, timeout=30)
+    print("users response status:", resp.status_code)
+    print("users response body:", resp.text[:500])
     resp.raise_for_status()
     users = resp.json()
+    # Render may return a list or a dict under a key
+    if isinstance(users, dict):
+        if "user" in users:
+            return users["user"]["id"]
+        if "id" in users:
+            return users["id"]
+        raise RuntimeError(f"Unexpected users response shape: {users.keys()}")
     if not users:
         raise RuntimeError("No Render users found")
     return users[0]["id"]
