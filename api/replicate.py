@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Flask 后端：提供日期列表、复刻进度 SSE 和静态文件服务"""
 import json
+import os
 import threading
 from datetime import datetime
 from pathlib import Path
@@ -94,4 +95,5 @@ def api_replicate():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, threaded=True, debug=False)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, threaded=True, debug=False)
