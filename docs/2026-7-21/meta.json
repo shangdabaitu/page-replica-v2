@@ -79,7 +79,7 @@
       "type": "detail_europe",
       "rel_path": "2026-7-21/oddslist/2929663.htm",
       "status": "ok",
-      "diff_ratio": 0.008324,
+      "diff_ratio": 0.008308,
       "attempt": 1,
       "message": "差异在可忽略范围内"
     },
@@ -1259,9 +1259,9 @@
       "type": "link",
       "rel_path": "2026-7-21/league/15.html",
       "status": "ok",
-      "diff_ratio": 0.000188,
+      "diff_ratio": null,
       "attempt": 1,
-      "message": "差异在可忽略范围内"
+      "message": "非 L1 页面跳过视觉对比"
     }
   ],
   "matches": [

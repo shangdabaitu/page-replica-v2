@@ -141,13 +141,17 @@ def sync_output_to_docs(docs_dir: Path | str | None = None) -> Path:
         return docs_dir
 
     import shutil
+
+    def _ignore_compare(src: str, names: list[str]) -> set[str]:
+        return {n for n in names if n.endswith(".compare.html")}
+
     for date_dir in config.OUTPUT_DIR.iterdir():
         if not date_dir.is_dir():
             continue
         target = docs_dir / date_dir.name
         if target.exists():
             shutil.rmtree(target)
-        shutil.copytree(date_dir, target)
+        shutil.copytree(date_dir, target, ignore=_ignore_compare)
 
     save_dates_json(docs_dir)
     return docs_dir

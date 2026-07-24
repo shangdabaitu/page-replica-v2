@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 import config
 from core.fetcher import fetch_url, normalize_url, decode_html
 from core.inliner import inline_page
-from core.renderer import render_html
+from core.renderer import render_html, render_league_page
 from core.simplifier import simplify_html
 from core.watermark import inject_watermark
 from core.extractor import (
@@ -34,6 +34,14 @@ DEFAULT_MAX_LEVEL = 3
 def _url_key(url: str) -> str:
     """生成 URL 的唯一键。"""
     return hashlib.md5(url.encode("utf-8")).hexdigest()
+
+
+def _is_league_page(url: str) -> bool:
+    """判断 URL 是否为 info.titan007.com 的联赛/杯赛资料页（含赛程）。"""
+    parsed = urlparse(url)
+    if parsed.netloc.lower() != "info.titan007.com":
+        return False
+    return re.match(r"/cn/(?:SubLeague|CupMatch|League)/\d+\.html", parsed.path, re.I) is not None
 
 
 def _url_to_relative_path(url: str) -> str:
@@ -109,9 +117,9 @@ def _freeze_rendered_page(html: str) -> str:
     soup = BeautifulSoup(html, "html.parser")
     for tag in list(soup.find_all("script")):
         tag.decompose()
-    # 注入本地 openAnalysisPage
+    # 注入本地 openAnalysisPage（列表页传入的是 match_id，分析页后缀为 cn.htm）
     new_tag = soup.new_tag("script")
-    new_tag.string = "function openAnalysisPage(scheduleID){ window.open('./analysis/' + scheduleID + '.htm'); }"
+    new_tag.string = "function openAnalysisPage(matchID){ window.open('./analysis/' + matchID + 'cn.htm'); }"
     if soup.head:
         soup.head.append(new_tag)
     else:
@@ -121,6 +129,41 @@ def _freeze_rendered_page(html: str) -> str:
         del tag["onmouseover"]
         del tag["onmouseout"]
     return str(soup)
+
+
+def _equivalent_urls(url: str) -> list[str]:
+    """返回与给定 URL 等价的可能变体，用于处理站点内部多域名指向同一内容的情况。"""
+    variants = {url}
+    parsed = urlparse(url)
+    path = parsed.path
+    qs = parsed.query
+
+    # 1x2.titan007.com 的欧赔页与 op1.titan007.com 的欧赔页等价
+    if parsed.netloc.lower() == "1x2.titan007.com" and re.match(r"/oddslist/\d+\.htm", path, re.I):
+        variants.add(url.replace("//1x2.titan007.com", "//op1.titan007.com", 1))
+        variants.add(url.replace("https://1x2.titan007.com", "https://op1.titan007.com", 1))
+
+    # info.titan007.com 的球队资料页/分析页与 zq.titan007.com 等价
+    if parsed.netloc.lower() == "info.titan007.com":
+        if re.match(r"/cn/team/Summary/\d+\.html", path, re.I):
+            variants.add(url.replace("//info.titan007.com", "//zq.titan007.com", 1))
+            variants.add(url.replace("https://info.titan007.com", "https://zq.titan007.com", 1))
+        if re.match(r"/analysis/\d+cn\.htm", path, re.I):
+            variants.add(url.replace("//info.titan007.com", "//zq.titan007.com", 1))
+            variants.add(url.replace("https://info.titan007.com", "https://zq.titan007.com", 1))
+
+    # 去掉仅用于导航的 l=0 参数（AsianOdds_n、OverDown_n、Corner 等）
+    if "l=0" in qs:
+        qs_clean = "&".join(p for p in qs.split("&") if p != "l=0")
+        variants.add(parsed._replace(query=qs_clean).geturl())
+
+    # http 与 https 等价
+    if url.startswith("http://"):
+        variants.add("https://" + url[7:])
+    elif url.startswith("https://"):
+        variants.add("http://" + url[8:])
+
+    return list(variants)
 
 
 def _rewrite_links(html: str, base_url: str, source_path: Path, url_map: dict[str, str]) -> str:
@@ -136,14 +179,19 @@ def _rewrite_links(html: str, base_url: str, source_path: Path, url_map: dict[st
             abs_url = normalize_url(val, base_url)
             if not abs_url:
                 continue
-            if abs_url in url_map:
-                target_rel = url_map[abs_url]
-                target_path = config.OUTPUT_DIR / target_rel
-                try:
-                    rel = os.path.relpath(target_path, source_dir)
-                except Exception:
-                    rel = target_rel
-                tag[attr] = rel
+            target_rel = None
+            for variant in _equivalent_urls(abs_url):
+                if variant in url_map:
+                    target_rel = url_map[variant]
+                    break
+            if target_rel is None:
+                continue
+            target_path = config.OUTPUT_DIR / target_rel
+            try:
+                rel = os.path.relpath(target_path, source_dir)
+            except Exception:
+                rel = target_rel
+            tag[attr] = rel
     return str(soup)
 
 
@@ -179,7 +227,10 @@ def _process_single_page(
 
             # 用 Headless Chromium 渲染，拿到 JS 执行后的 DOM（表格、按钮等）
             try:
-                rendered_html = render_html(url)
+                if _is_league_page(url):
+                    rendered_html = render_league_page(url)
+                else:
+                    rendered_html = render_html(url)
             except Exception as e:
                 print(f"[WARN] 页面渲染失败，回退到原始 HTML: {url} -> {e}")
                 rendered_html = raw_html
