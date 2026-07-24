@@ -1,17 +1,17 @@
 {
   "date": "2026-7-21",
   "source_url": "https://cp.titan007.com/buy/JingCai.aspx?typeID=101&oddstype=2&date=2026-7-21",
-  "created_at": "2026-07-23T14:59:28.358094",
+  "created_at": "2026-07-24T08:12:18.854936",
   "pages": [
     {
-      "url": "https://cp.titan007.com/buy/JingCai.aspx?typeID=101&oddstype=2&date=2026-7-21",
-      "level": 1,
-      "type": "list",
-      "rel_path": "2026-7-21/index.html",
+      "url": "https://zq.titan007.com/cn/team/TeamNews/247.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNews/247.html",
       "status": "ok",
-      "diff_ratio": 0.003148,
+      "diff_ratio": null,
       "attempt": 1,
-      "message": "差异在可忽略范围内"
+      "message": "非 L1 页面跳过视觉对比"
     },
     {
       "url": "https://zq.titan007.com/analysis/2910807cn.htm",
@@ -21,6 +21,36 @@
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryLeague/1142.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryLeague/1142.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryCup/1142.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryCup/1142.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNearYear/1142.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNearYear/1142.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
@@ -44,13 +74,43 @@
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://vip.titan007.com/OverDown_n.aspx?id=2910807",
+      "url": "https://zq.titan007.com/cn/team/TeamSche/1142.html",
       "level": 3,
-      "type": "detail_over_l3",
-      "rel_path": "2026-7-21/OverDown_n/2910807.html",
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamSche/1142.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/Lineup/1142.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/Lineup/1142.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerData/1142.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerData/1142.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerZh/1142.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerZh/1142.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
@@ -59,9 +119,19 @@
       "type": "detail_analysis",
       "rel_path": "2026-7-21/analysis/2929663cn.htm",
       "status": "ok",
-      "diff_ratio": 0.002201,
+      "diff_ratio": null,
       "attempt": 1,
-      "message": "差异在可忽略范围内"
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamHistoryOrder/1142.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamHistoryOrder/1142.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
     },
     {
       "url": "https://vip.titan007.com/AsianOdds_n.aspx?id=2929663",
@@ -69,9 +139,9 @@
       "type": "detail_asian",
       "rel_path": "2026-7-21/AsianOdds_n/2929663.html",
       "status": "ok",
-      "diff_ratio": 0.00034,
+      "diff_ratio": null,
       "attempt": 1,
-      "message": "差异在可忽略范围内"
+      "message": "非 L1 页面跳过视觉对比"
     },
     {
       "url": "https://op1.titan007.com/oddslist/2929663.htm",
@@ -79,19 +149,89 @@
       "type": "detail_europe",
       "rel_path": "2026-7-21/oddslist/2929663.htm",
       "status": "ok",
-      "diff_ratio": 0.008308,
+      "diff_ratio": null,
       "attempt": 1,
-      "message": "差异在可忽略范围内"
+      "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://vip.titan007.com/OverDown_n.aspx?id=2929663",
+      "url": "https://zq.titan007.com/cn/team/TeamNews/1142.html",
       "level": 3,
-      "type": "detail_over_l3",
-      "rel_path": "2026-7-21/OverDown_n/2929663.html",
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNews/1142.html",
       "status": "ok",
-      "diff_ratio": 0.000324,
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryLeague/14.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryLeague/14.html",
+      "status": "ok",
+      "diff_ratio": null,
       "attempt": 1,
-      "message": "差异在可忽略范围内"
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryCup/14.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryCup/14.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNearYear/14.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNearYear/14.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamSche/14.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamSche/14.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/Lineup/14.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/Lineup/14.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerData/14.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerData/14.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerZh/14.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerZh/14.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
     },
     {
       "url": "https://zq.titan007.com/analysis/2929664cn.htm",
@@ -104,13 +244,73 @@
       "message": "非 L1 页面跳过视觉对比"
     },
     {
+      "url": "https://zq.titan007.com/cn/team/TeamHistoryOrder/14.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamHistoryOrder/14.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNews/14.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNews/14.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryLeague/76.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryLeague/76.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryCup/76.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryCup/76.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNearYear/76.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNearYear/76.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamSche/76.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamSche/76.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
       "url": "https://vip.titan007.com/AsianOdds_n.aspx?id=2929664",
       "level": 2,
       "type": "detail_asian",
       "rel_path": "2026-7-21/AsianOdds_n/2929664.html",
       "status": "ok",
       "diff_ratio": null,
-      "attempt": 1,
+      "attempt": 2,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
@@ -124,23 +324,13 @@
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://vip.titan007.com/OverDown_n.aspx?id=2929664",
-      "level": 3,
-      "type": "detail_over_l3",
-      "rel_path": "2026-7-21/OverDown_n/2929664.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 3,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
       "url": "https://zq.titan007.com/analysis/2929665cn.htm",
       "level": 2,
       "type": "detail_analysis",
       "rel_path": "2026-7-21/analysis/2929665cn.htm",
       "status": "ok",
       "diff_ratio": null,
-      "attempt": 2,
+      "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
@@ -164,23 +354,13 @@
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://vip.titan007.com/OverDown_n.aspx?id=2929665",
-      "level": 3,
-      "type": "detail_over_l3",
-      "rel_path": "2026-7-21/OverDown_n/2929665.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 2,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
       "url": "https://zq.titan007.com/analysis/2999989cn.htm",
       "level": 2,
       "type": "detail_analysis",
       "rel_path": "2026-7-21/analysis/2999989cn.htm",
       "status": "ok",
       "diff_ratio": null,
-      "attempt": 2,
+      "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
@@ -190,7 +370,7 @@
       "rel_path": "2026-7-21/AsianOdds_n/2999989.html",
       "status": "ok",
       "diff_ratio": null,
-      "attempt": 2,
+      "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
@@ -204,23 +384,13 @@
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://vip.titan007.com/OverDown_n.aspx?id=2999989",
-      "level": 3,
-      "type": "detail_over_l3",
-      "rel_path": "2026-7-21/OverDown_n/2999989.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
       "url": "https://zq.titan007.com/analysis/2999991cn.htm",
       "level": 2,
       "type": "detail_analysis",
       "rel_path": "2026-7-21/analysis/2999991cn.htm",
       "status": "ok",
       "diff_ratio": null,
-      "attempt": 2,
+      "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
@@ -244,16 +414,6 @@
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://vip.titan007.com/OverDown_n.aspx?id=2999991",
-      "level": 3,
-      "type": "detail_over_l3",
-      "rel_path": "2026-7-21/OverDown_n/2999991.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
       "url": "https://zq.titan007.com/analysis/3033092cn.htm",
       "level": 2,
       "type": "detail_analysis",
@@ -270,7 +430,7 @@
       "rel_path": "2026-7-21/AsianOdds_n/3033092.html",
       "status": "ok",
       "diff_ratio": null,
-      "attempt": 2,
+      "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
@@ -284,10 +444,10 @@
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://vip.titan007.com/OverDown_n.aspx?id=3033092",
-      "level": 3,
-      "type": "detail_over_l3",
-      "rel_path": "2026-7-21/OverDown_n/3033092.html",
+      "url": "https://info.titan007.com/cn/SubLeague/15.html",
+      "level": 2,
+      "type": "link",
+      "rel_path": "2026-7-21/league/15.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
@@ -300,6 +460,26 @@
       "rel_path": "2026-7-21/league/103.html",
       "status": "ok",
       "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/League/4.html",
+      "level": 2,
+      "type": "link",
+      "rel_path": "2026-7-21/league/4.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/analysis/2910807.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2910807.htm",
+      "status": "ok",
+      "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
@@ -310,7 +490,7 @@
       "rel_path": "2026-7-21/team/343.html",
       "status": "ok",
       "diff_ratio": null,
-      "attempt": 1,
+      "attempt": 2,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
@@ -324,230 +504,80 @@
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/465.html",
+      "url": "https://zq.titan007.com/analysis/2910823cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/465.html",
+      "rel_path": "2026-7-21/analysis/2910823cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/356.html",
+      "url": "https://zq.titan007.com/analysis/2991118cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/356.html",
+      "rel_path": "2026-7-21/analysis/2991118cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/469.html",
+      "url": "https://zq.titan007.com/analysis/2910845cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/469.html",
+      "rel_path": "2026-7-21/analysis/2910845cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/3820.html",
+      "url": "https://zq.titan007.com/analysis/2910818cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/3820.html",
+      "rel_path": "2026-7-21/analysis/2910818cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/347.html",
+      "url": "https://zq.titan007.com/analysis/2910832cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/347.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/350.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/350.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/453.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/453.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/467.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/467.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/462.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/462.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/349.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/349.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/354.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/354.html",
+      "rel_path": "2026-7-21/analysis/2910832cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 2,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/369.html",
+      "url": "https://zq.titan007.com/analysis/2910837cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/369.html",
+      "rel_path": "2026-7-21/analysis/2910837cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/337.html",
+      "url": "https://zq.titan007.com/analysis/2910849cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/337.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/364.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/364.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/456.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/456.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 4,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/7429.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/7429.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/1964.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/1964.html",
+      "rel_path": "2026-7-21/analysis/2910849cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 2,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/7344.html",
+      "url": "https://zq.titan007.com/analysis/2929663.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/7344.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/25114.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/25114.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/1916.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/1916.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/2108.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/2108.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/3973.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/3973.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/27000.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/27000.html",
+      "rel_path": "2026-7-21/analysis/2929663.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
@@ -559,9 +589,9 @@
       "type": "link",
       "rel_path": "2026-7-21/team/4075.html",
       "status": "ok",
-      "diff_ratio": 0.000191,
-      "attempt": 1,
-      "message": "差异在可忽略范围内"
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
     },
     {
       "url": "https://zq.titan007.com/cn/team/Summary/9945.html",
@@ -569,15 +599,35 @@
       "type": "link",
       "rel_path": "2026-7-21/team/9945.html",
       "status": "ok",
-      "diff_ratio": 0.000201,
+      "diff_ratio": null,
       "attempt": 1,
-      "message": "差异在可忽略范围内"
+      "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/741.html",
+      "url": "https://zq.titan007.com/analysis/2929672cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/741.html",
+      "rel_path": "2026-7-21/analysis/2929672cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/analysis/2929671cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929671cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/analysis/2929664.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929664.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 2,
@@ -594,30 +644,50 @@
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/480.html",
+      "url": "https://zq.titan007.com/cn/team/Summary/488.html",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/480.html",
+      "rel_path": "2026-7-21/team/488.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 2,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/481.html",
+      "url": "https://zq.titan007.com/analysis/2929670cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/481.html",
+      "rel_path": "2026-7-21/analysis/2929670cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/21249.html",
+      "url": "https://zq.titan007.com/analysis/2929669cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/21249.html",
+      "rel_path": "2026-7-21/analysis/2929669cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/analysis/2929665.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929665.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/Summary/480.html",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/team/480.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
@@ -630,54 +700,24 @@
       "rel_path": "2026-7-21/team/497.html",
       "status": "ok",
       "diff_ratio": null,
-      "attempt": 2,
+      "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/488.html",
+      "url": "https://zq.titan007.com/analysis/2929673cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/488.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 3,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/7800.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/7800.html",
+      "rel_path": "2026-7-21/analysis/2929673cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/494.html",
+      "url": "https://zq.titan007.com/analysis/2999989.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/494.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 2,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/16584.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/16584.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/883.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/883.html",
+      "rel_path": "2026-7-21/analysis/2999989.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
@@ -700,184 +740,64 @@
       "rel_path": "2026-7-21/team/1142.html",
       "status": "ok",
       "diff_ratio": null,
-      "attempt": 2,
+      "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/1017.html",
+      "url": "https://zq.titan007.com/analysis/2998201cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/1017.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 2,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/1317.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/1317.html",
+      "rel_path": "2026-7-21/analysis/2998201cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/75.html",
+      "url": "https://zq.titan007.com/analysis/2999996cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/75.html",
+      "rel_path": "2026-7-21/analysis/2999996cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/240.html",
+      "url": "https://zq.titan007.com/analysis/2998206cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/240.html",
+      "rel_path": "2026-7-21/analysis/2998206cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 2,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/230.html",
+      "url": "https://zq.titan007.com/analysis/3003082cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/230.html",
+      "rel_path": "2026-7-21/analysis/3003082cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/1029.html",
+      "url": "https://zq.titan007.com/analysis/3003096cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/1029.html",
+      "rel_path": "2026-7-21/analysis/3003096cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/238.html",
+      "url": "https://zq.titan007.com/analysis/2999991.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/238.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/231.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/231.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/1143.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/1143.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/4493.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/4493.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/2712.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/2712.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/652.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/652.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 3,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/2345.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/2345.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 3,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/2537.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/2537.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/6034.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/6034.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/659.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/659.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 2,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/1234.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/1234.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 2,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/663.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/663.html",
+      "rel_path": "2026-7-21/analysis/2999991.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
@@ -900,167 +820,57 @@
       "rel_path": "2026-7-21/team/76.html",
       "status": "ok",
       "diff_ratio": null,
-      "attempt": 2,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/206.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/206.html",
-      "status": "ok",
-      "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/4652.html",
+      "url": "https://zq.titan007.com/analysis/3006516cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/4652.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/39213.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/39213.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/37791.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/37791.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/1292.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/1292.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/12.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/12.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/3107.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/3107.html",
+      "rel_path": "2026-7-21/analysis/3006516cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 2,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/9.html",
+      "url": "https://zq.titan007.com/analysis/2999995cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/9.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 2,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/8.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/8.html",
+      "rel_path": "2026-7-21/analysis/2999995cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/994.html",
+      "url": "https://zq.titan007.com/analysis/3010601cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/994.html",
+      "rel_path": "2026-7-21/analysis/3010601cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/1465.html",
+      "url": "https://zq.titan007.com/analysis/3002036cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/1465.html",
+      "rel_path": "2026-7-21/analysis/3002036cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/80.html",
+      "url": "https://zq.titan007.com/analysis/3033092.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/80.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 3,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/70.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/70.html",
+      "rel_path": "2026-7-21/analysis/3033092.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/1367.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/1367.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/77.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/77.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 3,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/79.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/79.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 3,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
@@ -1070,7 +880,7 @@
       "rel_path": "2026-7-21/team/35445.html",
       "status": "ok",
       "diff_ratio": null,
-      "attempt": 1,
+      "attempt": 2,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
@@ -1080,184 +890,1964 @@
       "rel_path": "2026-7-21/team/1986.html",
       "status": "ok",
       "diff_ratio": null,
-      "attempt": 1,
+      "attempt": 2,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/1261.html",
+      "url": "https://zq.titan007.com/analysis/3033102cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/1261.html",
+      "rel_path": "2026-7-21/analysis/3033102cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 2,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/33633.html",
+      "url": "https://zq.titan007.com/analysis/2913672cn.htm",
       "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/team/33633.html",
+      "rel_path": "2026-7-21/analysis/2913672cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/14945.html",
+      "url": "https://info.titan007.com/cn/Archer/2026/15.html",
       "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/14945.html",
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/Archer/2026/15.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/bestTeam/2026/15.html",
+      "level": 3,
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/bestTeam/2026/15.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/7610.html",
+      "url": "https://info.titan007.com/cn/TeamHeadPage/2026/15.html",
       "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/7610.html",
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/TeamHeadPage/2026/15.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/2618.html",
+      "url": "https://info.titan007.com/cn/FirGetLose/2026/15.html",
       "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/2618.html",
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/FirGetLose/2026/15.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 3,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/23952.html",
+      "url": "https://info.titan007.com/cn/NoGetLose/2026/15.html",
       "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/23952.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/11617.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/11617.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/7612.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/7612.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/2390.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/2390.html",
-      "status": "ok",
-      "diff_ratio": null,
-      "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
-    },
-    {
-      "url": "https://zq.titan007.com/cn/team/Summary/14654.html",
-      "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/14654.html",
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/NoGetLose/2026/15.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 2,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/940.html",
+      "url": "https://info.titan007.com/cn/Contrast/2026/15.html",
       "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/940.html",
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/Contrast/2026/15.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/CletGoal/2026-2027/103.html",
+      "level": 3,
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/CletGoal/2026-2027/103.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/383.html",
+      "url": "https://info.titan007.com/cn/CBigSmall/2026-2027/103.html",
       "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/383.html",
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/CBigSmall/2026-2027/103.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/2395.html",
+      "url": "https://info.titan007.com/cn/TechList/2026-2027/103.html",
       "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/2395.html",
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/TechList/2026-2027/103.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/CNormal/2026-2027/103.html",
+      "level": 3,
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/CNormal/2026-2027/103.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/387.html",
+      "url": "https://info.titan007.com/cn/CSinDou/2026-2027/103.html",
       "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/387.html",
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/CSinDou/2026-2027/103.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/CAllHalf/2026-2027/103.html",
+      "level": 3,
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/CAllHalf/2026-2027/103.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/2226.html",
+      "url": "https://info.titan007.com/cn/CMoreBall/2026-2027/103.html",
       "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/2226.html",
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/CMoreBall/2026-2027/103.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/386.html",
+      "url": "https://info.titan007.com/cn/TechList/2026/4.html",
       "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/386.html",
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/TechList/2026/4.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://zq.titan007.com/cn/team/Summary/8180.html",
+      "url": "https://info.titan007.com/cn/bestTeam/2026/4.html",
       "level": 3,
-      "type": "link",
-      "rel_path": "2026-7-21/team/8180.html",
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/bestTeam/2026/4.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/TeamHeadPage/2026/4.html",
+      "level": 3,
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/TeamHeadPage/2026/4.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/FirGetLose/2026/4.html",
+      "level": 3,
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/FirGetLose/2026/4.html",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
     },
     {
-      "url": "https://info.titan007.com/cn/SubLeague/15.html",
-      "level": 2,
+      "url": "https://info.titan007.com/cn/NoGetLose/2026/4.html",
+      "level": 3,
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/NoGetLose/2026/4.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/Contrast/2026/4.html",
+      "level": 3,
+      "type": "league_tab",
+      "rel_path": "2026-7-21/league/Contrast/2026/4.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryLeague/343.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryLeague/343.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryCup/343.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryCup/343.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNearYear/343.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNearYear/343.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamSche/343.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamSche/343.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/Lineup/343.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/Lineup/343.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerData/343.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerData/343.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerZh/343.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerZh/343.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamHistoryOrder/343.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamHistoryOrder/343.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNews/343.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNews/343.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryLeague/1979.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryLeague/1979.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryCup/1979.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryCup/1979.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNearYear/1979.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNearYear/1979.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamSche/1979.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamSche/1979.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/Lineup/1979.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/Lineup/1979.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerData/1979.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerData/1979.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerZh/1979.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerZh/1979.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamHistoryOrder/1979.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamHistoryOrder/1979.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNews/1979.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNews/1979.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryLeague/4075.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryLeague/4075.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryCup/4075.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryCup/4075.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNearYear/4075.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNearYear/4075.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamSche/4075.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamSche/4075.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/Lineup/4075.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/Lineup/4075.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerData/4075.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerData/4075.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerZh/4075.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerZh/4075.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamHistoryOrder/4075.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamHistoryOrder/4075.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNews/4075.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNews/4075.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryLeague/9945.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryLeague/9945.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryCup/9945.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryCup/9945.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNearYear/9945.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNearYear/9945.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamSche/9945.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamSche/9945.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/Lineup/9945.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/Lineup/9945.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerData/9945.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerData/9945.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerZh/9945.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerZh/9945.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamHistoryOrder/9945.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamHistoryOrder/9945.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNews/9945.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNews/9945.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryLeague/484.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryLeague/484.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryCup/484.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryCup/484.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNearYear/484.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNearYear/484.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamSche/484.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamSche/484.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/Lineup/484.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/Lineup/484.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerData/484.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerData/484.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerZh/484.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerZh/484.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamHistoryOrder/484.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamHistoryOrder/484.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNews/484.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNews/484.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryLeague/488.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryLeague/488.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryCup/488.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryCup/488.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNearYear/488.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNearYear/488.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamSche/488.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamSche/488.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/Lineup/488.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/Lineup/488.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerData/488.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerData/488.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerZh/488.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerZh/488.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamHistoryOrder/488.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamHistoryOrder/488.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNews/488.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNews/488.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryLeague/480.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryLeague/480.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryCup/480.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryCup/480.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNearYear/480.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNearYear/480.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamSche/480.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamSche/480.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/Lineup/480.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/Lineup/480.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerData/480.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerData/480.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerZh/480.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerZh/480.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamHistoryOrder/480.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamHistoryOrder/480.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNews/480.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNews/480.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryLeague/497.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryLeague/497.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryCup/497.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryCup/497.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNearYear/497.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNearYear/497.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamSche/497.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamSche/497.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/Lineup/497.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/Lineup/497.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerData/497.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerData/497.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerZh/497.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerZh/497.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamHistoryOrder/497.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamHistoryOrder/497.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNews/497.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNews/497.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryLeague/247.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryLeague/247.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/SummaryCup/247.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/SummaryCup/247.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamNearYear/247.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamNearYear/247.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamSche/247.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamSche/247.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/Lineup/247.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/Lineup/247.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerData/247.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerData/247.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerZh/247.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerZh/247.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/TeamHistoryOrder/247.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/TeamHistoryOrder/247.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/Lineup/76.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/Lineup/76.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerData/76.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerData/76.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://zq.titan007.com/cn/team/PlayerZh/76.html",
+      "level": 3,
+      "type": "team_tab",
+      "rel_path": "2026-7-21/team/PlayerZh/76.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://cp.titan007.com/buy/JingCai.aspx?typeID=101&oddstype=2&date=2026-7-21",
+      "level": 1,
+      "type": "list",
+      "rel_path": "2026-7-21/index.html",
+      "status": "needs_fix",
+      "diff_ratio": 0.181062,
+      "attempt": 4,
+      "message": "差异 18.11%，超过 10% 阈值，需要人工修复"
+    },
+    {
+      "url": "https://zq.titan007.com/analysis/2929674cn.htm",
+      "level": 3,
       "type": "link",
-      "rel_path": "2026-7-21/league/15.html",
+      "rel_path": "2026-7-21/analysis/2929674cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/team/Summary/494.html",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/league/team/Summary/494.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/team/Summary/488.html",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/league/team/Summary/488.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929669cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929669cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/team/Summary/481.html",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/league/team/Summary/481.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/team/Summary/484.html",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/league/team/Summary/484.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929670cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929670cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/team/Summary/21249.html",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/league/team/Summary/21249.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/team/Summary/9945.html",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/league/team/Summary/9945.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929671cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929671cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/team/Summary/16584.html",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/league/team/Summary/16584.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/team/Summary/4075.html",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/league/team/Summary/4075.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929672cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929672cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/team/Summary/497.html",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/league/team/Summary/497.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/team/Summary/7800.html",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/league/team/Summary/7800.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929673cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929673cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/team/Summary/741.html",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/league/team/Summary/741.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/team/Summary/480.html",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/league/team/Summary/480.html",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929674cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929674cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2921958cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2921958cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2921959cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2921959cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2921960cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2921960cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2921961cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2921961cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2921962cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2921962cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2921963cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2921963cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929563cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929563cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929564cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929564cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929565cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929565cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929566cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929566cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929561cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929561cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929562cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929562cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929567cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929567cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929568cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929568cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929569cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929569cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929570cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929570cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929571cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929571cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929572cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929572cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929573cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929573cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929574cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929574cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929575cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929575cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929576cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929576cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929577cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929577cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929578cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929578cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929579cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929579cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929580cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929580cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929581cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929581cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 4,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929582cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929582cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929583cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929583cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929584cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929584cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929585cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929585cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929586cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929586cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929587cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929587cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929588cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929588cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929589cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929589cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929590cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929590cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929591cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929591cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929592cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929592cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 4,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929593cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929593cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929594cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929594cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929595cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929595cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929596cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929596cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929597cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929597cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929598cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929598cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929599cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929599cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929600cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929600cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929601cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929601cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929602cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929602cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929603cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929603cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929604cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929604cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929605cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929605cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929606cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929606cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 4,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929607cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929607cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929608cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929608cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 3,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929609cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929609cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929610cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929610cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 4,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929611cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929611cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929612cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929612cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929613cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929613cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929614cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929614cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929615cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929615cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929616cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929616cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929617cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929617cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929618cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929618cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929619cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929619cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929620cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929620cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929621cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929621cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929622cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929622cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929623cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929623cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929624cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929624cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 1,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929625cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929625cn.htm",
+      "status": "ok",
+      "diff_ratio": null,
+      "attempt": 2,
+      "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/analysis/2929626cn.htm",
+      "level": 3,
+      "type": "link",
+      "rel_path": "2026-7-21/analysis/2929626cn.htm",
       "status": "ok",
       "diff_ratio": null,
       "attempt": 1,
@@ -1272,9 +2862,7 @@
       "match_time": "2026-07-21 18:30",
       "home_team": "济州SK",
       "away_team": "江原FC",
-      "status": "完场",
-      "home_team_id": "4075",
-      "away_team_id": "9945"
+      "status": "完场"
     },
     {
       "schedule_id": "5468202",
@@ -1283,9 +2871,7 @@
       "match_time": "2026-07-21 18:30",
       "home_team": "全北现代",
       "away_team": "大田市民",
-      "status": "完场",
-      "home_team_id": "484",
-      "away_team_id": "488"
+      "status": "完场"
     },
     {
       "schedule_id": "5468203",
@@ -1294,9 +2880,7 @@
       "match_time": "2026-07-21 18:30",
       "home_team": "蔚山现代",
       "away_team": "仁川联",
-      "status": "完场",
-      "home_team_id": "480",
-      "away_team_id": "497"
+      "status": "完场"
     },
     {
       "schedule_id": "5468205",
@@ -1305,9 +2889,7 @@
       "match_time": "2026-07-22 00:00",
       "home_team": "萨巴赫",
       "away_team": "库奥皮奥",
-      "status": "完场",
-      "home_team_id": "35445",
-      "away_team_id": "1986"
+      "status": "完场"
     },
     {
       "schedule_id": "5468206",
@@ -1316,9 +2898,7 @@
       "match_time": "2026-07-22 01:00",
       "home_team": "奥胡斯",
       "away_team": "波兹南",
-      "status": "完场",
-      "home_team_id": "247",
-      "away_team_id": "1142"
+      "status": "完场"
     },
     {
       "schedule_id": "5468207",
@@ -1327,9 +2907,7 @@
       "match_time": "2026-07-22 02:30",
       "home_team": "格风暴",
       "away_team": "哈茨",
-      "status": "完场",
-      "home_team_id": "14",
-      "away_team_id": "76"
+      "status": "完场"
     },
     {
       "schedule_id": "5468204",
@@ -1338,9 +2916,7 @@
       "match_time": "2026-07-22 06:30",
       "home_team": "米竞技",
       "away_team": "巴伊亚",
-      "status": "完场",
-      "home_team_id": "343",
-      "away_team_id": "1979"
+      "status": "完场"
     }
   ]
 }

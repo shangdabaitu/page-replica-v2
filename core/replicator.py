@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 import config
 from core.fetcher import fetch_url, normalize_url, decode_html
 from core.inliner import inline_page
-from core.renderer import render_html, render_league_page
+from core.renderer import render_html, render_league_page, render_league_with_tabs
 from core.simplifier import simplify_html
 from core.watermark import inject_watermark
 from core.extractor import (
@@ -21,6 +21,7 @@ from core.extractor import (
     extract_match_data,
     extract_links,
     extract_team_ids_from_analysis,
+    extract_tab_urls,
     get_detail_urls,
 )
 from storage import data_store
@@ -70,6 +71,20 @@ def _url_to_relative_path(url: str) -> str:
         if m:
             return f"team/{m.group(1)}.html"
 
+        # 杯赛/联赛资料页的主页（带赛季参数与不带赛季参数等价）
+        # /cn/SubLeague/2026/15.html   -> league/15.html
+        # /cn/CupMatch/2026-2027/103.html -> league/103.html
+        m = re.match(r"cn/(CupMatch|SubLeague|League)/([^/]+)/(\d+)\.html", path, re.I)
+        if m:
+            return f"league/{m.group(3)}.html"
+
+        # 杯赛/联赛资料页的标签页（独立 URL）
+        # /cn/CletGoal/2026-2027/103.html -> league/CletGoal/2026-2027/103.html
+        # /cn/Archer/2026/15.html         -> league/Archer/2026/15.html
+        m = re.match(r"cn/([A-Za-z]+)/([^/]+)/(\d+)\.html", path, re.I)
+        if m:
+            return f"league/{m.group(1)}/{m.group(2)}/{m.group(3)}.html"
+
     # zq.titan007.com 球队资料汇总页
     if parsed.netloc.lower() == "zq.titan007.com":
         m = re.match(r"cn/team/Summary/(\d+)\.html", path, re.I)
@@ -78,6 +93,11 @@ def _url_to_relative_path(url: str) -> str:
         m = re.match(r"big/team/Summary/(\d+)\.html", path, re.I)
         if m:
             return f"team/big_{m.group(1)}.html"
+        # 球队资料页的标签页（独立 URL）
+        # /cn/team/SummaryLeague/4075.html -> team/SummaryLeague/4075.html
+        m = re.match(r"cn/team/([A-Za-z]+)/(\d+)\.html", path, re.I)
+        if m:
+            return f"team/{m.group(1)}/{m.group(2)}.html"
 
     # 详情页：按已知模式分类目录
     if path.endswith(".htm") or path.endswith(".html"):
@@ -171,7 +191,20 @@ def _rewrite_links(html: str, base_url: str, source_path: Path, url_map: dict[st
     soup = BeautifulSoup(html, "lxml")
     attrs = ["href", "src", "action"]
     source_dir = source_path.parent
+
+    def _resolve_rel(abs_url: str) -> str | None:
+        for variant in _equivalent_urls(abs_url):
+            if variant in url_map:
+                target_rel = url_map[variant]
+                target_path = config.OUTPUT_DIR / target_rel
+                try:
+                    return os.path.relpath(target_path, source_dir)
+                except Exception:
+                    return target_rel
+        return None
+
     for tag in soup.find_all():
+        # 1) 普通 href / src / action
         for attr in attrs:
             val = tag.get(attr)
             if not val:
@@ -179,19 +212,45 @@ def _rewrite_links(html: str, base_url: str, source_path: Path, url_map: dict[st
             abs_url = normalize_url(val, base_url)
             if not abs_url:
                 continue
-            target_rel = None
-            for variant in _equivalent_urls(abs_url):
-                if variant in url_map:
-                    target_rel = url_map[variant]
-                    break
-            if target_rel is None:
-                continue
-            target_path = config.OUTPUT_DIR / target_rel
-            try:
-                rel = os.path.relpath(target_path, source_dir)
-            except Exception:
-                rel = target_rel
-            tag[attr] = rel
+            rel = _resolve_rel(abs_url)
+            if rel is not None:
+                tag[attr] = rel
+
+        # 2) onclick 中的 location.href / window.location 跳转（标签页导航常用）
+        onclick = tag.get("onclick")
+        if onclick:
+            new_onclick = onclick
+            for m in re.finditer(r"(location\.href|window\.location)\s*=\s*['\"]([^'\"]+)['\"]", onclick):
+                abs_url = normalize_url(m.group(2), base_url)
+                if not abs_url:
+                    continue
+                rel = _resolve_rel(abs_url)
+                if rel is not None:
+                    # 保持引号风格
+                    quote = m.group(0)[m.group(0).index(m.group(2)) - 1]
+                    new_onclick = new_onclick.replace(
+                        m.group(0),
+                        f"{m.group(1)}={quote}{rel}{quote}",
+                    )
+            if new_onclick != onclick:
+                tag["onclick"] = new_onclick
+
+        # 3) showHtml JS 标签页导航（SubLeague 赛程资料统计页内部标签）
+        onclick = tag.get("onclick")
+        if onclick and source_path.parent.name == "league":
+            m = re.search(r"showHtml\s*\(\s*(\d+)\s*\)", onclick, re.I)
+            if m:
+                tab_num = int(m.group(1))
+                base_stem = source_path.stem.split("_tab")[0]
+                target_name = f"{base_stem}.html" if tab_num == 1 else f"{base_stem}_tab{tab_num}.html"
+                target_path = source_path.parent / target_name
+                try:
+                    rel = os.path.relpath(target_path, source_dir)
+                except Exception:
+                    rel = target_name
+                tag["href"] = rel
+                del tag["onclick"]
+
     return str(soup)
 
 
@@ -225,12 +284,15 @@ def _process_single_page(
                 raise RuntimeError(f"第 {attempt + 1} 次抓取失败")
             raw_html = decode_html(data, ct)
 
-            # 用 Headless Chromium 渲染，拿到 JS 执行后的 DOM（表格、按钮等）
+            # 用 Headless Chromium 渲染，拿到 JS 执行后的 DOM。
+            # 只有联赛/杯赛资料页需要浏览器渲染（showHtml 标签 + 轮次合并），
+            # 其他静态页直接使用 fetch 结果以大幅提升速度。
+            tab_htmls: dict[int, str] = {}
             try:
                 if _is_league_page(url):
-                    rendered_html = render_league_page(url)
+                    rendered_html, tab_htmls = render_league_with_tabs(url)
                 else:
-                    rendered_html = render_html(url)
+                    rendered_html = raw_html
             except Exception as e:
                 print(f"[WARN] 页面渲染失败，回退到原始 HTML: {url} -> {e}")
                 rendered_html = raw_html
@@ -249,6 +311,24 @@ def _process_single_page(
             best_html = final_html
 
             output_path.write_text(final_html, encoding="utf-8")
+
+            # 保存联赛/赛事资料页的 showHtml JS 内部标签页
+            for t, tab_html in (tab_htmls or {}).items():
+                try:
+                    tab_rel = f"{rel_path[:-5]}_tab{t}.html" if rel_path.endswith(".html") else f"{rel_path}_tab{t}.html"
+                    tab_output_path = base_dir / tab_rel
+                    tab_output_path.parent.mkdir(parents=True, exist_ok=True)
+                    tab_inlined = inline_page(tab_html, url)
+                    tab_frozen = _freeze_rendered_page(tab_inlined)
+                    tab_simplified = simplify_html(tab_frozen)
+                    tab_marked = inject_watermark(tab_simplified)
+                    tab_final_html = _rewrite_links(tab_marked, url, tab_output_path, url_map)
+                    tab_output_path.write_text(tab_final_html, encoding="utf-8")
+                    # 用伪 URL 登记，便于最终统一重写链接
+                    tab_url = f"{url}#tab{t}"
+                    url_map[tab_url] = str(tab_output_path.relative_to(config.OUTPUT_DIR))
+                except Exception as e:
+                    print(f"[WARN] 保存标签页 {t} 失败: {url} -> {e}")
 
             # 视觉对比：默认仅对 L1 执行，避免 L2/L3 页面过多导致内存与时间爆炸。
             # 当 force_compare=True 时对任意层级都执行。
@@ -440,6 +520,26 @@ def replicate_date(date: str, max_level: int | None = None):
                         queue.append((link["url"], link["level"], link.get("type", "link")))
             except Exception as e:
                 yield {"type": "warning", "url": url, "message": f"提取子链接失败: {e}"}
+
+        # 提取并复刻页面自身的标签页（球队资料页、杯赛/联赛资料页的独立 URL 标签）。
+        # 这些标签页作为同级/末级内容页处理，不再继续下钻。
+        if result["status"] not in ("error",) and result.get("rel_path"):
+            try:
+                saved_path = base_dir / result["rel_path"]
+                html = saved_path.read_text(encoding="utf-8")
+                tabs = extract_tab_urls(html, url)
+                current_rel = _url_to_relative_path(url)
+                for tab in tabs:
+                    tab_url = tab["url"]
+                    if tab_url in queued or tab_url in visited:
+                        continue
+                    # 跳过与当前页同内容的标签（如 /cn/SubLeague/2026/15.html 与 /cn/SubLeague/15.html）
+                    if _url_to_relative_path(tab_url) == current_rel:
+                        continue
+                    queued.add(tab_url)
+                    queue.append((tab_url, max_level, tab["type"]))
+            except Exception as e:
+                yield {"type": "warning", "url": url, "message": f"提取标签页失败: {e}"}
 
     # 最终统一重写所有已保存页面的内链，确保链接在本地可跳转
     yield {"type": "progress", "url": "__rewrite_links__", "level": 0, "status": "rewriting"}

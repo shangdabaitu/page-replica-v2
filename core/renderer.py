@@ -8,11 +8,41 @@ from playwright.sync_api import sync_playwright
 
 
 def _find_chrome() -> str | None:
+    """查找可用的系统 Chrome/Chromium；排除 snap 包装脚本。"""
+    import subprocess
+
     for name in ("google-chrome-stable", "google-chrome", "chromium", "chromium-browser"):
         path = shutil.which(name)
-        if path:
-            return path
+        if not path:
+            continue
+        # 排除 Ubuntu 的 snap 包装脚本
+        try:
+            if b"requires the chromium snap" in Path(path).read_bytes()[:2048]:
+                continue
+        except Exception:
+            pass
+        # 确保该二进制能启动
+        try:
+            result = subprocess.run(
+                [path, "--version"],
+                capture_output=True,
+                timeout=5,
+                check=False,
+            )
+            if result.returncode == 0:
+                return path
+        except Exception:
+            continue
     return None
+
+
+def _launch_kwargs() -> dict:
+    """构造 Chromium 启动参数；优先使用系统 Chrome，否则让 Playwright 使用自带浏览器。"""
+    kwargs: dict = {"args": ["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"]}
+    chrome = _find_chrome()
+    if chrome:
+        kwargs["executable_path"] = chrome
+    return kwargs
 
 
 def render_html(url: str, wait_ms: int = 6000) -> str:
@@ -27,15 +57,8 @@ def render_and_capture(
     viewport_height: int = 900,
 ) -> tuple[str, bytes]:
     """在 Headless 浏览器中打开 url，同时返回渲染后的完整 HTML 和首屏截图（PNG）。"""
-    chrome = _find_chrome()
-    if not chrome:
-        raise RuntimeError("未找到 Chrome/Chromium 可执行文件")
-
     with sync_playwright() as p:
-        browser = p.chromium.launch(
-            executable_path=chrome,
-            args=["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"],
-        )
+        browser = p.chromium.launch(**_launch_kwargs())
         try:
             context = browser.new_context(
                 viewport={"width": viewport_width, "height": viewport_height},
@@ -60,15 +83,21 @@ def render_league_page(url: str, wait_ms: int = 6000) -> str:
     渲染联赛/赛事类型页，并在浏览器中依次点击所有轮次，
     把每轮赛程合并到同一张表中，确保静态化后所有比赛行都可见。
     """
-    chrome = _find_chrome()
-    if not chrome:
-        raise RuntimeError("未找到 Chrome/Chromium 可执行文件")
+    return render_league_with_tabs(url, wait_ms=wait_ms)[0]
 
+
+def render_league_with_tabs(
+    url: str, wait_ms: int = 6000
+) -> tuple[str, dict[int, str]]:
+    """
+    渲染联赛/赛事类型页，并捕获每个 showHtml JS 标签页的 DOM。
+
+    返回：
+      - main_html: 主标签页（积分榜 / 赛程资料统计）渲染后的完整 HTML，已合并所有轮次
+      - tab_htmls: dict，键为 showHtml 参数 2~11，值为对应标签页完整 HTML
+    """
     with sync_playwright() as p:
-        browser = p.chromium.launch(
-            executable_path=chrome,
-            args=["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"],
-        )
+        browser = p.chromium.launch(**_launch_kwargs())
         try:
             context = browser.new_context(
                 viewport={"width": 1440, "height": 900},
@@ -77,45 +106,24 @@ def render_league_page(url: str, wait_ms: int = 6000) -> str:
                     "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 ),
             )
-            page = context.new_page()
-            page.set_extra_http_headers({"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"})
-            page.goto(url, wait_until="networkidle", timeout=60000)
-            page.wait_for_timeout(wait_ms)
 
-            # 收集所有轮次的赛程行，按 match_id 去重
-            seen_ids: set[str] = set()
-            all_rows: list[str] = []
+            def _merge_all_rounds(page):
+                """点击所有轮次并把赛程行合并到 #Table3 tbody。"""
+                seen_ids: set[str] = set()
+                all_rows: list[str] = []
 
-            def _collect_current_rows():
-                return page.evaluate(
-                    """() => {
-                        const tbody = document.querySelector('#Table3 tbody');
-                        if (!tbody) return [];
-                        return Array.from(tbody.querySelectorAll('tr[id]')).map(r => ({
-                            id: r.id,
-                            html: r.outerHTML
-                        }));
-                    }"""
-                )
+                def _collect_current_rows():
+                    return page.evaluate(
+                        """() => {
+                            const tbody = document.querySelector('#Table3 tbody');
+                            if (!tbody) return [];
+                            return Array.from(tbody.querySelectorAll('tr[id]')).map(r => ({
+                                id: r.id,
+                                html: r.outerHTML
+                            }));
+                        }"""
+                    )
 
-            # 先收集默认显示的轮次
-            for row in _collect_current_rows():
-                rid = str(row.get("id", "")).strip()
-                html = row.get("html", "")
-                if rid and html and rid not in seen_ids:
-                    seen_ids.add(rid)
-                    all_rows.append(html)
-
-            round_cells = page.locator('td[onclick*="changeRound"]').all()
-            for cell in round_cells:
-                rnd_text = cell.text_content().strip()
-                if not rnd_text.isdigit():
-                    continue
-                try:
-                    cell.click()
-                    page.wait_for_timeout(1200)
-                except Exception:
-                    continue
                 for row in _collect_current_rows():
                     rid = str(row.get("id", "")).strip()
                     html = row.get("html", "")
@@ -123,17 +131,63 @@ def render_league_page(url: str, wait_ms: int = 6000) -> str:
                         seen_ids.add(rid)
                         all_rows.append(html)
 
-            if all_rows:
-                combined = "".join(all_rows)
-                page.evaluate(
-                    """(combined) => {
-                        const tbody = document.querySelector('#Table3 tbody');
-                        if (tbody) tbody.innerHTML = combined;
-                    }""",
-                    combined,
-                )
-                page.wait_for_timeout(500)
+                round_cells = page.locator('td[onclick*="changeRound"]').all()
+                for cell in round_cells:
+                    rnd_text = cell.text_content().strip()
+                    if not rnd_text.isdigit():
+                        continue
+                    try:
+                        cell.click()
+                        page.wait_for_timeout(1200)
+                    except Exception:
+                        continue
+                    for row in _collect_current_rows():
+                        rid = str(row.get("id", "")).strip()
+                        html = row.get("html", "")
+                        if rid and html and rid not in seen_ids:
+                            seen_ids.add(rid)
+                            all_rows.append(html)
 
-            return page.content()
+                if all_rows:
+                    combined = "".join(all_rows)
+                    page.evaluate(
+                        """(combined) => {
+                            const tbody = document.querySelector('#Table3 tbody');
+                            if (tbody) tbody.innerHTML = combined;
+                        }""",
+                        combined,
+                    )
+                    page.wait_for_timeout(500)
+
+            # 主标签页：打开页面、合并所有轮次、保持默认 showHtml(1) 状态
+            page = context.new_page()
+            page.set_extra_http_headers({"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"})
+            page.goto(url, wait_until="networkidle", timeout=60000)
+            page.wait_for_timeout(wait_ms)
+            _merge_all_rounds(page)
+            main_html = page.content()
+            page.close()
+
+            # 判断是否存在 showHtml 标签导航；不存在则直接返回
+            has_showhtml = "showHtml(" in main_html
+            tab_htmls: dict[int, str] = {}
+            if not has_showhtml:
+                return main_html, tab_htmls
+
+            # 依次渲染 showHtml(2) ~ showHtml(11)
+            for t in range(2, 12):
+                try:
+                    tab_page = context.new_page()
+                    tab_page.set_extra_http_headers({"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"})
+                    tab_page.goto(url, wait_until="networkidle", timeout=60000)
+                    tab_page.wait_for_timeout(wait_ms)
+                    tab_page.evaluate(f"showHtml({t})")
+                    tab_page.wait_for_timeout(2500)
+                    tab_htmls[t] = tab_page.content()
+                    tab_page.close()
+                except Exception:
+                    continue
+
+            return main_html, tab_htmls
         finally:
             browser.close()

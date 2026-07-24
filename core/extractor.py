@@ -237,6 +237,49 @@ def extract_team_ids_from_analysis(html: str) -> dict:
     return {"home_team_id": ids[0], "away_team_id": ids[1]}
 
 
+def extract_tab_urls(html: str, base_url: str) -> list[dict]:
+    """从页面中提取标签页对应的独立 URL（球队资料页、杯赛/联赛页等）。
+
+    支持的标签导航：
+      - 球队资料页 .team-nav li[onclick*=location.href]
+      - 杯赛/联赛/赛事资料页 .sub_menu a[href]
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    urls = []
+    seen = set()
+
+    # 1) 球队资料页
+    for li in soup.select(".team-nav li[onclick]"):
+        onclick = li.get("onclick", "")
+        m = re.search(r"location\.href\s*=\s*['\"]([^'\"]+)['\"]", onclick)
+        if not m:
+            continue
+        href = normalize_url(html_module.unescape(m.group(1)), base_url)
+        if not href or href in seen or not _is_interesting_url(href):
+            continue
+        seen.add(href)
+        urls.append({
+            "url": href,
+            "type": "team_tab",
+            "text": li.get_text(strip=True)[:50],
+        })
+
+    # 2) 杯赛/联赛/赛事资料页
+    for a in soup.select(".sub_menu a[href]"):
+        raw = html_module.unescape(a.get("href", ""))
+        href = normalize_url(raw, base_url)
+        if not href or href in seen or not _is_interesting_url(href):
+            continue
+        seen.add(href)
+        urls.append({
+            "url": href,
+            "type": "league_tab",
+            "text": a.get_text(strip=True)[:50],
+        })
+
+    return urls
+
+
 def _is_interesting_url(url: str) -> bool:
     """判断 URL 是否属于需要复刻的范围。"""
     parsed = urlparse(url)
@@ -246,11 +289,10 @@ def _is_interesting_url(url: str) -> bool:
     if host not in config.ALLOWED_HOSTS:
         return False
 
-    # 排除纯资源文件和已知非页面路径
+    # 排除纯资源文件和已知非比赛详情页（北京单场、空 analysis 目录、彩票购买页等）
     if path.endswith((".css", ".js", ".png", ".jpg", ".gif", ".ico", ".svg", ".woff", ".ttf")):
         return False
 
-    # 排除已知非比赛详情页（北京单场、空 analysis 目录、彩票购买页等）
     if "beijingdanchang" in path or "/buy/lottery.aspx" in path:
         return False
 
