@@ -155,7 +155,7 @@ def _is_l2_url(url: str) -> bool:
     path = parsed.path.lower()
     qs = parse_qs(parsed.query)
 
-    if parsed.netloc.lower() == "info.titan007.com" and re.match(r"/cn/CupMatch/\d+\.html", path, re.I):
+    if parsed.netloc.lower() == "info.titan007.com" and re.match(r"/cn/(?:CupMatch|SubLeague|League)/\d+\.html", path, re.I):
         return True
 
     if "id" in qs and re.match(r"\d+$", qs["id"][0]):
@@ -203,7 +203,7 @@ def _is_league_page(url: str) -> bool:
     """判断 URL 是否为 L2 的赛事类型/联赛聚合页。"""
     parsed = urlparse(url)
     path = parsed.path.lower()
-    return parsed.netloc.lower() == "info.titan007.com" and re.match(r"/cn/CupMatch/\d+\.html", path, re.I)
+    return parsed.netloc.lower() == "info.titan007.com" and re.match(r"/cn/(?:CupMatch|SubLeague|League)/\d+\.html", path, re.I)
 
 
 def _is_analysis_page(url: str) -> bool:

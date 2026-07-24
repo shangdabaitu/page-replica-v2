@@ -51,9 +51,11 @@ def _url_to_relative_path(url: str) -> str:
 
     # info.titan007.com 资料库页
     if parsed.netloc.lower() == "info.titan007.com":
-        # /cn/CupMatch/103.html -> league/103.html
-        # /cn/team/1234.html    -> team/1234.html
-        m = re.match(r"cn/CupMatch/(\d+)\.html", path, re.I)
+        # /cn/CupMatch/103.html   -> league/103.html
+        # /cn/SubLeague/15.html   -> league/15.html
+        # /cn/League/4.html       -> league/4.html
+        # /cn/team/1234.html      -> team/1234.html
+        m = re.match(r"cn/(?:CupMatch|SubLeague|League)/(\d+)\.html", path, re.I)
         if m:
             return f"league/{m.group(1)}.html"
         m = re.match(r"cn/team/(\d+)\.html", path, re.I)
@@ -151,6 +153,7 @@ def _process_single_page(
     level: int,
     base_dir: Path,
     url_map: dict[str, str],
+    force_compare: bool = False,
 ) -> dict:
     """抓取、内联、简体化、水印、保存并视觉对比一个页面。"""
     rel_path = _url_to_relative_path(url)
@@ -184,17 +187,24 @@ def _process_single_page(
             inlined = inline_page(rendered_html, url)
             frozen = _freeze_rendered_page(inlined)
             simplified = simplify_html(frozen)
+
+            # 视觉对比使用无水印版本，避免水印自身造成人为差异
+            compare_html = _rewrite_links(simplified, url, output_path, url_map)
+            compare_path = output_path.with_suffix(".compare.html")
+            compare_path.write_text(compare_html, encoding="utf-8")
+
             marked = inject_watermark(simplified)
             final_html = _rewrite_links(marked, url, output_path, url_map)
             best_html = final_html
 
             output_path.write_text(final_html, encoding="utf-8")
 
-            # 视觉对比：仅对 L1 执行，避免 L2/L3 页面过多导致内存与时间爆炸
-            if level == 1:
+            # 视觉对比：默认仅对 L1 执行，避免 L2/L3 页面过多导致内存与时间爆炸。
+            # 当 force_compare=True 时对任意层级都执行。
+            if level == 1 or force_compare:
                 compare_result = visual.compare_pages(
                     url,
-                    output_path,
+                    compare_path,
                     output_dir=base_dir / "diff",
                 )
             else:

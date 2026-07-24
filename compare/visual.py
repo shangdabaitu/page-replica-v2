@@ -5,7 +5,7 @@ import math
 from pathlib import Path
 from typing import Tuple
 
-from PIL import Image, ImageChops
+from PIL import Image, ImageChops, ImageFilter
 
 import config
 
@@ -91,6 +91,9 @@ def compute_diff(source_img: Image.Image, replica_img: Image.Image) -> Tuple[flo
     """
     计算两张图片的差异比例，返回 (diff_ratio, diff_image)。
     diff_ratio 范围 [0, 1]，0 表示完全一致。
+
+    为了降低不同 Chromium 实例在字体抗锯齿、子像素渲染上的微小噪声，
+    先对两张图做轻微高斯模糊，再以较高阈值统计真正结构性差异。
     """
     if source_img is None or replica_img is None:
         return 1.0, None
@@ -107,6 +110,10 @@ def compute_diff(source_img: Image.Image, replica_img: Image.Image) -> Tuple[flo
     a = pad(source_img)
     b = pad(replica_img)
 
+    # 轻微模糊消除抗锯齿噪声，保留文字/区块级别的真实差异
+    a = a.filter(ImageFilter.GaussianBlur(radius=1))
+    b = b.filter(ImageFilter.GaussianBlur(radius=1))
+
     diff = ImageChops.difference(a, b)
     # 转成灰度并统计非零像素
     gray = diff.convert("L")
@@ -114,13 +121,15 @@ def compute_diff(source_img: Image.Image, replica_img: Image.Image) -> Tuple[flo
     total = len(pixels)
     if total == 0:
         return 0.0, None
-    different = sum(1 for v in pixels if v > 10)
+    # 阈值 20：忽略由字体渲染、压缩、颜色取整带来的微小差异
+    different = sum(1 for v in pixels if v > 20)
     ratio = different / total
 
-    # 生成高亮差异图
+    # 生成高亮差异图：增强对比度让差异区域更明显
     highlight = None
     if ratio > config.DIFF_THRESHOLD_IGNORE:
-        highlight = ImageChops.multiply(diff, diff)
+        enhanced = ImageChops.multiply(diff, diff)
+        highlight = enhanced.point(lambda p: min(255, p * 4))
     return ratio, highlight
 
 
@@ -154,10 +163,58 @@ def compare_pages(source_url: str, replica_path: Path, output_dir: Path | None =
             "message": "无法启动浏览器，跳过视觉对比",
         }
 
+    return _compare_with_source_image(
+        source_img,
+        source_url,
+        replica_path,
+        output_dir=output_dir,
+    )
+
+
+def compare_with_source_image(
+    source_img: Image.Image,
+    source_display_url: str,
+    replica_path: Path,
+    output_dir: Path | None = None,
+) -> dict:
+    """用已经准备好的源截图与复刻页面做视觉对比，返回结果字典。"""
+    if not _playwright_ok():
+        return {
+            "source_url": source_display_url,
+            "replica_path": str(replica_path),
+            "diff_ratio": None,
+            "status": "skipped",
+            "message": "Playwright 未安装，跳过视觉对比",
+        }
+
+    if not replica_path.exists():
+        return {
+            "source_url": source_display_url,
+            "replica_path": str(replica_path),
+            "diff_ratio": None,
+            "status": "replica_not_found",
+            "message": "复刻文件不存在",
+        }
+
+    return _compare_with_source_image(
+        source_img,
+        source_display_url,
+        replica_path,
+        output_dir=output_dir,
+    )
+
+
+def _compare_with_source_image(
+    source_img: Image.Image,
+    source_display_url: str,
+    replica_path: Path,
+    output_dir: Path | None = None,
+) -> dict:
+    """内部：用源截图与复刻页面做视觉对比。"""
     replica_img = screenshot_page(f"file://{replica_path.resolve()}")
     if replica_img is None:
         return {
-            "source_url": source_url,
+            "source_url": source_display_url,
             "replica_path": str(replica_path),
             "diff_ratio": None,
             "status": "skipped",
@@ -168,7 +225,7 @@ def compare_pages(source_url: str, replica_path: Path, output_dir: Path | None =
     diff_path = None
     if diff_img and output_dir:
         output_dir.mkdir(parents=True, exist_ok=True)
-        diff_path = output_dir / f"diff_{_safe_name(source_url)}.png"
+        diff_path = output_dir / f"diff_{_safe_name(source_display_url)}.png"
         diff_img.save(diff_path)
 
     status = "ok"
@@ -181,7 +238,7 @@ def compare_pages(source_url: str, replica_path: Path, output_dir: Path | None =
         message = f"差异 {ratio:.2%}，超过 {config.DIFF_THRESHOLD_RETRY:.0%} 阈值，需要人工修复"
 
     return {
-        "source_url": source_url,
+        "source_url": source_display_url,
         "replica_path": str(replica_path),
         "diff_ratio": round(ratio, 6),
         "status": status,

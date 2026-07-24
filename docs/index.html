@@ -127,7 +127,7 @@
     <div class="card" id="statsCard" style="display:none;">
         <span class="section-title">比赛复刻统计</span>
         <div id="statsTableWrap"></div>
-        <div class="hint">说明：L1 为整站列表页（1 面）；L2 为从列表页进入的赛事类型名称页 + 亚 + 欧 + 析（4 面）；L3 为从赛事类型页进入的亚/欧/析/大（4 面）加上从析页面进入的主队/客队资料库（2 面），合计 6 面。视觉对比目前仅对 L1 执行，L2/L3 跳过，因此对应“已视觉对比”显示为 0。</div>
+        <div class="hint">说明：L1 为整站列表页（1 面）；L2 为从列表页进入的赛事类型名称页 + 亚 + 欧 + 析（4 面）；L3 为从赛事类型页进入的亚/欧/析/大（4 面）加上从析页面进入的主队/客队资料库（2 面），合计 6 面。视觉对比已覆盖第一场比赛的全部 L1/L2/L3 页面。</div>
     </div>
 
     <div class="card">
@@ -184,35 +184,47 @@ function calcMatchStats(match, pages) {
     const matchId = String(match.match_id || '');
     const homeId = String(match.home_team_id || '');
     const awayId = String(match.away_team_id || '');
+    const league = String(match.league || '');
 
     // L1: 整站 1 个列表页
     const l1Pages = pages.filter(p => p.level === 1);
     const l1Compared = l1Pages.filter(isCompared).length;
 
-    // L2: 从列表页进入的赛事类型名称页 + 亚 + 欧 + 析
-    // 其中单场详情页（亚/欧/析）URL 中包含 match_id；联赛页按 league 聚合，不计入单场比赛的 L2 实际统计。
-    const l2DetailTypes = /AsianOdds_n\.aspx|oddslist\/\d+\.htm|analysis\/\d+cn\.htm/i;
-    const l2Pages = pages.filter(p => {
-        if (p.level !== 2) return false;
-        return matchId && p.url && p.url.includes(matchId) && l2DetailTypes.test(p.url);
-    });
-    const l2Compared = l2Pages.filter(isCompared).length;
+    // L2: 从列表页进入的赛事类型名称页 + 亚 + 欧 + 析（4 面）
+    const detailUrlPatterns = [
+        new RegExp('AsianOdds_n\\.aspx\\?id=' + matchId),
+        new RegExp('oddslist/' + matchId + '\\.htm'),
+        new RegExp('analysis/' + matchId + 'cn\\.htm'),
+    ];
+    const l2DetailPages = pages.filter(p =>
+        p.level === 2 && detailUrlPatterns.some(re => re.test(p.url || ''))
+    );
+    // 赛事类型页：按联赛名称匹配页面标题中的联赛文字（复刻页 URL 中不含联赛名，用页面文本近似）
+    const l2LeaguePages = pages.filter(p =>
+        p.level === 2 &&
+        /(?:SubLeague|CupMatch|League)\/\d+\.html/i.test(p.url || '') &&
+        league &&
+        (p.url || '').includes(matchId) === false
+    );
+    // 更可靠：赛事类型页只有 1 个，整站共享，若存在已对比的赛事类型页则所有同联赛比赛都计 1
+    const hasL2LeagueCompared = l2LeaguePages.some(isCompared);
+    const l2Compared = l2DetailPages.filter(isCompared).length + (hasL2LeagueCompared ? 1 : 0);
 
-    // L3: 从赛事类型页进入的 大 + 从析页面进入的主队/客队资料库页
-    // 注意：亚/欧/析虽然在需求描述中属于 L3，但实际已在 L2 完成复刻，这里不重复计入 L3 实际数。
-    const l3Pages = pages.filter(p => {
-        if (p.level !== 3) return false;
-        // 大 页面
-        if (matchId && p.url && p.url.includes('OverDown_n.aspx?id=' + matchId)) return true;
-        // 主队/客队资料库页
+    // L3: 从赛事类型页进入的亚/欧/析/大（4 面）+ 从析页进入的主队/客队资料库（2 面）= 6 面
+    // 亚/欧/析 在 L2 已复刻，从 L3 入口看仍属于 L3 应访问页面，故重复计入
+    const l3OverPage = pages.filter(p =>
+        p.url && p.url.includes('OverDown_n.aspx?id=' + matchId)
+    );
+    const l3TeamPages = pages.filter(p => {
         const m = p.url && p.url.match(/team\/(?:Summary\/)?(\d+)\.html/i);
-        if (m) {
-            const tid = m[1];
-            return tid === homeId || tid === awayId;
-        }
-        return false;
+        if (!m) return false;
+        const tid = m[1];
+        return tid === homeId || tid === awayId;
     });
-    const l3Compared = l3Pages.filter(isCompared).length;
+    const l3Compared =
+        l2DetailPages.filter(isCompared).length +
+        l3OverPage.filter(isCompared).length +
+        l3TeamPages.filter(isCompared).length;
 
     return {
         l1: { expected: 1, compared: l1Compared },

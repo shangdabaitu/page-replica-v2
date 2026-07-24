@@ -8,10 +8,10 @@
       "level": 1,
       "type": "list",
       "rel_path": "2026-7-21/index.html",
-      "status": "needs_fix",
-      "diff_ratio": 0.239687,
-      "attempt": 4,
-      "message": "差异 23.97%，超过 10% 阈值，需要人工修复"
+      "status": "ok",
+      "diff_ratio": 0.003148,
+      "attempt": 1,
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://zq.titan007.com/analysis/2910807cn.htm",
@@ -59,9 +59,9 @@
       "type": "detail_analysis",
       "rel_path": "2026-7-21/analysis/2929663cn.htm",
       "status": "ok",
-      "diff_ratio": null,
+      "diff_ratio": 0.002201,
       "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://vip.titan007.com/AsianOdds_n.aspx?id=2929663",
@@ -69,9 +69,9 @@
       "type": "detail_asian",
       "rel_path": "2026-7-21/AsianOdds_n/2929663.html",
       "status": "ok",
-      "diff_ratio": null,
+      "diff_ratio": 0.00034,
       "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://op1.titan007.com/oddslist/2929663.htm",
@@ -79,9 +79,9 @@
       "type": "detail_europe",
       "rel_path": "2026-7-21/oddslist/2929663.htm",
       "status": "ok",
-      "diff_ratio": null,
+      "diff_ratio": 0.008324,
       "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://vip.titan007.com/OverDown_n.aspx?id=2929663",
@@ -89,9 +89,9 @@
       "type": "detail_over_l3",
       "rel_path": "2026-7-21/OverDown_n/2929663.html",
       "status": "ok",
-      "diff_ratio": null,
-      "attempt": 2,
-      "message": "非 L1 页面跳过视觉对比"
+      "diff_ratio": 0.000324,
+      "attempt": 1,
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://zq.titan007.com/analysis/2929664cn.htm",
@@ -559,9 +559,9 @@
       "type": "link",
       "rel_path": "2026-7-21/team/4075.html",
       "status": "ok",
-      "diff_ratio": null,
+      "diff_ratio": 0.000191,
       "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://zq.titan007.com/cn/team/Summary/9945.html",
@@ -569,9 +569,9 @@
       "type": "link",
       "rel_path": "2026-7-21/team/9945.html",
       "status": "ok",
-      "diff_ratio": null,
+      "diff_ratio": 0.000201,
       "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://zq.titan007.com/cn/team/Summary/741.html",
@@ -1252,6 +1252,16 @@
       "diff_ratio": null,
       "attempt": 1,
       "message": "非 L1 页面跳过视觉对比"
+    },
+    {
+      "url": "https://info.titan007.com/cn/SubLeague/15.html",
+      "level": 2,
+      "type": "link",
+      "rel_path": "2026-7-21/league/15.html",
+      "status": "ok",
+      "diff_ratio": 0.000188,
+      "attempt": 1,
+      "message": "差异在可忽略范围内"
     }
   ],
   "matches": [

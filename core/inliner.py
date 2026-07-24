@@ -29,9 +29,18 @@ def inline_page(html: str, base_url: str) -> str:
         style_tag.string = css
         tag.replace_with(style_tag)
 
-    # 2. 脚本不再内联，避免 </script> 截断导致脚本源码泄漏到正文。
+    # 2. 处理 HTML 内 <style> 标签中的 url(...)，把背景图等也内联
+    for tag in soup.find_all("style"):
+        if tag.string:
+            tag.string = _inline_css_urls(tag.string, base_url)
 
-    # 3. 内联 <img src="...">
+    # 2.5 处理元素 style 属性中的 url(...)
+    for tag in soup.find_all(style=True):
+        tag["style"] = _inline_css_urls(tag["style"], base_url)
+
+    # 3. 脚本不再内联，避免 </script> 截断导致脚本源码泄漏到正文。
+
+    # 4. 内联 <img src="...">
     for tag in soup.find_all("img", src=True):
         src = normalize_url(tag["src"], base_url)
         if not src:
