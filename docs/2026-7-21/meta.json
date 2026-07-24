@@ -19,9 +19,9 @@
       "type": "detail_analysis",
       "rel_path": "2026-7-21/analysis/2910807cn.htm",
       "status": "ok",
-      "diff_ratio": null,
+      "diff_ratio": 0.001573,
       "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://zq.titan007.com/cn/team/SummaryLeague/1142.html",
@@ -119,9 +119,9 @@
       "type": "detail_analysis",
       "rel_path": "2026-7-21/analysis/2929663cn.htm",
       "status": "ok",
-      "diff_ratio": null,
+      "diff_ratio": 0.003266,
       "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://zq.titan007.com/cn/team/TeamHistoryOrder/1142.html",
@@ -239,9 +239,9 @@
       "type": "detail_analysis",
       "rel_path": "2026-7-21/analysis/2929664cn.htm",
       "status": "ok",
-      "diff_ratio": null,
+      "diff_ratio": 0.000701,
       "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://zq.titan007.com/cn/team/TeamHistoryOrder/14.html",
@@ -329,9 +329,9 @@
       "type": "detail_analysis",
       "rel_path": "2026-7-21/analysis/2929665cn.htm",
       "status": "ok",
-      "diff_ratio": null,
+      "diff_ratio": 0.000708,
       "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://vip.titan007.com/AsianOdds_n.aspx?id=2929665",
@@ -359,9 +359,9 @@
       "type": "detail_analysis",
       "rel_path": "2026-7-21/analysis/2999989cn.htm",
       "status": "ok",
-      "diff_ratio": null,
+      "diff_ratio": 0.000749,
       "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://vip.titan007.com/AsianOdds_n.aspx?id=2999989",
@@ -389,9 +389,9 @@
       "type": "detail_analysis",
       "rel_path": "2026-7-21/analysis/2999991cn.htm",
       "status": "ok",
-      "diff_ratio": null,
+      "diff_ratio": 0.000724,
       "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://vip.titan007.com/AsianOdds_n.aspx?id=2999991",
@@ -419,9 +419,9 @@
       "type": "detail_analysis",
       "rel_path": "2026-7-21/analysis/3033092cn.htm",
       "status": "ok",
-      "diff_ratio": null,
+      "diff_ratio": 0.001974,
       "attempt": 1,
-      "message": "非 L1 页面跳过视觉对比"
+      "message": "差异在可忽略范围内"
     },
     {
       "url": "https://vip.titan007.com/AsianOdds_n.aspx?id=3033092",

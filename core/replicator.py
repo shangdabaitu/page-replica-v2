@@ -45,6 +45,14 @@ def _is_league_page(url: str) -> bool:
     return re.match(r"/cn/(?:SubLeague|CupMatch|League)/\d+\.html", parsed.path, re.I) is not None
 
 
+def _is_analysis_page(url: str) -> bool:
+    """判断 URL 是否为 zq.titan007.com 的比赛分析页（依赖 JS 动态加载数据）。"""
+    parsed = urlparse(url)
+    if parsed.netloc.lower() != "zq.titan007.com":
+        return False
+    return re.match(r"/analysis/\d+cn\.htm", parsed.path, re.I) is not None
+
+
 def _url_to_relative_path(url: str) -> str:
     """把 URL 映射成本地相对文件路径。"""
     parsed = urlparse(url)
@@ -261,6 +269,7 @@ def _process_single_page(
     base_dir: Path,
     url_map: dict[str, str],
     force_compare: bool = False,
+    page_type: str = "link",
 ) -> dict:
     """抓取、内联、简体化、水印、保存并视觉对比一个页面。"""
     rel_path = _url_to_relative_path(url)
@@ -285,12 +294,15 @@ def _process_single_page(
             raw_html = decode_html(data, ct)
 
             # 用 Headless Chromium 渲染，拿到 JS 执行后的 DOM。
-            # 只有联赛/杯赛资料页需要浏览器渲染（showHtml 标签 + 轮次合并），
+            # 联赛/杯赛资料页需要浏览器渲染（showHtml 标签 + 轮次合并）；
+            # 比赛分析页依赖 JS 动态加载数据，也需要浏览器渲染；
             # 其他静态页直接使用 fetch 结果以大幅提升速度。
             tab_htmls: dict[int, str] = {}
             try:
                 if _is_league_page(url):
                     rendered_html, tab_htmls = render_league_with_tabs(url)
+                elif _is_analysis_page(url) or page_type == "detail_analysis":
+                    rendered_html = render_html(url, wait_ms=8000)
                 else:
                     rendered_html = raw_html
             except Exception as e:
@@ -459,7 +471,13 @@ def replicate_date(date: str, max_level: int | None = None):
 
         yield {"type": "progress", "url": url, "level": level, "status": "processing"}
 
-        result = _process_single_page(url, date, level, base_dir, url_map)
+        # 对单场分析页启用浏览器渲染并强制视觉对比，确保 JS 动态数据被完整捕获
+        force_compare = page_type == "detail_analysis"
+        result = _process_single_page(
+            url, date, level, base_dir, url_map,
+            force_compare=force_compare,
+            page_type=page_type,
+        )
         results.append(result)
         report["pages_total"] += 1
 
