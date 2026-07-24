@@ -125,14 +125,18 @@ def extract_links(html: str, base_url: str, current_level: int, max_level: int) 
             if _has_empty_param(href):
                 continue
             # 按层级过滤，避免把全站导航都抓进来导致数量爆炸。
-            # L1 只提取进入 L2 的入口（赛事类型页、单场亚/欧/析/大详情页），
+            # L1 只提取进入 L2 的入口（赛事类型页、单场亚/欧/析详情页），
             # 不提取 L1 列表页中零散的球队资料链接，避免数量失控。
-            # L2 中仅单场分析页（析）里的主队/客队资料库链接需要继续下钻到 L3。
+            # L2 中：
+            #   - 单场分析页（析）里的主队/客队资料库链接下钻到 L3；
+            #   - 赛事类型/联赛聚合页里的单场亚/欧/析/大链接下钻到 L3。
             if current_level == 1:
                 if not _is_l2_url(href):
                     continue
             elif current_level == 2:
-                if not (_is_analysis_page(base_url) and _is_l3_url(href)):
+                from_league = _is_league_page(base_url) and _is_l3_url(href)
+                from_analysis = _is_analysis_page(base_url) and _is_l3_url(href)
+                if not (from_league or from_analysis):
                     continue
             seen.add(href)
             links.append({
@@ -146,7 +150,7 @@ def extract_links(html: str, base_url: str, current_level: int, max_level: int) 
 
 
 def _is_l2_url(url: str) -> bool:
-    """L2 入口：赛事类型页、单场亚/欧/析/大详情页。"""
+    """L2 入口：赛事类型页、单场亚/欧/析详情页（大 从 L2 赛事类型页下钻到 L3）。"""
     parsed = urlparse(url)
     path = parsed.path.lower()
     qs = parse_qs(parsed.query)
@@ -154,6 +158,34 @@ def _is_l2_url(url: str) -> bool:
     if parsed.netloc.lower() == "info.titan007.com" and re.match(r"/cn/CupMatch/\d+\.html", path, re.I):
         return True
 
+    if "id" in qs and re.match(r"\d+$", qs["id"][0]):
+        if "AsianOdds_n.aspx" in path:
+            return True
+
+    if re.match(r"/oddslist/\d+\.htm", path, re.I):
+        return True
+
+    if re.match(r"/analysis/\d+cn\.htm", path, re.I) or re.match(r"/analysis/\d+\.htm", path, re.I):
+        return True
+
+    return False
+
+
+def _is_l3_url(url: str) -> bool:
+    """L3 入口：球队资料库页，以及从 L2 赛事类型页下钻的单场亚/欧/析/大详情页。"""
+    parsed = urlparse(url)
+    path = parsed.path.lower()
+    qs = parse_qs(parsed.query)
+
+    # 球队资料汇总页
+    if re.search(r"/team/Summary/\d+\.html", path, re.I):
+        return True
+
+    # info 域名的球队/联赛资料页
+    if parsed.netloc.lower() == "info.titan007.com" and re.match(r"/cn/team/\d+\.html", path, re.I):
+        return True
+
+    # 从赛事类型页下钻到 L3 的单场详情页：亚、欧、析、大
     if "id" in qs and re.match(r"\d+$", qs["id"][0]):
         if "AsianOdds_n.aspx" in path or "OverDown_n.aspx" in path:
             return True
@@ -167,20 +199,11 @@ def _is_l2_url(url: str) -> bool:
     return False
 
 
-def _is_l3_url(url: str) -> bool:
-    """L3 入口：球队资料库页。"""
+def _is_league_page(url: str) -> bool:
+    """判断 URL 是否为 L2 的赛事类型/联赛聚合页。"""
     parsed = urlparse(url)
     path = parsed.path.lower()
-
-    # 球队资料汇总页
-    if re.search(r"/team/Summary/\d+\.html", path, re.I):
-        return True
-
-    # info 域名的球队/联赛资料页
-    if parsed.netloc.lower() == "info.titan007.com" and re.match(r"/cn/team/\d+\.html", path, re.I):
-        return True
-
-    return False
+    return parsed.netloc.lower() == "info.titan007.com" and re.match(r"/cn/CupMatch/\d+\.html", path, re.I)
 
 
 def _is_analysis_page(url: str) -> bool:

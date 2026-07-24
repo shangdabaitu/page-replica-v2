@@ -49,13 +49,14 @@
     },
     {
       "url": "https://vip.titan007.com/OverDown_n.aspx?id=2910807",
-      "level": 2,
+      "level": 3,
       "rel_path": "OverDown_n/2910807.html",
       "status": "ok",
       "attempt": 1,
       "diff_ratio": null,
       "message": "非 L1 页面跳过视觉对比",
-      "output_path": "2026-7-21/OverDown_n/2910807.html"
+      "output_path": "2026-7-21/OverDown_n/2910807.html",
+      "type": "detail_over_l3"
     },
     {
       "url": "https://zq.titan007.com/analysis/2929663cn.htm",
@@ -89,13 +90,14 @@
     },
     {
       "url": "https://vip.titan007.com/OverDown_n.aspx?id=2929663",
-      "level": 2,
+      "level": 3,
       "rel_path": "OverDown_n/2929663.html",
       "status": "ok",
       "attempt": 2,
       "diff_ratio": null,
       "message": "非 L1 页面跳过视觉对比",
-      "output_path": "2026-7-21/OverDown_n/2929663.html"
+      "output_path": "2026-7-21/OverDown_n/2929663.html",
+      "type": "detail_over_l3"
     },
     {
       "url": "https://zq.titan007.com/analysis/2929664cn.htm",
@@ -129,13 +131,14 @@
     },
     {
       "url": "https://vip.titan007.com/OverDown_n.aspx?id=2929664",
-      "level": 2,
+      "level": 3,
       "rel_path": "OverDown_n/2929664.html",
       "status": "ok",
       "attempt": 3,
       "diff_ratio": null,
       "message": "非 L1 页面跳过视觉对比",
-      "output_path": "2026-7-21/OverDown_n/2929664.html"
+      "output_path": "2026-7-21/OverDown_n/2929664.html",
+      "type": "detail_over_l3"
     },
     {
       "url": "https://zq.titan007.com/analysis/2929665cn.htm",
@@ -169,13 +172,14 @@
     },
     {
       "url": "https://vip.titan007.com/OverDown_n.aspx?id=2929665",
-      "level": 2,
+      "level": 3,
       "rel_path": "OverDown_n/2929665.html",
       "status": "ok",
       "attempt": 2,
       "diff_ratio": null,
       "message": "非 L1 页面跳过视觉对比",
-      "output_path": "2026-7-21/OverDown_n/2929665.html"
+      "output_path": "2026-7-21/OverDown_n/2929665.html",
+      "type": "detail_over_l3"
     },
     {
       "url": "https://zq.titan007.com/analysis/2999989cn.htm",
@@ -209,13 +213,14 @@
     },
     {
       "url": "https://vip.titan007.com/OverDown_n.aspx?id=2999989",
-      "level": 2,
+      "level": 3,
       "rel_path": "OverDown_n/2999989.html",
       "status": "ok",
       "attempt": 1,
       "diff_ratio": null,
       "message": "非 L1 页面跳过视觉对比",
-      "output_path": "2026-7-21/OverDown_n/2999989.html"
+      "output_path": "2026-7-21/OverDown_n/2999989.html",
+      "type": "detail_over_l3"
     },
     {
       "url": "https://zq.titan007.com/analysis/2999991cn.htm",
@@ -249,13 +254,14 @@
     },
     {
       "url": "https://vip.titan007.com/OverDown_n.aspx?id=2999991",
-      "level": 2,
+      "level": 3,
       "rel_path": "OverDown_n/2999991.html",
       "status": "ok",
       "attempt": 1,
       "diff_ratio": null,
       "message": "非 L1 页面跳过视觉对比",
-      "output_path": "2026-7-21/OverDown_n/2999991.html"
+      "output_path": "2026-7-21/OverDown_n/2999991.html",
+      "type": "detail_over_l3"
     },
     {
       "url": "https://zq.titan007.com/analysis/3033092cn.htm",
@@ -289,13 +295,14 @@
     },
     {
       "url": "https://vip.titan007.com/OverDown_n.aspx?id=3033092",
-      "level": 2,
+      "level": 3,
       "rel_path": "OverDown_n/3033092.html",
       "status": "ok",
       "attempt": 1,
       "diff_ratio": null,
       "message": "非 L1 页面跳过视觉对比",
-      "output_path": "2026-7-21/OverDown_n/3033092.html"
+      "output_path": "2026-7-21/OverDown_n/3033092.html",
+      "type": "detail_over_l3"
     },
     {
       "url": "https://info.titan007.com/cn/CupMatch/103.html",

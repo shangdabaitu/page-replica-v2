@@ -127,7 +127,7 @@
     <div class="card" id="statsCard" style="display:none;">
         <span class="section-title">比赛复刻统计</span>
         <div id="statsTableWrap"></div>
-        <div class="hint">说明：L1 为整站列表页（1 面），L2 为单场的亚/欧/析/大（4 面），L3 为单场析页面进入的主队/客队资料库（2 面）。视觉对比目前仅对 L1 执行，L2/L3 跳过，因此对应“已视觉对比”显示为 0。</div>
+        <div class="hint">说明：L1 为整站列表页（1 面）；L2 为从列表页进入的赛事类型名称页 + 亚 + 欧 + 析（4 面）；L3 为从赛事类型页进入的亚/欧/析/大（4 面）加上从析页面进入的主队/客队资料库（2 面），合计 6 面。视觉对比目前仅对 L1 执行，L2/L3 跳过，因此对应“已视觉对比”显示为 0。</div>
     </div>
 
     <div class="card">
@@ -189,27 +189,35 @@ function calcMatchStats(match, pages) {
     const l1Pages = pages.filter(p => p.level === 1);
     const l1Compared = l1Pages.filter(isCompared).length;
 
-    // L2: 单场亚/欧/析/大，URL 中包含 match_id
+    // L2: 从列表页进入的赛事类型名称页 + 亚 + 欧 + 析
+    // 其中单场详情页（亚/欧/析）URL 中包含 match_id；联赛页按 league 聚合，不计入单场比赛的 L2 实际统计。
+    const l2DetailTypes = /AsianOdds_n\.aspx|oddslist\/\d+\.htm|analysis\/\d+cn\.htm/i;
     const l2Pages = pages.filter(p => {
         if (p.level !== 2) return false;
-        return matchId && p.url && p.url.includes(matchId);
+        return matchId && p.url && p.url.includes(matchId) && l2DetailTypes.test(p.url);
     });
     const l2Compared = l2Pages.filter(isCompared).length;
 
-    // L3: 主队/客队资料库页
+    // L3: 从赛事类型页进入的 大 + 从析页面进入的主队/客队资料库页
+    // 注意：亚/欧/析虽然在需求描述中属于 L3，但实际已在 L2 完成复刻，这里不重复计入 L3 实际数。
     const l3Pages = pages.filter(p => {
         if (p.level !== 3) return false;
+        // 大 页面
+        if (matchId && p.url && p.url.includes('OverDown_n.aspx?id=' + matchId)) return true;
+        // 主队/客队资料库页
         const m = p.url && p.url.match(/team\/(?:Summary\/)?(\d+)\.html/i);
-        if (!m) return false;
-        const tid = m[1];
-        return tid === homeId || tid === awayId;
+        if (m) {
+            const tid = m[1];
+            return tid === homeId || tid === awayId;
+        }
+        return false;
     });
     const l3Compared = l3Pages.filter(isCompared).length;
 
     return {
         l1: { expected: 1, compared: l1Compared },
         l2: { expected: 4, compared: l2Compared },
-        l3: { expected: 2, compared: l3Compared },
+        l3: { expected: 6, compared: l3Compared },
     };
 }
 
