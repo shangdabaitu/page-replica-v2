@@ -80,6 +80,10 @@ def _url_to_relative_path(url: str) -> str:
         m = re.match(r"cn/team/(\d+)\.html", path, re.I)
         if m:
             return f"team/{m.group(1)}.html"
+        # /cn/team/Summary/4075.html -> team/4075.html（与 zq.titan007.com 球队资料页等价）
+        m = re.match(r"cn/team/Summary/(\d+)\.html", path, re.I)
+        if m:
+            return f"team/{m.group(1)}.html"
 
         # 杯赛/联赛资料页的主页（带赛季参数与不带赛季参数等价）
         # /cn/SubLeague/2026/15.html   -> league/15.html
@@ -173,14 +177,18 @@ def _equivalent_urls(url: str) -> list[str]:
         variants.add(url.replace("//1x2.titan007.com", "//op1.titan007.com", 1))
         variants.add(url.replace("https://1x2.titan007.com", "https://op1.titan007.com", 1))
 
-    # info.titan007.com 的球队资料页/分析页与 zq.titan007.com 等价
-    if parsed.netloc.lower() == "info.titan007.com":
+    # info.titan007.com 的球队资料页/分析页与 zq.titan007.com 等价（双向）
+    if parsed.netloc.lower() in ("info.titan007.com", "zq.titan007.com"):
         if re.match(r"/cn/team/Summary/\d+\.html", path, re.I):
             variants.add(url.replace("//info.titan007.com", "//zq.titan007.com", 1))
             variants.add(url.replace("https://info.titan007.com", "https://zq.titan007.com", 1))
+            variants.add(url.replace("//zq.titan007.com", "//info.titan007.com", 1))
+            variants.add(url.replace("https://zq.titan007.com", "https://info.titan007.com", 1))
         if re.match(r"/analysis/\d+cn\.htm", path, re.I):
             variants.add(url.replace("//info.titan007.com", "//zq.titan007.com", 1))
             variants.add(url.replace("https://info.titan007.com", "https://zq.titan007.com", 1))
+            variants.add(url.replace("//zq.titan007.com", "//info.titan007.com", 1))
+            variants.add(url.replace("https://zq.titan007.com", "https://info.titan007.com", 1))
 
     # 去掉仅用于导航的 l=0 参数（AsianOdds_n、OverDown_n、Corner 等）
     if "l=0" in qs:
