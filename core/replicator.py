@@ -86,8 +86,14 @@ def _url_to_relative_path(url: str) -> str:
             return f"team/{m.group(1)}.html"
 
         # /cn/team/SummaryLeague/4075.html -> team/SummaryLeague/4075.html
+        # /cn/team/Summary/SummaryLeague/4075.html -> team/SummaryLeague/4075.html
         # 必须放在通用三字段匹配之前，避免被误判为联赛资料页
         m = re.match(r"cn/team/([A-Za-z]+)/(\d+)\.html", path, re.I)
+        if m:
+            tab_name = _canonical_team_tab(m.group(1))
+            if tab_name:
+                return f"team/{tab_name}/{m.group(2)}.html"
+        m = re.match(r"cn/team/Summary/([A-Za-z]+)/(\d+)\.html", path, re.I)
         if m:
             tab_name = _canonical_team_tab(m.group(1))
             if tab_name:
@@ -117,7 +123,13 @@ def _url_to_relative_path(url: str) -> str:
             return f"team/big_{m.group(1)}.html"
         # 球队资料页的标签页（独立 URL）
         # /cn/team/SummaryLeague/4075.html -> team/SummaryLeague/4075.html
+        # /cn/team/Summary/SummaryLeague/4075.html -> team/SummaryLeague/4075.html
         m = re.match(r"cn/team/([A-Za-z]+)/(\d+)\.html", path, re.I)
+        if m:
+            tab_name = _canonical_team_tab(m.group(1))
+            if tab_name:
+                return f"team/{tab_name}/{m.group(2)}.html"
+        m = re.match(r"cn/team/Summary/([A-Za-z]+)/(\d+)\.html", path, re.I)
         if m:
             tab_name = _canonical_team_tab(m.group(1))
             if tab_name:
@@ -239,19 +251,28 @@ def _resolve_team_tab_link(source_path: Path, raw_href: str, base_url: str) -> s
       - ../Summary/SummaryLeague/4075.html
       - ../SummaryLeague/4075.html
       - SummaryLeague/4075.html
+      - ../../league/team/Summary/4075.html（旧错误路径）
     返回相对于 source_path 的正确本地路径。
     """
-    # 先按常规方式解析，若已能解析到正确的 team/tab URL 则不再兜底
+    # 1) 先按常规方式解析，若已能解析到正确的 team/tab URL 则不再兜底
     abs_url = normalize_url(raw_href, base_url)
     if abs_url:
         parsed = urlparse(abs_url)
+        # 球队汇总页 /cn/team/Summary/{id}.html
+        m = re.match(r"/cn/team/Summary/(\d+)\.html", parsed.path, re.I)
+        if m:
+            return _build_team_summary_rel(source_path, m.group(1))
         m = re.match(r"/cn/team/([A-Za-z]+)/(\d+)\.html", parsed.path, re.I)
         if m:
             tab_name = _canonical_team_tab(m.group(1))
             if tab_name:
                 return _build_team_tab_rel(source_path, tab_name, m.group(2))
 
-    # 直接从 raw_href 中匹配 tab 名与球队 ID
+    # 2) 直接从 raw_href 中匹配 tab 名与球队 ID
+    # 先尝试球队汇总页（Summary）
+    m = re.search(r"(?:league/)?team/Summary/(\d+)\.html", raw_href, re.I)
+    if m:
+        return _build_team_summary_rel(source_path, m.group(1))
     m = re.search(r"(?:Summary/)?([A-Za-z]+)/(\d+)\.html", raw_href)
     if not m:
         return None
@@ -259,6 +280,23 @@ def _resolve_team_tab_link(source_path: Path, raw_href: str, base_url: str) -> s
     if not tab_name:
         return None
     return _build_team_tab_rel(source_path, tab_name, m.group(2))
+
+
+def _build_team_summary_rel(source_path: Path, team_id: str) -> str | None:
+    """根据 source_path 的位置生成指向球队汇总页 team/{team_id}.html 的相对路径。"""
+    parts = source_path.relative_to(config.OUTPUT_DIR).parts
+    if len(parts) < 3 or parts[1] != "team":
+        return None
+
+    if len(parts) == 3:
+        # 已经在球队汇总页，当前页
+        if parts[2] == f"{team_id}.html":
+            return None
+        return f"{team_id}.html"
+    elif len(parts) == 4:
+        # {date}/team/{current_tab}/{team_id}.html -> ../{team_id}.html
+        return f"../{team_id}.html"
+    return None
 
 
 def _build_team_tab_rel(source_path: Path, tab_name: str, team_id: str) -> str | None:

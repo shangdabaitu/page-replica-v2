@@ -237,6 +237,31 @@ def extract_team_ids_from_analysis(html: str) -> dict:
     return {"home_team_id": ids[0], "away_team_id": ids[1]}
 
 
+def _canonical_team_tab_url(url: str) -> str:
+    """把球队资料页标签 URL 中的畸形路径规范成有效 URL。
+
+    源站 team-nav 的 onclick 里会出现两种畸形相对路径：
+      - ../cn/team/Summary/SummaryLeague/4075.html
+      - ../Summary/SummaryLeague/4075.html
+    它们经 urljoin 后会变成：
+      - https://zq.titan007.com/cn/team/cn/team/Summary/SummaryLeague/4075.html
+      - https://zq.titan007.com/cn/team/Summary/SummaryLeague/4075.html
+    而这些 URL 在服务器上实际不存在（返回 404），真实地址是：
+      - https://zq.titan007.com/cn/team/SummaryLeague/4075.html
+    本函数把上述畸形 URL 统一修正为两段式真实 URL。
+    """
+    if not url:
+        return url
+    # 去掉重复的主机/路径段，例如 /cn/team/cn/team/ -> /cn/team/
+    while "/cn/team/cn/team/" in url:
+        url = url.replace("/cn/team/cn/team/", "/cn/team/")
+    # 把 /cn/team/Summary/{Tab}/{id}.html 改为 /cn/team/{Tab}/{id}.html
+    m = re.search(r"/cn/team/Summary/([A-Za-z]+)/(\d+)\.html", url, re.I)
+    if m:
+        url = re.sub(r"/cn/team/Summary/([A-Za-z]+)/(\d+)\.html", rf"/cn/team/\1/\2.html", url, flags=re.I)
+    return url
+
+
 def extract_tab_urls(html: str, base_url: str) -> list[dict]:
     """从页面中提取标签页对应的独立 URL（球队资料页、杯赛/联赛页等）。
 
@@ -255,7 +280,10 @@ def extract_tab_urls(html: str, base_url: str) -> list[dict]:
         if not m:
             continue
         href = normalize_url(html_module.unescape(m.group(1)), base_url)
-        if not href or href in seen or not _is_interesting_url(href):
+        if not href:
+            continue
+        href = _canonical_team_tab_url(href)
+        if href in seen or not _is_interesting_url(href):
             continue
         seen.add(href)
         urls.append({
