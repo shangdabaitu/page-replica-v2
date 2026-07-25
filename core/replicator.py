@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """复刻引擎：按日期递归复刻页面并进行视觉对比"""
 import hashlib
+import io
 import json
 import os
 import re
@@ -9,11 +10,12 @@ from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
 from bs4 import BeautifulSoup
+from PIL import Image
 
 import config
 from core.fetcher import fetch_url, normalize_url, decode_html
 from core.inliner import inline_page
-from core.renderer import render_html, render_league_page, render_league_with_tabs
+from core.renderer import render_and_capture, render_league_with_tabs
 from core.simplifier import simplify_html
 from core.watermark import inject_watermark
 from core.extractor import (
@@ -294,17 +296,19 @@ def _process_single_page(
             raw_html = decode_html(data, ct)
 
             # 用 Headless Chromium 渲染，拿到 JS 执行后的 DOM。
-            # 联赛/杯赛资料页需要浏览器渲染（showHtml 标签 + 轮次合并）；
-            # 比赛分析页依赖 JS 动态加载数据，也需要浏览器渲染；
-            # 其他静态页直接使用 fetch 结果以大幅提升速度。
+            # 需求要求所有页面都先执行原始页面 JS；联赛/杯赛资料页额外合并轮次与标签页。
+            # 同时捕获同源首屏截图，避免后续数据源页面被反爬/过期导致视觉对比失真。
             tab_htmls: dict[int, str] = {}
+            source_img = None
             try:
                 if _is_league_page(url):
-                    rendered_html, tab_htmls = render_league_with_tabs(url)
-                elif _is_analysis_page(url) or page_type == "detail_analysis":
-                    rendered_html = render_html(url, wait_ms=8000)
+                    rendered_html, tab_htmls, source_png = render_league_with_tabs(url)
                 else:
-                    rendered_html = raw_html
+                    rendered_html, source_png = render_and_capture(url, wait_ms=8000)
+                try:
+                    source_img = Image.open(io.BytesIO(source_png))
+                except Exception as e:
+                    print(f"[WARN] 源页面截图解码失败: {url} -> {e}")
             except Exception as e:
                 print(f"[WARN] 页面渲染失败，回退到原始 HTML: {url} -> {e}")
                 rendered_html = raw_html
@@ -342,22 +346,21 @@ def _process_single_page(
                 except Exception as e:
                     print(f"[WARN] 保存标签页 {t} 失败: {url} -> {e}")
 
-            # 视觉对比：默认仅对 L1 执行，避免 L2/L3 页面过多导致内存与时间爆炸。
-            # 当 force_compare=True 时对任意层级都执行。
-            if level == 1 or force_compare:
-                compare_result = visual.compare_pages(
+            # 视觉对比：需求要求统计各层级已视觉对比页面数，默认对所有页面执行。
+            # 优先使用渲染时捕获的源截图，避免数据源页面后续被反爬或内容过期导致误判。
+            if source_img is not None:
+                compare_result = visual.compare_with_source_image(
+                    source_img,
                     url,
                     compare_path,
                     output_dir=base_dir / "diff",
                 )
             else:
-                compare_result = {
-                    "source_url": url,
-                    "replica_path": str(output_path),
-                    "diff_ratio": None,
-                    "status": "skipped",
-                    "message": "非 L1 页面跳过视觉对比",
-                }
+                compare_result = visual.compare_pages(
+                    url,
+                    compare_path,
+                    output_dir=base_dir / "diff",
+                )
             best_diff = compare_result
 
             # 视觉对比被跳过（如浏览器未安装）也视为成功

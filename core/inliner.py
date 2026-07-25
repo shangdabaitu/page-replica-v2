@@ -10,8 +10,25 @@ from core.fetcher import fetch_resource, normalize_url, decode_html, data_url
 import config
 
 
+def _looks_like_css(text: str) -> bool:
+    """判断解码后的内容是否像合法 CSS（排除加密/二进制响应）。"""
+    if not text:
+        return False
+    # 至少包含一些 CSS 关键符号
+    if "{" not in text or "}" not in text:
+        return False
+    # 可打印 ASCII（含常见空白、标点、中文）占比应较高
+    printable = sum(1 for c in text if c.isprintable() or c in " \t\n\r")
+    if printable / max(len(text), 1) < 0.85:
+        return False
+    return True
+
+
 def inline_page(html: str, base_url: str) -> str:
-    """把页面中的外部 CSS/图片资源内联；脚本不内联，后续由 freeze 阶段删除。"""
+    """把页面中的外部 CSS/图片资源内联；脚本不内联，后续由 freeze 阶段删除。
+
+    对疑似加密或二进制的 CSS 资源保持原 <link> 引用，避免内联垃圾数据破坏渲染。
+    """
     soup = BeautifulSoup(html, "html.parser")
 
     # 1. 内联 <link rel="stylesheet">
@@ -23,6 +40,10 @@ def inline_page(html: str, base_url: str) -> str:
         if data is None:
             continue
         css = decode_html(data, ct)
+        # 跳过加密/二进制 CSS，保持外链让浏览器自行获取解密
+        if not _looks_like_css(css):
+            tag["href"] = href
+            continue
         # 处理 CSS 中的相对 url(...)
         css = _inline_css_urls(css, href)
         style_tag = soup.new_tag("style")

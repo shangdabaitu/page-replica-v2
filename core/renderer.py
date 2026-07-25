@@ -45,14 +45,14 @@ def _launch_kwargs() -> dict:
     return kwargs
 
 
-def render_html(url: str, wait_ms: int = 6000) -> str:
+def render_html(url: str, wait_ms: int = 4000) -> str:
     """在 Headless 浏览器中打开 url，返回渲染后的完整 HTML。"""
     return render_and_capture(url, wait_ms=wait_ms)[0]
 
 
 def render_and_capture(
     url: str,
-    wait_ms: int = 6000,
+    wait_ms: int = 4000,
     viewport_width: int = 1440,
     viewport_height: int = 900,
 ) -> tuple[str, bytes]:
@@ -78,7 +78,7 @@ def render_and_capture(
             browser.close()
 
 
-def render_league_page(url: str, wait_ms: int = 6000) -> str:
+def render_league_page(url: str, wait_ms: int = 4000) -> str:
     """
     渲染联赛/赛事类型页，并在浏览器中依次点击所有轮次，
     把每轮赛程合并到同一张表中，确保静态化后所有比赛行都可见。
@@ -87,14 +87,15 @@ def render_league_page(url: str, wait_ms: int = 6000) -> str:
 
 
 def render_league_with_tabs(
-    url: str, wait_ms: int = 6000
-) -> tuple[str, dict[int, str]]:
+    url: str, wait_ms: int = 4000
+) -> tuple[str, dict[int, str], bytes]:
     """
     渲染联赛/赛事类型页，并捕获每个 showHtml JS 标签页的 DOM。
 
     返回：
       - main_html: 主标签页（积分榜 / 赛程资料统计）渲染后的完整 HTML，已合并所有轮次
       - tab_htmls: dict，键为 showHtml 参数 2~11，值为对应标签页完整 HTML
+      - main_png: 主标签页首屏截图（PNG 字节），用于和复刻结果做同源视觉对比
     """
     with sync_playwright() as p:
         browser = p.chromium.launch(**_launch_kwargs())
@@ -166,28 +167,28 @@ def render_league_with_tabs(
             page.wait_for_timeout(wait_ms)
             _merge_all_rounds(page)
             main_html = page.content()
-            page.close()
+            main_png = page.screenshot(full_page=False, type="png")
 
             # 判断是否存在 showHtml 标签导航；不存在则直接返回
             has_showhtml = "showHtml(" in main_html
             tab_htmls: dict[int, str] = {}
             if not has_showhtml:
-                return main_html, tab_htmls
+                page.close()
+                return main_html, tab_htmls, main_png
 
-            # 依次渲染 showHtml(2) ~ showHtml(11)
+            # 在同一页内依次切换 showHtml 标签并捕获 DOM，避免重复打开页面
             for t in range(2, 12):
                 try:
-                    tab_page = context.new_page()
-                    tab_page.set_extra_http_headers({"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"})
-                    tab_page.goto(url, wait_until="networkidle", timeout=60000)
-                    tab_page.wait_for_timeout(wait_ms)
-                    tab_page.evaluate(f"showHtml({t})")
-                    tab_page.wait_for_timeout(2500)
-                    tab_htmls[t] = tab_page.content()
-                    tab_page.close()
+                    page.evaluate(f"showHtml({t})")
+                    page.wait_for_timeout(1200)
+                    tab_htmls[t] = page.content()
+                    # 切回默认标签，减少后续标签依赖
+                    page.evaluate("showHtml(1)")
+                    page.wait_for_timeout(300)
                 except Exception:
                     continue
 
-            return main_html, tab_htmls
+            page.close()
+            return main_html, tab_htmls, main_png
         finally:
             browser.close()
