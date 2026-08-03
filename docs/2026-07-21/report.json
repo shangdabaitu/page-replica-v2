@@ -1,0 +1,84 @@
+{
+  "date": "2026-07-21",
+  "max_level": 0,
+  "pages_total": 7,
+  "pages_ok": 7,
+  "pages_retry": 0,
+  "pages_fix": 0,
+  "pages_error": 0,
+  "pages_cancelled": 0,
+  "details": [
+    {
+      "url": "https://cp.titan007.com/buy/JingCai.aspx?typeID=101&oddstype=2&date=2026-07-21",
+      "level": 1,
+      "rel_path": "index.html",
+      "status": "ok",
+      "attempt": 1,
+      "diff_ratio": 0.00221,
+      "message": "差异在可忽略范围内",
+      "output_path": "2026-07-21/index.html"
+    },
+    {
+      "url": "https://zq.titan007.com/analysis/2159255cn.htm",
+      "level": 2,
+      "rel_path": "analysis/2159255cn.htm",
+      "status": "ok",
+      "attempt": 1,
+      "diff_ratio": 0.012492,
+      "message": "差异在可忽略范围内",
+      "output_path": "2026-07-21/analysis/2159255cn.htm"
+    },
+    {
+      "url": "https://vip.titan007.com/AsianOdds_n.aspx?id=2159255",
+      "level": 2,
+      "rel_path": "AsianOdds_n/2159255.html",
+      "status": "ok",
+      "attempt": 1,
+      "diff_ratio": 0.002541,
+      "message": "差异在可忽略范围内",
+      "output_path": "2026-07-21/AsianOdds_n/2159255.html"
+    },
+    {
+      "url": "https://op1.titan007.com/oddslist/2159255.htm",
+      "level": 2,
+      "rel_path": "oddslist/2159255.htm",
+      "status": "ok",
+      "attempt": 1,
+      "diff_ratio": 0.010789,
+      "message": "差异在可忽略范围内",
+      "output_path": "2026-07-21/oddslist/2159255.htm"
+    },
+    {
+      "url": "https://zq.titan007.com/analysis/2159264cn.htm",
+      "level": 2,
+      "rel_path": "analysis/2159264cn.htm",
+      "status": "ok",
+      "attempt": 1,
+      "diff_ratio": 0.01254,
+      "message": "差异在可忽略范围内",
+      "output_path": "2026-07-21/analysis/2159264cn.htm"
+    },
+    {
+      "url": "https://vip.titan007.com/AsianOdds_n.aspx?id=2159264",
+      "level": 2,
+      "rel_path": "AsianOdds_n/2159264.html",
+      "status": "ok",
+      "attempt": 1,
+      "diff_ratio": 0.00213,
+      "message": "差异在可忽略范围内",
+      "output_path": "2026-07-21/AsianOdds_n/2159264.html"
+    },
+    {
+      "url": "https://op1.titan007.com/oddslist/2159264.htm",
+      "level": 2,
+      "rel_path": "oddslist/2159264.htm",
+      "status": "ok",
+      "attempt": 1,
+      "diff_ratio": 0.010302,
+      "message": "差异在可忽略范围内",
+      "output_path": "2026-07-21/oddslist/2159264.htm"
+    }
+  ],
+  "elapsed_seconds": 51.9,
+  "cancelled": false
+}

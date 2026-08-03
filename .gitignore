@@ -1,5 +1,6 @@
 output/
-docs/           # 生成的复刻页面，由运行时产生
+# docs/ 已启用 GitHub Pages，需要跟踪到仓库
+# docs/           # 生成的复刻页面，由运行时产生
 __pycache__/
 *.pyc
 *.pyo
