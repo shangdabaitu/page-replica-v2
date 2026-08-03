@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """复刻数据持久化模块"""
 import json
+import threading
 import time
 from pathlib import Path
 from datetime import datetime
@@ -48,14 +49,43 @@ def save_meta(date: str, meta: dict):
         json.dump(meta, f, ensure_ascii=False, indent=2)
 
 
+_meta_locks: dict[str, threading.RLock] = {}
+_meta_locks_guard = threading.Lock()
+
+
+def _get_meta_lock(date: str) -> threading.RLock:
+    """获取指定日期的元数据锁（按日期隔离，减少并发竞争）。"""
+    with _meta_locks_guard:
+        lock = _meta_locks.get(date)
+        if lock is None:
+            lock = threading.RLock()
+            _meta_locks[date] = lock
+        return lock
+
+
 def append_page(date: str, page_info: dict):
-    """向元数据中追加一条页面记录。"""
-    meta = load_meta(date)
-    # 去重：以 url 为键，更新已有记录
-    pages = {p["url"]: p for p in meta.get("pages", [])}
-    pages[page_info["url"]] = page_info
-    meta["pages"] = list(pages.values())
-    save_meta(date, meta)
+    """向元数据中追加一条页面记录（线程安全）。"""
+    with _get_meta_lock(date):
+        meta = load_meta(date)
+        # 去重：以 url 为键，更新已有记录
+        pages = {p["url"]: p for p in meta.get("pages", [])}
+        pages[page_info["url"]] = page_info
+        meta["pages"] = list(pages.values())
+        save_meta(date, meta)
+
+
+def update_match_team_ids(date: str, match_id: str, team_ids: dict):
+    """根据分析页提取的球队 ID 更新 meta.matches（线程安全）。"""
+    with _get_meta_lock(date):
+        meta = load_meta(date)
+        updated = False
+        for match in meta.get("matches", []):
+            if str(match.get("match_id")) == match_id:
+                match.update(team_ids)
+                updated = True
+                break
+        if updated:
+            save_meta(date, meta)
 
 
 def save_matches(date: str, matches: list[dict]):

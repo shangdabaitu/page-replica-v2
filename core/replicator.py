@@ -7,6 +7,7 @@ import os
 import re
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs, urlunparse
 
@@ -498,7 +499,9 @@ def _process_single_page(
                 if _is_league_page(url):
                     rendered_html, tab_htmls, source_png = render_league_with_tabs(url)
                 else:
-                    rendered_html, source_png = render_and_capture(url, wait_ms=8000)
+                    # 非联赛页（如分析页、欧赔页）等待 3s 让 JS 加载动态数据，
+                    # 比原来的 8s 显著缩短整体耗时。
+                    rendered_html, source_png = render_and_capture(url, wait_ms=3000)
                 try:
                     source_img = Image.open(io.BytesIO(source_png))
                 except Exception as e:
@@ -542,6 +545,7 @@ def _process_single_page(
             output_path.write_text(final_html, encoding="utf-8")
 
             # 保存联赛/赛事资料页的 showHtml JS 内部标签页
+            tab_paths: dict[int, str] = {}
             for t, tab_html in (tab_htmls or {}).items():
                 try:
                     tab_rel = f"{rel_path[:-5]}_tab{t}.html" if rel_path.endswith(".html") else f"{rel_path}_tab{t}.html"
@@ -555,7 +559,9 @@ def _process_single_page(
                     tab_output_path.write_text(tab_final_html, encoding="utf-8")
                     # 用伪 URL 登记，便于最终统一重写链接
                     tab_url = f"{url}#tab{t}"
-                    url_map[tab_url] = str(tab_output_path.relative_to(config.OUTPUT_DIR))
+                    tab_rel_path = str(tab_output_path.relative_to(config.OUTPUT_DIR))
+                    url_map[tab_url] = tab_rel_path
+                    tab_paths[t] = tab_rel_path
                 except Exception as e:
                     print(f"[WARN] 保存标签页 {t} 失败: {url} -> {e}")
 
@@ -702,111 +708,139 @@ def replicate_date(date: str, max_level: int | None = None, cancel_event: thread
             yield {"type": "warning", "message": f"已达到单任务最大页面数限制 {MAX_PAGES_PER_JOB}"}
             break
 
-        url, level, page_type = queue.pop(0)
-        url_key = _url_key(url)
-        if url_key in visited:
+        # 取出下一批未访问的页面（最多 CONCURRENCY 个），同批次内并发处理
+        batch: list[tuple[str, int, str]] = []
+        while queue and len(batch) < config.CONCURRENCY and report["pages_total"] + len(batch) < MAX_PAGES_PER_JOB:
+            url, level, page_type = queue.pop(0)
+            url_key = _url_key(url)
+            if url_key in visited:
+                continue
+            visited.add(url_key)
+            batch.append((url, level, page_type))
+
+        if not batch:
             continue
-        visited.add(url_key)
 
-        yield {"type": "progress", "url": url, "level": level, "status": "processing"}
+        for url, level, page_type in batch:
+            yield {"type": "progress", "url": url, "level": level, "status": "processing"}
 
-        # 对单场分析页启用浏览器渲染并强制视觉对比，确保 JS 动态数据被完整捕获
-        force_compare = page_type == "detail_analysis"
-        result = _process_single_page(
-            url, date, level, base_dir, url_map,
-            force_compare=force_compare,
-            page_type=page_type,
-            cancel_event=cancel_event,
-        )
-        results.append(result)
-        report["pages_total"] += 1
+        batch_results: list[dict] = []
+        with ThreadPoolExecutor(max_workers=min(config.CONCURRENCY, len(batch))) as executor:
+            future_to_task: dict = {}
+            for url, level, page_type in batch:
+                # 对单场分析页启用浏览器渲染并强制视觉对比
+                force_compare = page_type == "detail_analysis"
+                future = executor.submit(
+                    _process_single_page,
+                    url, date, level, base_dir, url_map,
+                    force_compare=force_compare,
+                    page_type=page_type,
+                    cancel_event=cancel_event,
+                )
+                future_to_task[future] = (url, level, page_type)
 
-        if result.get("output_path"):
-            url_map[url] = result["output_path"]
-            data_store.append_page(date, {
-                "url": url,
-                "level": level,
-                "type": page_type,
-                "rel_path": result["output_path"],
-                "status": result["status"],
-                "diff_ratio": result.get("diff_ratio"),
-                "attempt": result.get("attempt", 1),
-                "message": result.get("message"),
-            })
+            for future in as_completed(future_to_task):
+                url, level, page_type = future_to_task[future]
+                try:
+                    result = future.result()
+                except Exception as e:
+                    result = {
+                        "url": url,
+                        "level": level,
+                        "rel_path": _url_to_relative_path(url),
+                        "status": "error",
+                        "attempt": 1,
+                        "message": f"工作线程异常: {e}",
+                        "output_path": None,
+                    }
+                batch_results.append((url, level, page_type, result))
 
-            # 对单场分析页（析）提取主队/客队资料库 ID 并写入 meta.matches，
-            # 供前端按比赛统计 L3 复刻/视觉对比情况。
-            if level == 2 and page_type == "detail_analysis":
-                m = re.search(r"/analysis/(\d+)cn\.htm", url, re.I)
-                if m:
-                    match_id = m.group(1)
-                    try:
-                        saved_path = config.OUTPUT_DIR / result["output_path"]
-                        analysis_html = saved_path.read_text(encoding="utf-8")
-                        team_ids = extract_team_ids_from_analysis(analysis_html)
-                        if team_ids:
-                            meta = data_store.load_meta(date)
-                            for match in meta.get("matches", []):
-                                if str(match.get("match_id")) == match_id:
-                                    match.update(team_ids)
-                                    break
-                            data_store.save_meta(date, meta)
-                    except Exception as e:
-                        yield {"type": "warning", "url": url, "message": f"提取球队资料 ID 失败: {e}"}
+        # 按 batch 原始顺序输出事件并更新共享状态，保证 SSE 顺序可预测
+        batch_results.sort(key=lambda item: batch.index((item[0], item[1], item[2])))
+        for url, level, page_type, result in batch_results:
+            results.append(result)
+            report["pages_total"] += 1
 
-        if result["status"] == "ok":
-            report["pages_ok"] += 1
-        elif result["status"] == "ok_with_diff":
-            report["pages_retry"] += 1
-        elif result["status"] == "needs_fix":
-            report["pages_fix"] += 1
-        elif result["status"] == "error":
-            report["pages_error"] += 1
-        elif result["status"] == "cancelled":
-            report["pages_cancelled"] += 1
+            if result.get("output_path"):
+                url_map[url] = result["output_path"]
+                data_store.append_page(date, {
+                    "url": url,
+                    "level": level,
+                    "type": page_type,
+                    "rel_path": result["output_path"],
+                    "status": result["status"],
+                    "diff_ratio": result.get("diff_ratio"),
+                    "attempt": result.get("attempt", 1),
+                    "message": result.get("message"),
+                })
 
-        report["details"].append(result)
-        yield {"type": "page_done", **result}
+                # 对单场分析页（析）提取主队/客队资料库 ID 并写入 meta.matches
+                if level == 2 and page_type == "detail_analysis":
+                    m = re.search(r"/analysis/(\d+)cn\.htm", url, re.I)
+                    if m:
+                        match_id = m.group(1)
+                        try:
+                            saved_path = config.OUTPUT_DIR / result["output_path"]
+                            analysis_html = saved_path.read_text(encoding="utf-8")
+                            team_ids = extract_team_ids_from_analysis(analysis_html)
+                            if team_ids:
+                                data_store.update_match_team_ids(date, match_id, team_ids)
+                        except Exception as e:
+                            yield {"type": "warning", "url": url, "message": f"提取球队资料 ID 失败: {e}"}
 
-        # 任务被取消时不再继续扩散
-        if _check_cancel():
-            yield {"type": "warning", "message": "任务已取消或超过最大运行时间，停止扩散新链接"}
-            break
+            if result["status"] == "ok":
+                report["pages_ok"] += 1
+            elif result["status"] == "ok_with_diff":
+                report["pages_retry"] += 1
+            elif result["status"] == "needs_fix":
+                report["pages_fix"] += 1
+            elif result["status"] == "error":
+                report["pages_error"] += 1
+            elif result["status"] == "cancelled":
+                report["pages_cancelled"] += 1
 
-        # 继续提取下一层链接（仅当处理成功时）
-        if result["status"] not in ("error", "cancelled") and level < max_level:
-            try:
-                saved_path = base_dir / result["rel_path"]
-                html = saved_path.read_text(encoding="utf-8")
-                links = extract_links(html, url, level, max_level)
-                for link in links:
-                    link_key = _url_key(link["url"])
-                    if link_key not in queued and link_key not in visited:
-                        queued.add(link_key)
-                        queue.append((link["url"], link["level"], link.get("type", "link")))
-            except Exception as e:
-                yield {"type": "warning", "url": url, "message": f"提取子链接失败: {e}"}
+            report["details"].append(result)
+            yield {"type": "page_done", **result}
 
-        # 提取并复刻页面自身的标签页（球队资料页、杯赛/联赛资料页的独立 URL 标签）。
-        # 仅对非标签页类型的页面执行，避免标签页之间互相扩散导致无限循环。
-        if result["status"] not in ("error", "cancelled") and result.get("rel_path") and page_type not in ("team_tab", "league_tab"):
-            try:
-                saved_path = base_dir / result["rel_path"]
-                html = saved_path.read_text(encoding="utf-8")
-                tabs = extract_tab_urls(html, url)
-                current_rel = _url_to_relative_path(url)
-                for tab in tabs:
-                    tab_url = tab["url"]
-                    tab_key = _url_key(tab_url)
-                    if tab_key in queued or tab_key in visited:
-                        continue
-                    # 跳过与当前页同内容的标签（如 /cn/SubLeague/2026/15.html 与 /cn/SubLeague/15.html）
-                    if _url_to_relative_path(tab_url) == current_rel:
-                        continue
-                    queued.add(tab_key)
-                    queue.append((tab_url, max_level, tab["type"]))
-            except Exception as e:
-                yield {"type": "warning", "url": url, "message": f"提取标签页失败: {e}"}
+            # 任务被取消时不再继续扩散
+            if _check_cancel():
+                yield {"type": "warning", "message": "任务已取消或超过最大运行时间，停止扩散新链接"}
+                break
+
+            # 继续提取下一层链接（仅当处理成功时）
+            if result["status"] not in ("error", "cancelled") and level < max_level:
+                try:
+                    saved_path = base_dir / result["rel_path"]
+                    html = saved_path.read_text(encoding="utf-8")
+                    links = extract_links(html, url, level, max_level)
+                    for link in links:
+                        link_key = _url_key(link["url"])
+                        if link_key not in queued and link_key not in visited:
+                            queued.add(link_key)
+                            queue.append((link["url"], link["level"], link.get("type", "link")))
+                except Exception as e:
+                    yield {"type": "warning", "url": url, "message": f"提取子链接失败: {e}"}
+
+            # 提取并复刻页面自身的标签页（球队资料页、杯赛/联赛资料页的独立 URL 标签）。
+            # 仅对非标签页类型的页面执行，避免标签页之间互相扩散导致无限循环。
+            if result["status"] not in ("error", "cancelled") and result.get("rel_path") and page_type not in ("team_tab", "league_tab"):
+                try:
+                    saved_path = base_dir / result["rel_path"]
+                    html = saved_path.read_text(encoding="utf-8")
+                    tabs = extract_tab_urls(html, url)
+                    current_rel = _url_to_relative_path(url)
+                    for tab in tabs:
+                        tab_url = tab["url"]
+                        tab_key = _url_key(tab_url)
+                        if tab_key in queued or tab_key in visited:
+                            continue
+                        # 跳过与当前页同内容的标签（如 /cn/SubLeague/2026/15.html 与 /cn/SubLeague/15.html）
+                        if _url_to_relative_path(tab_url) == current_rel:
+                            continue
+                        queued.add(tab_key)
+                        queue.append((tab_url, max_level, tab["type"]))
+                except Exception as e:
+                    yield {"type": "warning", "url": url, "message": f"提取标签页失败: {e}"}
 
     # 最终统一重写所有已保存页面的内链，确保链接在本地可跳转
     yield {"type": "progress", "url": "__rewrite_links__", "level": 0, "status": "rewriting"}
@@ -831,6 +865,13 @@ def replicate_date(date: str, max_level: int | None = None, cancel_event: thread
         yield {"type": "progress", "url": "__sync_docs__", "level": 0, "status": "synced"}
     except Exception as e:
         yield {"type": "warning", "message": f"同步到 docs/ 失败: {e}"}
+
+    # 释放当前线程的浏览器实例，避免任务结束后 Chromium 进程残留
+    try:
+        from core.renderer import close_thread_browser
+        close_thread_browser()
+    except Exception:
+        pass
 
     # 最终输出：列表页相对路径
     list_rel = url_map.get(list_url, f"{date}/index.html")

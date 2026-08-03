@@ -3,6 +3,7 @@
 import random
 import re
 import base64
+import threading
 import time
 import requests
 from urllib.parse import urljoin, urlparse
@@ -46,7 +47,39 @@ def _make_session() -> requests.Session:
 
 
 _session = _make_session()
-_resource_cache: dict[str, tuple[bytes, str | None]] = {}
+_resource_cache_lock = threading.RLock()
+
+
+class _LRUResourceCache:
+    """带容量上限的线程安全 LRU 资源缓存，避免长任务内存无限增长。"""
+
+    def __init__(self, maxsize: int = 500):
+        self._maxsize = maxsize
+        self._cache: dict[str, tuple[bytes, str | None]] = {}
+        self._order: list[str] = []
+
+    def _touch(self, key: str):
+        if key in self._order:
+            self._order.remove(key)
+        self._order.append(key)
+
+    def get(self, key: str):
+        with _resource_cache_lock:
+            if key not in self._cache:
+                return _CACHE_MISS_SENTINEL
+            self._touch(key)
+            return self._cache[key]
+
+    def put(self, key: str, value: tuple[bytes, str | None]):
+        with _resource_cache_lock:
+            self._touch(key)
+            self._cache[key] = value
+            while len(self._order) > self._maxsize:
+                old = self._order.pop(0)
+                self._cache.pop(old, None)
+
+
+_resource_cache = _LRUResourceCache(maxsize=500)
 
 
 def _rotate_headers():
@@ -73,16 +106,22 @@ def decode_html(data: bytes, content_type: str | None) -> str:
         return data.decode("gbk", "ignore")
 
 
-def fetch_url(url: str, timeout: int = config.REQUEST_TIMEOUT, retries: int = config.MAX_RETRIES) -> tuple[bytes | None, str | None]:
+def fetch_url(
+    url: str,
+    timeout: int = config.REQUEST_TIMEOUT,
+    retries: int = config.MAX_RETRIES,
+    delay_range: tuple[float, float] = (0.5, 2.0),
+) -> tuple[bytes | None, str | None]:
     """抓取 URL，返回 (content_bytes, content_type)。带指数退避重试和 SSL 容错。
 
     对客户端错误（4xx）直接失败不重试，避免在 404 资源上浪费时间。
+    delay_range 控制请求前随机等待，页面抓取用较大间隔，资源内联用较小间隔。
     """
     last_error = None
     for attempt in range(retries + 1):
         try:
             # 基础请求间隔 + 随机抖动，避免请求过于密集
-            time.sleep(random.uniform(0.5, 2.0))
+            time.sleep(random.uniform(*delay_range))
             _rotate_headers()
             r = _session.get(url, timeout=timeout, stream=False, verify=True)
             r.raise_for_status()
@@ -121,12 +160,15 @@ def fetch_resource(url: str, timeout: int = 5, retries: int = 0) -> tuple[bytes 
     """抓取资源并缓存（失败结果也缓存，避免同一 404 资源被反复请求）。
 
     默认使用较短超时、不重试，避免资源内联阶段被慢资源拖垮整个任务。
+    线程安全：使用带容量上限的 LRU 缓存，可被并发内联安全调用。
     """
-    cached = _resource_cache.get(url, _CACHE_MISS_SENTINEL)
+    cached = _resource_cache.get(url)
     if cached is not _CACHE_MISS_SENTINEL:
         return cached
-    data, ct = fetch_url(url, timeout=timeout, retries=retries)
-    _resource_cache[url] = (data, ct)
+
+    # 资源内联阶段使用更短请求间隔，避免大量资源拖垮整体耗时
+    data, ct = fetch_url(url, timeout=timeout, retries=retries, delay_range=(0.05, 0.2))
+    _resource_cache.put(url, (data, ct))
     return data, ct
 
 

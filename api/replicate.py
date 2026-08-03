@@ -102,6 +102,12 @@ def api_replicate():
         finally:
             _running.pop(date, None)
             _cancel_events.pop(date, None)
+            # 释放当前线程持有的浏览器实例，避免 Chromium 进程残留
+            try:
+                from core.renderer import close_thread_browser
+                close_thread_browser()
+            except Exception:
+                pass
 
     _running[date] = threading.current_thread()
     return Response(

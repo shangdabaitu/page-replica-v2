@@ -25,53 +25,36 @@ def _playwright_ok() -> bool:
     return _playwright_available
 
 
-def _launch_browser(p):
-    """启动 Chromium，优先使用 renderer 发现的可用浏览器（系统 Chrome/Playwright headless-shell）。"""
-    from core.renderer import _find_chrome
-    args = ["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"]
-    chrome = _find_chrome()
-    if chrome:
-        try:
-            return p.chromium.launch(executable_path=chrome, args=args)
-        except Exception as e:
-            print(f"[WARN] 用 {chrome} 启动 Chromium 失败: {e}")
-    try:
-        # 最后回退到 Playwright 自带 Chromium（依赖完整安装）
-        return p.chromium.launch(args=args)
-    except Exception as e:
-        print(f"[WARN] 启动 Playwright 自带 Chromium 失败: {e}")
-    print("[WARN] 未找到可用的 Chromium")
-    return None
-
-
 def screenshot_page(url: str, width: int = 1440, height: int = 900) -> Image.Image | None:
-    """对指定 URL 进行截图并返回 PIL Image。只截取可视区域，避免长页面占用过大内存。"""
+    """对指定 URL 进行截图并返回 PIL Image。只截取可视区域，避免长页面占用过大内存。
+
+    复用当前线程的浏览器实例，避免每次截图都重新启动 Chromium。
+    """
     if not _playwright_ok():
         print("[WARN] Playwright 不可用，跳过截图")
         return None
 
-    from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
+    from playwright.sync_api import TimeoutError as PWTimeout
+    from core.renderer import get_thread_browser
 
     try:
-        with sync_playwright() as p:
-            browser = _launch_browser(p)
-            if not browser:
-                return None
-            context = browser.new_context(
-                viewport={"width": width, "height": height},
-                user_agent=(
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                ),
-            )
-            page = context.new_page()
-            page.set_extra_http_headers({
-                "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-            })
+        browser = get_thread_browser()
+        context = browser.new_context(
+            viewport={"width": width, "height": height},
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            ),
+        )
+        context.set_extra_http_headers({
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+        })
+        page = context.new_page()
+        try:
             try:
-                page.goto(url, wait_until="networkidle", timeout=60000)
+                # 本地复刻页通常已内联资源，用较短 networkidle 超时避免阻塞
+                page.goto(url, wait_until="networkidle", timeout=15000)
             except PWTimeout:
-                # networkidle 超时仍继续截图
                 pass
             # 等待页面主体渲染
             try:
@@ -79,11 +62,12 @@ def screenshot_page(url: str, width: int = 1440, height: int = 900) -> Image.Ima
             except Exception:
                 pass
             png_bytes = page.screenshot(full_page=False, type="png")
-            browser.close()
             img = Image.open(io.BytesIO(png_bytes))
             # 避免 PIL 反压缩炸弹警告阻塞流程
             Image.MAX_IMAGE_PIXELS = max(Image.MAX_IMAGE_PIXELS, img.width * img.height * 2)
             return img
+        finally:
+            context.close()
     except Exception as e:
         print(f"[WARN] 截图 {url} 失败: {e}")
         return None
