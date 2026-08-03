@@ -3,14 +3,18 @@
 import json
 import re
 import shutil
+import subprocess
+from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
 
-def _find_chrome() -> str | None:
-    """查找可用的系统 Chrome/Chromium；排除 snap 包装脚本。"""
-    import subprocess
+# Playwright 自带 headless-shell 的固定缓存目录名（按当前安装版本）
+_PLAYWRIGHT_HEADLESS_SHELL = Path.home() / ".cache" / "ms-playwright" / "chromium_headless_shell-1234" / "chrome-headless-shell-linux64" / "chrome-headless-shell"
 
+
+def _find_chrome() -> str | None:
+    """查找可用的系统 Chrome/Chromium；排除 snap 包装脚本，最后回退到 Playwright headless-shell。"""
     for name in ("google-chrome-stable", "google-chrome", "chromium", "chromium-browser"):
         path = shutil.which(name)
         if not path:
@@ -33,11 +37,25 @@ def _find_chrome() -> str | None:
                 return path
         except Exception:
             continue
+
+    # 没有系统 Chrome 时，回退到 Playwright 已安装的 headless-shell
+    if _PLAYWRIGHT_HEADLESS_SHELL.exists():
+        try:
+            result = subprocess.run(
+                [str(_PLAYWRIGHT_HEADLESS_SHELL), "--version"],
+                capture_output=True,
+                timeout=5,
+                check=False,
+            )
+            if result.returncode == 0:
+                return str(_PLAYWRIGHT_HEADLESS_SHELL)
+        except Exception:
+            pass
     return None
 
 
 def _launch_kwargs() -> dict:
-    """构造 Chromium 启动参数；优先使用系统 Chrome，否则让 Playwright 使用自带浏览器。"""
+    """构造 Chromium 启动参数；优先使用系统 Chrome/已安装 headless-shell，否则让 Playwright 使用自带浏览器。"""
     kwargs: dict = {"args": ["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"]}
     chrome = _find_chrome()
     if chrome:

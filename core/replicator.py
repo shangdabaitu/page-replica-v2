@@ -5,9 +5,10 @@ import io
 import json
 import os
 import re
+import threading
 import time
 from pathlib import Path
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, urlunparse
 
 from bs4 import BeautifulSoup
 from PIL import Image
@@ -33,10 +34,50 @@ from compare import visual
 # 默认最大递归层级：1 列表页 -> 2 详情页 -> 3 子页面
 DEFAULT_MAX_LEVEL = 3
 
+# 任务级安全限制
+MAX_PAGES_PER_JOB = 500          # 单个任务最多处理页面数
+MAX_JOB_SECONDS = 30 * 60        # 单个任务最长运行 30 分钟
+
+
+def _canonical_url(url: str) -> str:
+    """把 URL 规范成统一形式，用于去重判断。
+
+    规则：
+      - 去掉 fragment
+      - 域名、路径统一小写
+      - query 参数按字母排序
+      - 去掉已知无意义导航参数（如 l=0）
+    """
+    parsed = urlparse(url)
+    host = parsed.netloc.lower()
+    path = parsed.path.lower()
+
+    qs = parse_qs(parsed.query, keep_blank_values=True)
+    # 删除空值和无意义导航参数
+    drop_keys = {"l"}
+    normalized_qs: dict[str, list[str]] = {}
+    for key, values in qs.items():
+        key_lower = key.lower()
+        if key_lower in drop_keys:
+            continue
+        kept = [v for v in values if v.strip() != ""]
+        if not kept:
+            continue
+        if key_lower not in normalized_qs:
+            normalized_qs[key_lower] = []
+        normalized_qs[key_lower].extend(kept)
+
+    sorted_query = "&".join(
+        f"{k}={v}"
+        for k in sorted(normalized_qs.keys())
+        for v in sorted(set(normalized_qs[k]))
+    )
+    return urlunparse((parsed.scheme.lower(), host, path, "", sorted_query, ""))
+
 
 def _url_key(url: str) -> str:
-    """生成 URL 的唯一键。"""
-    return hashlib.md5(url.encode("utf-8")).hexdigest()
+    """生成 URL 的唯一键（基于规范化后的 URL）。"""
+    return hashlib.md5(_canonical_url(url).encode("utf-8")).hexdigest()
 
 
 def _is_league_page(url: str) -> bool:
@@ -397,6 +438,7 @@ def _process_single_page(
     url_map: dict[str, str],
     force_compare: bool = False,
     page_type: str = "link",
+    cancel_event: threading.Event | None = None,
 ) -> dict:
     """抓取、内联、简体化、水印、保存并视觉对比一个页面。"""
     rel_path = _url_to_relative_path(url)
@@ -414,15 +456,42 @@ def _process_single_page(
     best_diff = None
 
     for attempt in range(config.MAX_RETRIES + 1):
+        if cancel_event is not None and cancel_event.is_set():
+            return {
+                **event_base,
+                "status": "cancelled",
+                "attempt": attempt + 1,
+                "message": "用户取消",
+                "output_path": None,
+            }
+
         try:
             data, ct = fetch_url(url, timeout=config.REQUEST_TIMEOUT)
             if data is None:
                 raise RuntimeError(f"第 {attempt + 1} 次抓取失败")
             raw_html = decode_html(data, ct)
 
+            if cancel_event is not None and cancel_event.is_set():
+                return {
+                    **event_base,
+                    "status": "cancelled",
+                    "attempt": attempt + 1,
+                    "message": "用户取消",
+                    "output_path": None,
+                }
+
             # 用 Headless Chromium 渲染，拿到 JS 执行后的 DOM。
             # 需求要求所有页面都先执行原始页面 JS；联赛/杯赛资料页额外合并轮次与标签页。
             # 同时捕获同源首屏截图，避免后续数据源页面被反爬/过期导致视觉对比失真。
+            if cancel_event is not None and cancel_event.is_set():
+                return {
+                    **event_base,
+                    "status": "cancelled",
+                    "attempt": attempt + 1,
+                    "message": "用户取消",
+                    "output_path": None,
+                }
+
             tab_htmls: dict[int, str] = {}
             source_img = None
             try:
@@ -438,8 +507,27 @@ def _process_single_page(
                 print(f"[WARN] 页面渲染失败，回退到原始 HTML: {url} -> {e}")
                 rendered_html = raw_html
 
-            inlined = inline_page(rendered_html, url)
+            if cancel_event is not None and cancel_event.is_set():
+                return {
+                    **event_base,
+                    "status": "cancelled",
+                    "attempt": attempt + 1,
+                    "message": "用户取消",
+                    "output_path": None,
+                }
+
+            inlined = inline_page(rendered_html, url, cancel_event=cancel_event)
             frozen = _freeze_rendered_page(inlined)
+
+            if cancel_event is not None and cancel_event.is_set():
+                return {
+                    **event_base,
+                    "status": "cancelled",
+                    "attempt": attempt + 1,
+                    "message": "用户取消",
+                    "output_path": None,
+                }
+
             simplified = simplify_html(frozen)
 
             # 视觉对比使用无水印版本，避免水印自身造成人为差异
@@ -459,7 +547,7 @@ def _process_single_page(
                     tab_rel = f"{rel_path[:-5]}_tab{t}.html" if rel_path.endswith(".html") else f"{rel_path}_tab{t}.html"
                     tab_output_path = base_dir / tab_rel
                     tab_output_path.parent.mkdir(parents=True, exist_ok=True)
-                    tab_inlined = inline_page(tab_html, url)
+                    tab_inlined = inline_page(tab_html, url, cancel_event=cancel_event)
                     tab_frozen = _freeze_rendered_page(tab_inlined)
                     tab_simplified = simplify_html(tab_frozen)
                     tab_marked = inject_watermark(tab_simplified)
@@ -542,7 +630,7 @@ def _process_single_page(
     }
 
 
-def replicate_date(date: str, max_level: int | None = None):
+def replicate_date(date: str, max_level: int | None = None, cancel_event: threading.Event | None = None):
     """
     复刻某一日期的页面。
     这是一个生成器，每次 yield 一个进度事件字典。
@@ -556,8 +644,8 @@ def replicate_date(date: str, max_level: int | None = None):
     start_time = time.time()
     url_map: dict[str, str] = {}  # url -> relative path (based on OUTPUT_DIR)
     results: list[dict] = []
-    visited: set[str] = set()      # 已处理完成的 URL
-    queued: set[str] = set()       # 已在队列中的 URL
+    visited: set[str] = set()      # 已处理完成的 URL（基于规范键）
+    queued: set[str] = set()       # 已在队列中的 URL（基于规范键）
     report = {
         "date": date,
         "max_level": max_level,
@@ -566,14 +654,27 @@ def replicate_date(date: str, max_level: int | None = None):
         "pages_retry": 0,
         "pages_fix": 0,
         "pages_error": 0,
+        "pages_cancelled": 0,
         "details": [],
     }
 
+    def _check_cancel(msg: str = "用户取消") -> bool:
+        """检查取消标志或总超时，返回是否需要停止。"""
+        if cancel_event is not None and cancel_event.is_set():
+            return True
+        if time.time() - start_time > MAX_JOB_SECONDS:
+            return True
+        return False
+
     yield {"type": "start", "date": date, "max_level": max_level}
+
+    if _check_cancel():
+        yield {"type": "finish", "date": date, "list_page": f"{date}/index.html", "report": report, "message": "任务启动前已取消"}
+        return
 
     list_url = config.SOURCE_URL_TEMPLATE.format(date=date)
     queue = [(list_url, 1, "list")]
-    queued.add(list_url)
+    queued.add(_url_key(list_url))
 
     # 先加入由 scheduleID 构造的详情页（level=2）
     try:
@@ -585,17 +686,27 @@ def replicate_date(date: str, max_level: int | None = None):
             sids = extract_schedule_ids(list_html, list_url)
             for sid in sids:
                 for detail in get_detail_urls(sid):
-                    if detail["url"] not in queued:
+                    detail_key = _url_key(detail["url"])
+                    if detail_key not in queued:
                         queue.append((detail["url"], detail["level"], detail["type"]))
-                        queued.add(detail["url"])
+                        queued.add(detail_key)
     except Exception as e:
         yield {"type": "warning", "message": f"解析列表页失败: {e}"}
 
     while queue:
+        if _check_cancel():
+            yield {"type": "warning", "message": "任务已取消或超过最大运行时间"}
+            break
+
+        if report["pages_total"] >= MAX_PAGES_PER_JOB:
+            yield {"type": "warning", "message": f"已达到单任务最大页面数限制 {MAX_PAGES_PER_JOB}"}
+            break
+
         url, level, page_type = queue.pop(0)
-        if url in visited:
+        url_key = _url_key(url)
+        if url_key in visited:
             continue
-        visited.add(url)
+        visited.add(url_key)
 
         yield {"type": "progress", "url": url, "level": level, "status": "processing"}
 
@@ -605,6 +716,7 @@ def replicate_date(date: str, max_level: int | None = None):
             url, date, level, base_dir, url_map,
             force_compare=force_compare,
             page_type=page_type,
+            cancel_event=cancel_event,
         )
         results.append(result)
         report["pages_total"] += 1
@@ -629,7 +741,7 @@ def replicate_date(date: str, max_level: int | None = None):
                 if m:
                     match_id = m.group(1)
                     try:
-                        saved_path = base_dir / result["output_path"]
+                        saved_path = config.OUTPUT_DIR / result["output_path"]
                         analysis_html = saved_path.read_text(encoding="utf-8")
                         team_ids = extract_team_ids_from_analysis(analysis_html)
                         if team_ids:
@@ -650,26 +762,34 @@ def replicate_date(date: str, max_level: int | None = None):
             report["pages_fix"] += 1
         elif result["status"] == "error":
             report["pages_error"] += 1
+        elif result["status"] == "cancelled":
+            report["pages_cancelled"] += 1
 
         report["details"].append(result)
         yield {"type": "page_done", **result}
 
+        # 任务被取消时不再继续扩散
+        if _check_cancel():
+            yield {"type": "warning", "message": "任务已取消或超过最大运行时间，停止扩散新链接"}
+            break
+
         # 继续提取下一层链接（仅当处理成功时）
-        if result["status"] not in ("error",) and level < max_level:
+        if result["status"] not in ("error", "cancelled") and level < max_level:
             try:
                 saved_path = base_dir / result["rel_path"]
                 html = saved_path.read_text(encoding="utf-8")
                 links = extract_links(html, url, level, max_level)
                 for link in links:
-                    if link["url"] not in queued and link["url"] not in visited:
-                        queued.add(link["url"])
+                    link_key = _url_key(link["url"])
+                    if link_key not in queued and link_key not in visited:
+                        queued.add(link_key)
                         queue.append((link["url"], link["level"], link.get("type", "link")))
             except Exception as e:
                 yield {"type": "warning", "url": url, "message": f"提取子链接失败: {e}"}
 
         # 提取并复刻页面自身的标签页（球队资料页、杯赛/联赛资料页的独立 URL 标签）。
-        # 这些标签页作为同级/末级内容页处理，不再继续下钻。
-        if result["status"] not in ("error",) and result.get("rel_path"):
+        # 仅对非标签页类型的页面执行，避免标签页之间互相扩散导致无限循环。
+        if result["status"] not in ("error", "cancelled") and result.get("rel_path") and page_type not in ("team_tab", "league_tab"):
             try:
                 saved_path = base_dir / result["rel_path"]
                 html = saved_path.read_text(encoding="utf-8")
@@ -677,12 +797,13 @@ def replicate_date(date: str, max_level: int | None = None):
                 current_rel = _url_to_relative_path(url)
                 for tab in tabs:
                     tab_url = tab["url"]
-                    if tab_url in queued or tab_url in visited:
+                    tab_key = _url_key(tab_url)
+                    if tab_key in queued or tab_key in visited:
                         continue
                     # 跳过与当前页同内容的标签（如 /cn/SubLeague/2026/15.html 与 /cn/SubLeague/15.html）
                     if _url_to_relative_path(tab_url) == current_rel:
                         continue
-                    queued.add(tab_url)
+                    queued.add(tab_key)
                     queue.append((tab_url, max_level, tab["type"]))
             except Exception as e:
                 yield {"type": "warning", "url": url, "message": f"提取标签页失败: {e}"}
@@ -701,6 +822,7 @@ def replicate_date(date: str, max_level: int | None = None):
             yield {"type": "warning", "url": src_url, "message": f"链接重写失败: {e}"}
 
     report["elapsed_seconds"] = round(time.time() - start_time, 2)
+    report["cancelled"] = _check_cancel() or report["pages_cancelled"] > 0
     data_store.save_report(date, report)
 
     # 同步到 docs/ 并更新 dates.json，供 GitHub Pages 直接访问

@@ -26,22 +26,21 @@ def _playwright_ok() -> bool:
 
 
 def _launch_browser(p):
-    """启动 Chromium，优先使用系统已安装的 Chrome/Chromium，否则回退到 Playwright 自带浏览器。"""
-    import shutil
+    """启动 Chromium，优先使用 renderer 发现的可用浏览器（系统 Chrome/Playwright headless-shell）。"""
+    from core.renderer import _find_chrome
     args = ["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"]
-    for name in ("google-chrome-stable", "google-chrome", "chromium", "chromium-browser"):
-        exe = shutil.which(name)
-        if exe:
-            try:
-                return p.chromium.launch(executable_path=exe, args=args)
-            except Exception as e:
-                print(f"[WARN] 用 {name} 启动 Chromium 失败: {e}")
+    chrome = _find_chrome()
+    if chrome:
+        try:
+            return p.chromium.launch(executable_path=chrome, args=args)
+        except Exception as e:
+            print(f"[WARN] 用 {chrome} 启动 Chromium 失败: {e}")
     try:
-        # 未找到系统 Chrome 时，使用 Playwright 自带的 Chromium
+        # 最后回退到 Playwright 自带 Chromium（依赖完整安装）
         return p.chromium.launch(args=args)
     except Exception as e:
         print(f"[WARN] 启动 Playwright 自带 Chromium 失败: {e}")
-    print("[WARN] 未找到可用的系统 Chrome/Chromium")
+    print("[WARN] 未找到可用的 Chromium")
     return None
 
 

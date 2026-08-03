@@ -17,6 +17,7 @@ app = Flask(__name__, static_folder=None)
 CORS(app)
 
 _running: dict[str, threading.Thread] = {}
+_cancel_events: dict[str, threading.Event] = {}
 
 
 def _event_stream(generator):
@@ -62,6 +63,21 @@ def api_status():
     })
 
 
+@app.route("/api/stop")
+def api_stop():
+    """请求停止指定日期的复刻任务。"""
+    date = request.args.get("date", "").strip()
+    if not date:
+        return jsonify({"error": "缺少 date 参数"}), 400
+
+    event = _cancel_events.get(date)
+    if event is None:
+        return jsonify({"stopped": False, "message": "该日期没有运行中的任务"}), 404
+
+    event.set()
+    return jsonify({"stopped": True, "date": date})
+
+
 @app.route("/api/replicate")
 def api_replicate():
     date = request.args.get("date", "").strip()
@@ -74,14 +90,18 @@ def api_replicate():
     if date in _running:
         return jsonify({"error": f"日期 {date} 的复刻任务正在进行中"}), 409
 
+    cancel_event = threading.Event()
+    _cancel_events[date] = cancel_event
+
     def generate():
         try:
-            for event in replicate_date(date, max_level=max_level):
+            for event in replicate_date(date, max_level=max_level, cancel_event=cancel_event):
                 yield event
         except Exception as e:
             yield {"type": "error", "message": str(e)}
         finally:
             _running.pop(date, None)
+            _cancel_events.pop(date, None)
 
     _running[date] = threading.current_thread()
     return Response(

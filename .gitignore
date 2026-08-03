@@ -1,4 +1,5 @@
 output/
+docs/           # 生成的复刻页面，由运行时产生
 __pycache__/
 *.pyc
 *.pyo

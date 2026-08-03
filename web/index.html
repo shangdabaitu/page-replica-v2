@@ -112,6 +112,7 @@
                 <input type="number" id="levelInput" value="3" min="1" max="5">
             </div>
             <button id="startBtn">开始复刻</button>
+            <button id="stopBtn" style="display:none;background:var(--danger);">停止复刻</button>
         </div>
         <div class="status" id="dateStatus"></div>
     </div>
@@ -137,12 +138,16 @@
 const dateInput = document.getElementById('dateInput');
 const levelInput = document.getElementById('levelInput');
 const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
 const logEl = document.getElementById('log');
 const progressStatus = document.getElementById('progressStatus');
 const datesList = document.getElementById('datesList');
 const dateStatus = document.getElementById('dateStatus');
 const previewCard = document.getElementById('previewCard');
 const previewFrame = document.getElementById('previewFrame');
+
+let currentEs = null;
+let currentDate = null;
 
 function log(msg, cls='info') {
     const line = document.createElement('div');
@@ -193,6 +198,19 @@ async function previewDate(date) {
     }
 }
 
+function resetButtons(running) {
+    if (running) {
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'inline-block';
+        stopBtn.disabled = false;
+    } else {
+        startBtn.style.display = 'inline-block';
+        startBtn.disabled = false;
+        stopBtn.style.display = 'none';
+        stopBtn.disabled = true;
+    }
+}
+
 startBtn.addEventListener('click', () => {
     const rawDate = dateInput.value;
     if (!rawDate) {
@@ -205,12 +223,13 @@ startBtn.addEventListener('click', () => {
 
     logEl.innerHTML = '';
     previewCard.classList.add('hidden');
-    startBtn.disabled = true;
+    resetButtons(true);
     progressStatus.textContent = '复刻中…';
     log(`开始复刻日期：${date}`, 'info');
 
-    const es = new EventSource(`/api/replicate?date=${encodeURIComponent(date)}&max_level=${maxLevel}`);
-    es.onmessage = (ev) => {
+    currentDate = date;
+    currentEs = new EventSource(`/api/replicate?date=${encodeURIComponent(date)}&max_level=${maxLevel}`);
+    currentEs.onmessage = (ev) => {
         let data;
         try { data = JSON.parse(ev.data); } catch { data = { type: 'raw', message: ev.data }; }
         switch (data.type) {
@@ -230,20 +249,49 @@ startBtn.addEventListener('click', () => {
                 log(`错误：${data.message}`, 'err');
                 break;
             case 'finish':
-                log(`复刻完成，共 ${data.report.pages_total} 个页面，成功 ${data.report.pages_ok}，需修复 ${data.report.pages_fix}，失败 ${data.report.pages_error}，耗时 ${data.report.elapsed_seconds}s`, 'ok');
-                es.close();
-                startBtn.disabled = false;
-                progressStatus.textContent = '已完成';
+                const cancelled = data.report && data.report.cancelled;
+                log(cancelled ? `复刻已停止，共处理 ${data.report.pages_total} 个页面` : `复刻完成，共 ${data.report.pages_total} 个页面，成功 ${data.report.pages_ok}，需修复 ${data.report.pages_fix}，失败 ${data.report.pages_error}，耗时 ${data.report.elapsed_seconds}s`, 'ok');
+                currentEs.close();
+                currentEs = null;
+                currentDate = null;
+                resetButtons(false);
+                progressStatus.textContent = cancelled ? '已停止' : '已完成';
                 previewDate(data.date || date);
                 loadDates();
                 break;
         }
     };
-    es.onerror = () => {
+    currentEs.onerror = () => {
         log('SSE 连接中断', 'warn');
-        startBtn.disabled = false;
+        currentEs = null;
+        currentDate = null;
+        resetButtons(false);
         progressStatus.textContent = '连接已断开';
     };
+});
+
+stopBtn.addEventListener('click', () => {
+    if (!currentDate || !currentEs) {
+        return;
+    }
+    stopBtn.disabled = true;
+    progressStatus.textContent = '正在停止…';
+    log('请求停止任务…', 'warn');
+
+    fetch(`/api/stop?date=${encodeURIComponent(currentDate)}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.stopped) {
+                log('停止请求已发送', 'warn');
+            } else {
+                log(`停止请求失败：${data.message || '未知错误'}`, 'err');
+                stopBtn.disabled = false;
+            }
+        })
+        .catch(e => {
+            log(`停止请求异常：${e}`, 'err');
+            stopBtn.disabled = false;
+        });
 });
 
 function shortUrl(url) {

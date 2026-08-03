@@ -117,12 +117,15 @@ def fetch_url(url: str, timeout: int = config.REQUEST_TIMEOUT, retries: int = co
 _CACHE_MISS_SENTINEL = object()
 
 
-def fetch_resource(url: str) -> tuple[bytes | None, str | None]:
-    """抓取资源并缓存（失败结果也缓存，避免同一 404 资源被反复请求）。"""
+def fetch_resource(url: str, timeout: int = 5, retries: int = 0) -> tuple[bytes | None, str | None]:
+    """抓取资源并缓存（失败结果也缓存，避免同一 404 资源被反复请求）。
+
+    默认使用较短超时、不重试，避免资源内联阶段被慢资源拖垮整个任务。
+    """
     cached = _resource_cache.get(url, _CACHE_MISS_SENTINEL)
     if cached is not _CACHE_MISS_SENTINEL:
         return cached
-    data, ct = fetch_url(url)
+    data, ct = fetch_url(url, timeout=timeout, retries=retries)
     _resource_cache[url] = (data, ct)
     return data, ct
 

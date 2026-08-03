@@ -24,15 +24,21 @@ def _looks_like_css(text: str) -> bool:
     return True
 
 
-def inline_page(html: str, base_url: str) -> str:
+def inline_page(html: str, base_url: str, cancel_event=None) -> str:
     """把页面中的外部 CSS/图片资源内联；脚本不内联，后续由 freeze 阶段删除。
 
     对疑似加密或二进制的 CSS 资源保持原 <link> 引用，避免内联垃圾数据破坏渲染。
+    支持 cancel_event，在资源下载前后检查以便及时响应停止请求。
     """
+    def _cancelled() -> bool:
+        return cancel_event is not None and cancel_event.is_set()
+
     soup = BeautifulSoup(html, "html.parser")
 
     # 1. 内联 <link rel="stylesheet">
     for tag in soup.find_all("link", rel="stylesheet", href=True):
+        if _cancelled():
+            break
         href = normalize_url(tag["href"], base_url)
         if not href:
             continue
@@ -45,7 +51,7 @@ def inline_page(html: str, base_url: str) -> str:
             tag["href"] = href
             continue
         # 处理 CSS 中的相对 url(...)
-        css = _inline_css_urls(css, href)
+        css = _inline_css_urls(css, href, cancel_event=cancel_event)
         style_tag = soup.new_tag("style")
         style_tag.string = css
         tag.replace_with(style_tag)
@@ -53,16 +59,18 @@ def inline_page(html: str, base_url: str) -> str:
     # 2. 处理 HTML 内 <style> 标签中的 url(...)，把背景图等也内联
     for tag in soup.find_all("style"):
         if tag.string:
-            tag.string = _inline_css_urls(tag.string, base_url)
+            tag.string = _inline_css_urls(tag.string, base_url, cancel_event=cancel_event)
 
     # 2.5 处理元素 style 属性中的 url(...)
     for tag in soup.find_all(style=True):
-        tag["style"] = _inline_css_urls(tag["style"], base_url)
+        tag["style"] = _inline_css_urls(tag["style"], base_url, cancel_event=cancel_event)
 
     # 3. 脚本不再内联，避免 </script> 截断导致脚本源码泄漏到正文。
 
     # 4. 内联 <img src="...">
     for tag in soup.find_all("img", src=True):
+        if _cancelled():
+            break
         src = normalize_url(tag["src"], base_url)
         if not src:
             continue
@@ -78,6 +86,8 @@ def inline_page(html: str, base_url: str) -> str:
 
     # 4. 内联其他使用 src 的标签（iframe 除外）
     for tag in soup.find_all(src=True):
+        if _cancelled():
+            break
         if tag.name in ("script", "img", "iframe"):
             continue
         src = normalize_url(tag["src"], base_url)
@@ -93,9 +103,11 @@ def inline_page(html: str, base_url: str) -> str:
     return str(soup)
 
 
-def _inline_css_urls(css: str, css_url: str) -> str:
+def _inline_css_urls(css: str, css_url: str, cancel_event=None) -> str:
     """把 CSS 中的 url(...) 相对路径转成绝对路径或 data URL。"""
     def repl(match):
+        if cancel_event is not None and cancel_event.is_set():
+            return match.group(0)
         raw = match.group(1).strip("\"'\t ")
         abs_url = normalize_url(raw, css_url)
         if not abs_url:
