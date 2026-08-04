@@ -211,17 +211,37 @@ def _freeze_rendered_page(html: str) -> str:
     """
     对渲染后的 DOM 做冻结处理：删除所有脚本，
     只注入 openAnalysisPage 的最小本地实现，确保页面以静态方式展示。
+    同时注入 UTF-8 charset meta，避免静态文件缺少 HTTP 头时浏览器乱猜编码。
     """
     soup = BeautifulSoup(html, "html.parser")
     for tag in list(soup.find_all("script")):
         tag.decompose()
+
+    head = soup.head
+    if head is None:
+        head = soup.new_tag("head")
+        if soup.html:
+            soup.html.insert(0, head)
+        elif soup.body:
+            soup.body.insert_before(head)
+
+    # 确保有 charset 声明
+    has_charset = False
+    for meta in head.find_all("meta"):
+        content = (meta.get("content") or "").lower()
+        http_equiv = (meta.get("http-equiv") or "").lower()
+        if meta.get("charset") or "charset" in content or http_equiv == "content-type":
+            has_charset = True
+            break
+    if not has_charset:
+        charset_meta = soup.new_tag("meta", charset="utf-8")
+        head.insert(0, charset_meta)
+
     # 注入本地 openAnalysisPage（列表页传入的是 match_id，分析页后缀为 cn.htm）
     new_tag = soup.new_tag("script")
     new_tag.string = "function openAnalysisPage(matchID){ window.open('./analysis/' + matchID + 'cn.htm'); }"
-    if soup.head:
-        soup.head.append(new_tag)
-    else:
-        soup.body.insert(0, new_tag)
+    head.append(new_tag)
+
     # 移除依赖已删除脚本的悬停事件，保留 onclick
     for tag in soup.find_all(attrs={"onmouseover": True, "onmouseout": True}):
         del tag["onmouseover"]
