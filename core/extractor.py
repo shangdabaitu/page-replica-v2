@@ -14,10 +14,11 @@ import config
 def extract_schedule_ids(html: str, base_url: str) -> list[str]:
     """从列表页提取所有比赛 ID（优先返回能打开详情页的真实 matchID）。"""
     ids = set()
-    # 方法1：从亚盘/欧赔/盘路/大小球/分析弹窗链接中提取真实 matchID
+    # 方法1：从亚盘/欧赔/盘路/大小球/角球/分析弹窗链接中提取真实 matchID
     match_patterns = [
         r'AsianOdds_n\.aspx\?id=(\d+)',
         r'OverDown_n\.aspx\?id=(\d+)',
+        r'Corner\.aspx\?id=(\d+)',
         r'oddslist/(\d+)\.htm',
         r'panlu/(\d+)\.htm',
         r'openAnalysisPage\((\d+)\)',
@@ -150,7 +151,7 @@ def extract_links(html: str, base_url: str, current_level: int, max_level: int) 
 
 
 def _is_l2_url(url: str) -> bool:
-    """L2 入口：赛事类型页、单场亚/欧/析详情页（大 从 L2 赛事类型页下钻到 L3）。"""
+    """L2 入口：赛事类型页、单场亚/欧/析/角球详情页（大 从 L2 的赛事类型页下钻到 L3）。"""
     parsed = urlparse(url)
     path = parsed.path.lower()
     qs = parse_qs(parsed.query)
@@ -159,7 +160,7 @@ def _is_l2_url(url: str) -> bool:
         return True
 
     if "id" in qs and re.match(r"\d+$", qs["id"][0]):
-        if "AsianOdds_n.aspx" in path:
+        if "AsianOdds_n.aspx" in path or "Corner.aspx" in path:
             return True
 
     if re.match(r"/oddslist/\d+\.htm", path, re.I):
