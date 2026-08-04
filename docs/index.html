@@ -127,7 +127,7 @@
     <div class="card" id="statsCard" style="display:none;">
         <span class="section-title">比赛复刻统计</span>
         <div id="statsTableWrap"></div>
-        <div class="hint">说明：L1 为整站列表页（1 面）；L2 为从列表页进入的赛事类型名称页 + 亚 + 欧 + 析（4 面）；L3 为从赛事类型页进入的亚/欧/析/大（4 面）加上从析页面进入的主队/客队资料库（2 面），合计 6 面。视觉对比已覆盖第一场比赛的全部 L1/L2/L3 页面。</div>
+        <div class="hint">说明：L1 为整站列表页（1 面）；L2 为从列表页进入的赛事类型名称页 + 亚 + 欧 + 析（4 面）；L3 为从赛事类型页进入的亚/欧/析/大（4 面）加上从析页面进入的主队/客队资料库（2 面），合计 6 面。标签页统计主队/客队资料库内的各标签状态（赛程、阵容、球员数据等）。受源站 zq.titan007.com / info.titan007.com SSL 连接中断影响，当前标签页视觉对比暂无法在线完成；代码已修复为后续复刻时默认对比所有页面。</div>
     </div>
 
     <div class="card">
@@ -226,10 +226,21 @@ function calcMatchStats(match, pages) {
         l3OverPage.filter(isCompared).length +
         l3TeamPages.filter(isCompared).length;
 
+    // 标签页：主队/客队资料库内部的各标签状态（如赛程、阵容、球员数据等）
+    const teamTabPages = pages.filter(p => {
+        if (p.type !== 'team_tab') return false;
+        const m = p.url && p.url.match(/team\/([A-Za-z]+)\/(\d+)\.html/i);
+        if (!m) return false;
+        const tid = m[2];
+        return tid === homeId || tid === awayId;
+    });
+    const tabCompared = teamTabPages.filter(isCompared).length;
+
     return {
         l1: { expected: 1, compared: l1Compared },
         l2: { expected: 4, compared: l2Compared },
         l3: { expected: 6, compared: l3Compared },
+        tab: { expected: teamTabPages.length, compared: tabCompared },
     };
 }
 
@@ -256,6 +267,7 @@ function renderStats(item, meta) {
                 <th class="num">L1 应复刻 / 已视觉对比</th>
                 <th class="num">L2 应复刻 / 已视觉对比</th>
                 <th class="num">L3 应复刻 / 已视觉对比</th>
+                <th class="num">标签页 总数 / 已视觉对比</th>
             </tr>
         </thead>
         <tbody>`;
@@ -265,6 +277,7 @@ function renderStats(item, meta) {
         const l1Cls = s.l1.compared >= s.l1.expected ? 'ok' : 'warn';
         const l2Cls = s.l2.compared >= s.l2.expected ? 'ok' : 'warn';
         const l3Cls = s.l3.compared >= s.l3.expected ? 'ok' : 'warn';
+        const tabCls = s.tab.compared >= s.tab.expected ? 'ok' : 'warn';
         html += `<tr>
             <td>${escapeHtml(match.league || '-')}</td>
             <td>${escapeHtml(match.match_time || '-')}</td>
@@ -274,6 +287,7 @@ function renderStats(item, meta) {
             <td class="num ${l1Cls}">${s.l1.expected} / ${s.l1.compared}</td>
             <td class="num ${l2Cls}">${s.l2.expected} / ${s.l2.compared}</td>
             <td class="num ${l3Cls}">${s.l3.expected} / ${s.l3.compared}</td>
+            <td class="num ${tabCls}">${s.tab.expected} / ${s.tab.compared}</td>
         </tr>`;
     }
 
