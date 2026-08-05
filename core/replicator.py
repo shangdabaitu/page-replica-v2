@@ -20,6 +20,7 @@ from core.inliner import inline_page
 from core.renderer import render_and_capture, render_league_with_tabs
 from core.simplifier import simplify_html
 from core.watermark import inject_watermark
+from core.live_tabs import replicate_all_live_tabs
 from core.extractor import (
     extract_schedule_ids,
     extract_match_data,
@@ -883,6 +884,21 @@ def replicate_date(date: str, max_level: int | None = None, cancel_event: thread
                         queue.append((tab_url, max_level, tab["type"]))
                 except Exception as e:
                     yield {"type": "warning", "url": url, "message": f"提取标签页失败: {e}"}
+
+    # 复刻所有 live detail 页的内部标签页（现场分析/动画直播/高清直播/球员统计/文字直播等）
+    try:
+        if not _check_cancel():
+            yield {"type": "progress", "url": "__live_tabs__", "level": 0, "status": "replicating_live_tabs"}
+            live_tab_results = replicate_all_live_tabs(date)
+            for match_id, saved_files in live_tab_results.items():
+                base_url = f"https://live.titan007.com/detail/{match_id}cn.htm"
+                for fname in saved_files:
+                    # 文件名形如 2929663cn.htm、2929663cn_players.htm 等
+                    suffix = fname.replace(f"{match_id}cn", "").replace(".htm", "")
+                    tab_url = f"{base_url[:-4]}{suffix}.htm" if suffix else base_url
+                    url_map[tab_url] = f"{date}/live/detail/{fname}"
+    except Exception as e:
+        yield {"type": "warning", "message": f"复刻 live detail 标签页失败: {e}"}
 
     # 最终统一重写所有已保存页面的内链，确保链接在本地可跳转
     yield {"type": "progress", "url": "__rewrite_links__", "level": 0, "status": "rewriting"}
