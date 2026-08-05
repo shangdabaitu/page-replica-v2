@@ -244,6 +244,14 @@ def _freeze_rendered_page(html: str) -> str:
         charset_meta = soup.new_tag("meta", charset="utf-8")
         head.insert(0, charset_meta)
 
+    # 禁用页面缓存，避免 GitHub Pages 10 分钟缓存导致用户看到过旧版本
+    cache_meta = soup.new_tag("meta", attrs={"http-equiv": "Cache-Control", "content": "no-cache, no-store, must-revalidate"})
+    head.insert(0, cache_meta)
+    pragma_meta = soup.new_tag("meta", attrs={"http-equiv": "Pragma", "content": "no-cache"})
+    head.insert(0, pragma_meta)
+    expires_meta = soup.new_tag("meta", attrs={"http-equiv": "Expires", "content": "0"})
+    head.insert(0, expires_meta)
+
     # 注入本地 openAnalysisPage（列表页传入的是 match_id，分析页后缀为 cn.htm）
     new_tag = soup.new_tag("script")
     new_tag.string = "function openAnalysisPage(matchID){ window.open('./analysis/' + matchID + 'cn.htm'); }"
