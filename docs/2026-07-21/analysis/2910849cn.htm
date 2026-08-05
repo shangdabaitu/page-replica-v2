@@ -2375,7 +2375,8 @@ div.AspNetPager>a:last-child {
         margin: 0 10px;
     }
 } */
-</style><script>function openAnalysisPage(matchID){ window.open('./analysis/' + matchID + 'cn.htm'); }</script></head>
+</style><script>function openAnalysisPage(matchID){ window.open('./analysis/' + matchID + 'cn.htm'); }
+function showDetail(matchID){ var base = window.location.href.replace(/\/[^\/]*$/, '/'); window.location.href = base + '../live/detail/' + matchID + 'cn.htm'; }</script></head>
 <body>
 <style>body {
     margin: 0px;

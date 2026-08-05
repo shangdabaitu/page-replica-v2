@@ -576,7 +576,8 @@ input[type="checkbox"] {position: relative;bottom: -3px;}
 	display: none
 }</style>
 <!--script language=JavaScript src='//img.titan007.com/footballAnaly.aspx'></script-->
-<script>function openAnalysisPage(matchID){ window.open('./analysis/' + matchID + 'cn.htm'); }</script></head>
+<script>function openAnalysisPage(matchID){ window.open('./analysis/' + matchID + 'cn.htm'); }
+function showDetail(matchID){ var base = window.location.href.replace(/\/[^\/]*$/, '/'); window.location.href = base + '../live/detail/' + matchID + 'cn.htm'; }</script></head>
 <body>
 <style>body {
     margin: 0px;

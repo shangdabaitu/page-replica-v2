@@ -14,7 +14,7 @@ import config
 def extract_schedule_ids(html: str, base_url: str) -> list[str]:
     """从列表页提取所有比赛 ID（优先返回能打开详情页的真实 matchID）。"""
     ids = set()
-    # 方法1：从亚盘/欧赔/盘路/大小球/角球/分析弹窗链接中提取真实 matchID
+    # 方法1：从亚盘/欧赔/盘路/大小球/角球/现场分析/分析弹窗链接中提取真实 matchID
     match_patterns = [
         r'AsianOdds_n\.aspx\?id=(\d+)',
         r'OverDown_n\.aspx\?id=(\d+)',
@@ -22,6 +22,8 @@ def extract_schedule_ids(html: str, base_url: str) -> list[str]:
         r'oddslist/(\d+)\.htm',
         r'panlu/(\d+)\.htm',
         r'openAnalysisPage\((\d+)\)',
+        r'showDetail\((\d+)\)',
+        r'live\.titan007\.com/detail/(\d+)',
     ]
     for pat in match_patterns:
         for m in re.finditer(pat, html, re.I):
@@ -147,11 +149,34 @@ def extract_links(html: str, base_url: str, current_level: int, max_level: int) 
                 "level": current_level + 1,
             })
 
+    # 提取 onclick 中的现场分析等 JS 导航链接（如 showDetail(id)）
+    for parent in candidate_parents:
+        for tag in parent.find_all(onclick=True):
+            onclick = tag.get("onclick") or ""
+            for m in re.finditer(r"showDetail\((\d+)\)", onclick, re.I):
+                live_url = f"https://live.titan007.com/detail/{m.group(1)}cn.htm"
+                if live_url in seen:
+                    continue
+                if current_level == 1 and not _is_l2_url(live_url):
+                    continue
+                if current_level == 2 and not (
+                    (_is_league_page(base_url) and _is_l3_url(live_url)) or
+                    (_is_analysis_page(base_url))
+                ):
+                    continue
+                seen.add(live_url)
+                links.append({
+                    "url": live_url,
+                    "type": "onclick",
+                    "text": tag.get_text(strip=True)[:50] or "现场分析",
+                    "level": current_level + 1,
+                })
+
     return links
 
 
 def _is_l2_url(url: str) -> bool:
-    """L2 入口：赛事类型页、单场亚/欧/析/角球详情页（大 从 L2 的赛事类型页下钻到 L3）。"""
+    """L2 入口：赛事类型页、单场亚/欧/析/角球/现场分析详情页（大 从 L2 的赛事类型页下钻到 L3）。"""
     parsed = urlparse(url)
     path = parsed.path.lower()
     qs = parse_qs(parsed.query)
@@ -167,6 +192,10 @@ def _is_l2_url(url: str) -> bool:
         return True
 
     if re.match(r"/analysis/\d+cn\.htm", path, re.I) or re.match(r"/analysis/\d+\.htm", path, re.I):
+        return True
+
+    # live.titan007.com 现场分析页
+    if parsed.netloc.lower() == "live.titan007.com" and re.match(r"/detail/\d+(cn|sb)?\.htm", path, re.I):
         return True
 
     return False

@@ -177,6 +177,13 @@ def _url_to_relative_path(url: str) -> str:
             if tab_name:
                 return f"team/{tab_name}/{m.group(2)}.html"
 
+    # live.titan007.com 现场分析页
+    if parsed.netloc.lower() == "live.titan007.com":
+        m = re.match(r"detail/(\d+)(cn|sb)?\.htm", path, re.I)
+        if m:
+            suffix = m.group(2) or ""
+            return f"live/detail/{m.group(1)}{suffix}.htm"
+
     # 详情页：按已知模式分类目录
     if path.endswith(".htm") or path.endswith(".html"):
         parts = Path(path).parts
@@ -241,6 +248,13 @@ def _freeze_rendered_page(html: str) -> str:
     new_tag = soup.new_tag("script")
     new_tag.string = "function openAnalysisPage(matchID){ window.open('./analysis/' + matchID + 'cn.htm'); }"
     head.append(new_tag)
+
+    # 注入本地 showDetail，让分析页“现场分析”标签跳转本地 live/detail 页面。
+    # 由于分析页位于 {date}/analysis/ 下，而 live/detail 位于 {date}/live/detail/ 下，
+    # 需要从当前文件所在目录向上退一级再进入 live/detail。
+    show_detail_tag = soup.new_tag("script")
+    show_detail_tag.string = "function showDetail(matchID){ var base = window.location.href.replace(/\\/[^\\/]*$/, '/'); window.location.href = base + '../live/detail/' + matchID + 'cn.htm'; }"
+    head.append(show_detail_tag)
 
     # 移除依赖已删除脚本的悬停事件，保留 onclick
     for tag in soup.find_all(attrs={"onmouseover": True, "onmouseout": True}):
