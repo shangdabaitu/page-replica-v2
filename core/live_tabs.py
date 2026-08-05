@@ -13,9 +13,10 @@ from playwright.sync_api import sync_playwright
 import config
 from core.fetcher import fetch_url, decode_html
 from core.inliner import inline_page
-from core.replicator import _freeze_rendered_page, _rewrite_links
 from core.simplifier import simplify_html
 from core.watermark import inject_watermark
+
+# 延迟导入 core.replicator，避免循环依赖
 
 
 TAB_SUFFIXES = {
@@ -194,6 +195,8 @@ def _inline_live_iframes(html: str, player_html: str, text_live_html: str) -> st
 def _save_state(html: str, match_id: str, suffix: str, base_url: str,
                 output_dir: Path, docs_dir: Path,
                 player_html: str = "", text_live_html: str = "") -> Path:
+    from core.replicator import _freeze_rendered_page
+
     rel_path = f"live/detail/{match_id}cn{suffix}.htm"
     output_path = output_dir / rel_path
     docs_path = docs_dir / rel_path
@@ -347,6 +350,8 @@ def replicate_all_live_tabs(date: str) -> dict[str, list[str]]:
 
 def rewrite_live_tab_links(date: str) -> None:
     """对指定日期下所有 live detail 页面做最终链接重写，确保标签页互相跳转且外部链接本地化。"""
+    from core.replicator import _rewrite_links
+
     base_dir = config.OUTPUT_DIR / date
     docs_dir = Path("/workspace/page-replica-v2/docs") / date
     url_map = _build_url_map(date)
