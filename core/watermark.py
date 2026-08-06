@@ -88,15 +88,27 @@ def _build_watermark_html(text: str = WATERMARK_TEXT) -> str:
 {fallback_script}"""
 
 
+_BODY_RE = re.compile(r"<body\b[^>]*>", re.I)
+
+
 def inject_watermark(html: str) -> str:
-    """在 HTML 页面中注入复刻水印。"""
+    """在 HTML 页面中注入复刻水印。
+
+    水印放在 <body> 之后，确保即使 CDN/浏览器对大文件做截断/流式渲染，
+    最先到达的也是水印，用户一打开就能看到。
+    """
     # 如果已经存在则不再注入
     if "replica-watermark-overlay" in html:
         return html
 
     watermark_html = _build_watermark_html()
 
-    # 优先在 </body> 前注入
+    # 优先在 <body> 后注入
+    m = _BODY_RE.search(html)
+    if m:
+        return html[: m.end()] + watermark_html + html[m.end() :]
+
+    # 退回到 </body> 前
     if "</body>" in html:
         return html.replace("</body>", watermark_html + "\n</body>", 1)
 
