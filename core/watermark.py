@@ -6,9 +6,13 @@ from config import WATERMARK_TEXT
 
 
 def _build_watermark_html(text: str = WATERMARK_TEXT) -> str:
-    """生成水印 HTML：使用固定定位的旋转文本网格，避免依赖背景图/SVG data URL。"""
-    # 3 行 x 4 列的文本网格，交错排列
-    rows, cols = 3, 4
+    """生成水印 HTML：使用固定定位的旋转文本网格，避免依赖背景图/SVG data URL。
+
+    同时附带一段兜底 JS：如果因为缓存或解析问题导致 overlay 为空，
+    页面加载后会自动把文字项补进去，确保水印一定可见。
+    """
+    # 5 行 x 5 列的文本网格，覆盖更密集
+    rows, cols = 5, 5
     items = []
     for r in range(rows):
         for c in range(cols):
@@ -22,25 +26,66 @@ def _build_watermark_html(text: str = WATERMARK_TEXT) -> str:
 
     items_html = "\n".join(items)
 
+    # 兜底脚本：DOM 就绪后检查 overlay 是否为空，空则自动填充
+    fallback_script = f"""<script>
+(function(){{
+  var text="{text}";
+  function fill(){{
+    var overlay=document.getElementById("replica-watermark-overlay");
+    if(!overlay){{
+      overlay=document.createElement("div");
+      overlay.className="replica-watermark-overlay";
+      overlay.id="replica-watermark-overlay";
+      document.body.appendChild(overlay);
+    }}
+    if(overlay.querySelector(".replica-watermark-item")) return;
+    overlay.innerHTML="";
+    var rows=5,cols=5;
+    for(var r=0;r<rows;r++){{
+      for(var c=0;c<cols;c++){{
+        var d=document.createElement("div");
+        d.className="replica-watermark-item";
+        d.style.position="absolute";
+        d.style.top=((r+0.5)*(100/rows))+"%";
+        d.style.left=((c+0.5)*(100/cols))+"%";
+        d.style.transform="translate(-50%,-50%) rotate(-30deg)";
+        d.textContent=text;
+        overlay.appendChild(d);
+      }}
+    }}
+  }}
+  if(document.readyState==="loading"){{
+    document.addEventListener("DOMContentLoaded",fill);
+  }}else{{
+    fill();
+  }}
+}})();
+</script>"""
+
     return f"""<style>
 .replica-watermark-overlay {{
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    z-index: 2147483647; pointer-events: none; opacity: 0.95;
-    overflow: hidden;
+    z-index: 2147483647; pointer-events: none; overflow: hidden;
 }}
 .replica-watermark-overlay .replica-watermark-item {{
-    font-size: clamp(24px, 3vw, 48px);
-    font-weight: bold;
-    color: #000;
-    opacity: 0.45;
-    text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+    font-size: clamp(40px, 6vw, 80px);
+    font-weight: 900;
+    letter-spacing: 6px;
+    color: rgba(255, 0, 0, 0.28);
+    text-shadow:
+        -2px -2px 0 rgba(255,255,255,0.9),
+         2px -2px 0 rgba(255,255,255,0.9),
+        -2px  2px 0 rgba(255,255,255,0.9),
+         2px  2px 0 rgba(255,255,255,0.9),
+         0 0 8px rgba(255,255,255,0.8);
     white-space: nowrap;
     user-select: none;
 }}
 </style>
 <div class="replica-watermark-overlay" id="replica-watermark-overlay">
 {items_html}
-</div>"""
+</div>
+{fallback_script}"""
 
 
 def inject_watermark(html: str) -> str:
