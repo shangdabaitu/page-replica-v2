@@ -2,15 +2,45 @@
 """复刻水印注入模块"""
 import re
 
-WATERMARK_HTML = """<style>
-.replica-watermark-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2147483647;
-    pointer-events: none; opacity: 0.95;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='140' viewBox='0 0 220 140'%3E%3Ctext x='50%25' y='50%25' font-size='34' font-weight='bold' fill='%23000' fill-opacity='0.55' stroke='%23fff' stroke-opacity='0.6' stroke-width='1.2' font-family='Arial' text-anchor='middle' dominant-baseline='middle' transform='rotate(-30 110 70)'%3E%E5%A4%8D%E5%88%BB%E9%A1%B5%E9%9D%A2%3C/text%3E%3C/svg%3E");
-    background-repeat: repeat; background-size: 220px 140px;
-}
+from config import WATERMARK_TEXT
+
+
+def _build_watermark_html(text: str = WATERMARK_TEXT) -> str:
+    """生成水印 HTML：使用固定定位的旋转文本网格，避免依赖背景图/SVG data URL。"""
+    # 3 行 x 4 列的文本网格，交错排列
+    rows, cols = 3, 4
+    items = []
+    for r in range(rows):
+        for c in range(cols):
+            top = (r + 0.5) * (100 / rows)
+            left = (c + 0.5) * (100 / cols)
+            items.append(
+                f'<div class="replica-watermark-item" '
+                f'style="position:absolute;top:{top:.1f}%;left:{left:.1f}%;'
+                f'transform:translate(-50%,-50%) rotate(-30deg);">{text}</div>'
+            )
+
+    items_html = "\n".join(items)
+
+    return f"""<style>
+.replica-watermark-overlay {{
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 2147483647; pointer-events: none; opacity: 0.95;
+    overflow: hidden;
+}}
+.replica-watermark-overlay .replica-watermark-item {{
+    font-size: clamp(24px, 3vw, 48px);
+    font-weight: bold;
+    color: #000;
+    opacity: 0.45;
+    text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+    white-space: nowrap;
+    user-select: none;
+}}
 </style>
-<div class="replica-watermark-overlay" id="replica-watermark-overlay"></div>"""
+<div class="replica-watermark-overlay" id="replica-watermark-overlay">
+{items_html}
+</div>"""
 
 
 def inject_watermark(html: str) -> str:
@@ -19,13 +49,15 @@ def inject_watermark(html: str) -> str:
     if "replica-watermark-overlay" in html:
         return html
 
+    watermark_html = _build_watermark_html()
+
     # 优先在 </body> 前注入
     if "</body>" in html:
-        return html.replace("</body>", WATERMARK_HTML + "\n</body>", 1)
+        return html.replace("</body>", watermark_html + "\n</body>", 1)
 
     # 退回到 </html> 前
     if "</html>" in html:
-        return html.replace("</html>", WATERMARK_HTML + "\n</html>", 1)
+        return html.replace("</html>", watermark_html + "\n</html>", 1)
 
     # 最后追加
-    return html + WATERMARK_HTML
+    return html + watermark_html

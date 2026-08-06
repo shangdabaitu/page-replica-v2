@@ -1,4 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "//www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 <html xmlns="//www.w3.org/1999/xhtml"><head><script>(function(){var qs=location.search;if(!qs.includes('v=3')){var u=location.href;location.replace(u+(u.indexOf('?')>-1?'&':'?')+'v=3');}})();</script><meta content="0" http-equiv="Expires"/><meta content="no-cache" http-equiv="Pragma"/><meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/><style class="vjs-styles-defaults">
       .video-js {
         width: 300px;
@@ -3934,13 +3935,35 @@ nJ{gA&quot;xj\u&amp;amp;y$	rk#算8t 'THk5Rl兵弦c8缣s]wZn耗S)yL*
 </span>
 </div>
 <br/>
+
+
 <style>
 .replica-watermark-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2147483647;
-    pointer-events: none; opacity: 0.95;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='140' viewBox='0 0 220 140'%3E%3Ctext x='50%25' y='50%25' font-size='34' font-weight='bold' fill='%23000' fill-opacity='0.55' stroke='%23fff' stroke-opacity='0.6' stroke-width='1.2' font-family='Arial' text-anchor='middle' dominant-baseline='middle' transform='rotate(-30 110 70)'%3E%E5%A4%8D%E5%88%BB%E9%A1%B5%E9%9D%A2%3C/text%3E%3C/svg%3E");
-    background-repeat: repeat; background-size: 220px 140px;
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 2147483647; pointer-events: none; opacity: 0.95;
+    overflow: hidden;
+}
+.replica-watermark-overlay .replica-watermark-item {
+    font-size: clamp(24px, 3vw, 48px);
+    font-weight: bold;
+    color: #000;
+    opacity: 0.45;
+    text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+    white-space: nowrap;
+    user-select: none;
 }
 </style>
-<div class="replica-watermark-overlay" id="replica-watermark-overlay"></div>
-</body></html>
+<div class="replica-watermark-overlay" id="replica-watermark-overlay">
+<div class="replica-watermark-item" style="position:absolute;top:16.7%;left:12.5%;transform:translate(-50%,-50%) rotate(-30deg);">复刻页面</div>
+<div class="replica-watermark-item" style="position:absolute;top:16.7%;left:37.5%;transform:translate(-50%,-50%) rotate(-30deg);">复刻页面</div>
+<div class="replica-watermark-item" style="position:absolute;top:16.7%;left:62.5%;transform:translate(-50%,-50%) rotate(-30deg);">复刻页面</div>
+<div class="replica-watermark-item" style="position:absolute;top:16.7%;left:87.5%;transform:translate(-50%,-50%) rotate(-30deg);">复刻页面</div>
+<div class="replica-watermark-item" style="position:absolute;top:50.0%;left:12.5%;transform:translate(-50%,-50%) rotate(-30deg);">复刻页面</div>
+<div class="replica-watermark-item" style="position:absolute;top:50.0%;left:37.5%;transform:translate(-50%,-50%) rotate(-30deg);">复刻页面</div>
+<div class="replica-watermark-item" style="position:absolute;top:50.0%;left:62.5%;transform:translate(-50%,-50%) rotate(-30deg);">复刻页面</div>
+<div class="replica-watermark-item" style="position:absolute;top:50.0%;left:87.5%;transform:translate(-50%,-50%) rotate(-30deg);">复刻页面</div>
+<div class="replica-watermark-item" style="position:absolute;top:83.3%;left:12.5%;transform:translate(-50%,-50%) rotate(-30deg);">复刻页面</div>
+<div class="replica-watermark-item" style="position:absolute;top:83.3%;left:37.5%;transform:translate(-50%,-50%) rotate(-30deg);">复刻页面</div>
+<div class="replica-watermark-item" style="position:absolute;top:83.3%;left:62.5%;transform:translate(-50%,-50%) rotate(-30deg);">复刻页面</div>
+<div class="replica-watermark-item" style="position:absolute;top:83.3%;left:87.5%;transform:translate(-50%,-50%) rotate(-30deg);">复刻页面</div>
+</div></body></html>
