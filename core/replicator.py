@@ -253,16 +253,18 @@ def _freeze_rendered_page(html: str) -> str:
     expires_meta = soup.new_tag("meta", attrs={"http-equiv": "Expires", "content": "0"})
     head.insert(0, expires_meta)
 
-    # 注入本地 openAnalysisPage（列表页传入的是 match_id，分析页后缀为 cn.htm）
+    # 注入本地 openAnalysisPage（列表页传入的是 match_id，分析页后缀为 cn.htm）。
+    # 加入 v=2 缓存破坏参数，避免浏览器沿用旧版无水印页面。
     new_tag = soup.new_tag("script")
-    new_tag.string = "function openAnalysisPage(matchID){ window.open('./analysis/' + matchID + 'cn.htm'); }"
+    new_tag.string = "function openAnalysisPage(matchID){ window.open('./analysis/' + matchID + 'cn.htm?v=2'); }"
     head.append(new_tag)
 
     # 注入本地 showDetail，让分析页“现场分析”标签跳转本地 live/detail 页面。
     # 由于分析页位于 {date}/analysis/ 下，而 live/detail 位于 {date}/live/detail/ 下，
     # 需要从当前文件所在目录向上退一级再进入 live/detail。
+    # 加入 v=2 缓存破坏参数，确保从分析页点入时加载最新版本。
     show_detail_tag = soup.new_tag("script")
-    show_detail_tag.string = "function showDetail(matchID){ var base = window.location.href.replace(/\\/[^\\/]*$/, '/'); window.location.href = base + '../live/detail/' + matchID + 'cn.htm'; }"
+    show_detail_tag.string = "function showDetail(matchID){ var base = window.location.href.replace(/\\/[^\\/]*$/, '/'); window.location.href = base + '../live/detail/' + matchID + 'cn.htm?v=2'; }"
     head.append(show_detail_tag)
 
     # 移除依赖已删除脚本的悬停事件，保留 onclick

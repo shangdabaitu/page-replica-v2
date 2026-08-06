@@ -131,18 +131,18 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
 
 
 def _patch_live_tab_links(html: str, match_id: str) -> str:
-    """把 live detail 页内各标签的 JS 切换改成本地文件链接。"""
+    """把 live detail 页内各标签的 JS 切换改成本地文件链接，并加缓存破坏参数。"""
     from bs4 import BeautifulSoup
 
     base = f"./{match_id}cn"
     links = {
-        "menu0": f"{base}.htm",
-        "menu1": f"{base}_players.htm",
-        "menu2": f"{base}_text.htm",
-        "tvLive1": f"{base}_animation.htm",
-        "tvLive2": f"{base}_hd.htm",
-        "eventMenu0": f"{base}.htm",
-        "eventMenu1": f"{base}_event_detail.htm",
+        "menu0": f"{base}.htm?v=2",
+        "menu1": f"{base}_players.htm?v=2",
+        "menu2": f"{base}_text.htm?v=2",
+        "tvLive1": f"{base}_animation.htm?v=2",
+        "tvLive2": f"{base}_hd.htm?v=2",
+        "eventMenu0": f"{base}.htm?v=2",
+        "eventMenu1": f"{base}_event_detail.htm?v=2",
     }
 
     soup = BeautifulSoup(html, "html.parser")
@@ -163,7 +163,7 @@ def _patch_live_tab_links(html: str, match_id: str) -> str:
     # 顶部"现场分析"A标签
     for a in soup.find_all("a", href=True):
         if a.get("href") == "javascript:void(0);" and "现场分析" in (a.text or ""):
-            a["href"] = f"{base}.htm"
+            a["href"] = f"{base}.htm?v=2"
             if "onclick" in a.attrs:
                 del a["onclick"]
 
