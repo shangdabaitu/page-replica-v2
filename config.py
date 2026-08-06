@@ -43,6 +43,9 @@ ALLOWED_HOSTS = {
 # 水印配置
 WATERMARK_TEXT = "复刻页面"
 
+# 缓存破坏参数：升级时修改此值，可强制浏览器拉取新版页面
+CACHE_BUSTER = "v=3"
+
 # 输出文件命名
 LIST_PAGE_NAME = "JingCai_{date}.html"
 META_FILE = "meta.json"

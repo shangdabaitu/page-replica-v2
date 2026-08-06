@@ -134,15 +134,16 @@ def _patch_live_tab_links(html: str, match_id: str) -> str:
     """把 live detail 页内各标签的 JS 切换改成本地文件链接，并加缓存破坏参数。"""
     from bs4 import BeautifulSoup
 
+    cache_buster = config.CACHE_BUSTER
     base = f"./{match_id}cn"
     links = {
-        "menu0": f"{base}.htm?v=2",
-        "menu1": f"{base}_players.htm?v=2",
-        "menu2": f"{base}_text.htm?v=2",
-        "tvLive1": f"{base}_animation.htm?v=2",
-        "tvLive2": f"{base}_hd.htm?v=2",
-        "eventMenu0": f"{base}.htm?v=2",
-        "eventMenu1": f"{base}_event_detail.htm?v=2",
+        "menu0": f"{base}.htm?{cache_buster}",
+        "menu1": f"{base}_players.htm?{cache_buster}",
+        "menu2": f"{base}_text.htm?{cache_buster}",
+        "tvLive1": f"{base}_animation.htm?{cache_buster}",
+        "tvLive2": f"{base}_hd.htm?{cache_buster}",
+        "eventMenu0": f"{base}.htm?{cache_buster}",
+        "eventMenu1": f"{base}_event_detail.htm?{cache_buster}",
     }
 
     soup = BeautifulSoup(html, "html.parser")
@@ -163,7 +164,7 @@ def _patch_live_tab_links(html: str, match_id: str) -> str:
     # 顶部"现场分析"A标签
     for a in soup.find_all("a", href=True):
         if a.get("href") == "javascript:void(0);" and "现场分析" in (a.text or ""):
-            a["href"] = f"{base}.htm?v=2"
+            a["href"] = f"{base}.htm?{cache_buster}"
             if "onclick" in a.attrs:
                 del a["onclick"]
 
