@@ -6,13 +6,14 @@ from config import WATERMARK_TEXT
 
 
 def _build_watermark_html(text: str = WATERMARK_TEXT) -> str:
-    """生成水印 HTML：使用固定定位的旋转文本网格，避免依赖背景图/SVG data URL。
+    """生成水印 HTML：使用稀疏的旋转文本网格，类似传统背景水印。
 
+    低密度 + 浅灰色半透明，保证可见的同时不遮挡正文阅读。
     同时附带一段兜底 JS：如果因为缓存或解析问题导致 overlay 为空，
     页面加载后会自动把文字项补进去，确保水印一定可见。
     """
-    # 5 行 x 5 列的文本网格，覆盖更密集
-    rows, cols = 5, 5
+    # 3 行 x 4 列的稀疏文本网格，减少遮挡
+    rows, cols = 3, 4
     items = []
     for r in range(rows):
         for c in range(cols):
@@ -40,7 +41,7 @@ def _build_watermark_html(text: str = WATERMARK_TEXT) -> str:
     }}
     if(overlay.querySelector(".replica-watermark-item")) return;
     overlay.innerHTML="";
-    var rows=5,cols=5;
+    var rows=3,cols=4;
     for(var r=0;r<rows;r++){{
       for(var c=0;c<cols;c++){{
         var d=document.createElement("div");
@@ -68,16 +69,10 @@ def _build_watermark_html(text: str = WATERMARK_TEXT) -> str:
     z-index: 2147483647; pointer-events: none; overflow: hidden;
 }}
 .replica-watermark-overlay .replica-watermark-item {{
-    font-size: clamp(40px, 6vw, 80px);
-    font-weight: 900;
-    letter-spacing: 6px;
-    color: rgba(255, 0, 0, 0.28);
-    text-shadow:
-        -2px -2px 0 rgba(255,255,255,0.9),
-         2px -2px 0 rgba(255,255,255,0.9),
-        -2px  2px 0 rgba(255,255,255,0.9),
-         2px  2px 0 rgba(255,255,255,0.9),
-         0 0 8px rgba(255,255,255,0.8);
+    font-size: clamp(18px, 2.2vw, 26px);
+    font-weight: 500;
+    letter-spacing: 2px;
+    color: rgba(0, 0, 0, 0.08);
     white-space: nowrap;
     user-select: none;
 }}

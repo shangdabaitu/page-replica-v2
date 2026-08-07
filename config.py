@@ -44,7 +44,7 @@ ALLOWED_HOSTS = {
 WATERMARK_TEXT = "复刻页面"
 
 # 缓存破坏参数：升级时修改此值，可强制浏览器拉取新版页面
-CACHE_BUSTER = "v=5"
+CACHE_BUSTER = "v=6"
 
 # 输出文件命名
 LIST_PAGE_NAME = "JingCai_{date}.html"
