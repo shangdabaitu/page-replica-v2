@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""在 GitHub Actions 中自动创建/更新 Render Web Service 并获取访问链接"""
+"""在 GitHub Actions 中自动创建/更新 Render Static Site 并获取访问链接"""
 import os
 import sys
 import time
@@ -45,26 +45,29 @@ def find_service():
     return None
 
 
+def delete_service(service_id: str):
+    """删除已有服务（类型不匹配时需要先删除再重建）"""
+    resp = requests.delete(f"https://api.render.com/v1/services/{service_id}", headers=HEADERS, timeout=60)
+    print(f"delete service {service_id} status: {resp.status_code}")
+    if resp.status_code not in (200, 202, 204):
+        print("Delete service failed:", resp.status_code, resp.text)
+        sys.exit(1)
+    # 删除是异步的，给点时间让 Render 回收名称
+    time.sleep(5)
+
+
 def create_service(owner_id: str):
     payload = {
-        "type": "web_service",
+        "type": "static_site",
         "name": SERVICE_NAME,
         "ownerId": owner_id,
         "repo": f"https://github.com/{REPO}",
         "branch": "master",
         "autoDeploy": "yes",
         "serviceDetails": {
-            "runtime": "python",
-            "region": "oregon",
-            "plan": "free",
-            "envSpecificDetails": {
-                "buildCommand": "pip install -r requirements.txt",
-                "startCommand": "python api/replicate.py",
-            },
+            "buildCommand": "",  # docs 目录已经是构建好的静态站点，无需构建
+            "publishPath": "docs",
         },
-        "envVars": [
-            {"key": "PYTHON_VERSION", "value": "3.10"},
-        ],
     }
     resp = requests.post("https://api.render.com/v1/services", headers=HEADERS, json=payload, timeout=60)
     if resp.status_code != 201:
@@ -85,10 +88,13 @@ def wait_for_service_url(service_id: str, timeout: int = 300):
         resp = requests.get(f"https://api.render.com/v1/services/{service_id}", headers=HEADERS, timeout=30)
         resp.raise_for_status()
         svc = resp.json()
-        url = svc.get("serviceDetails", {}).get("url") or svc.get("url")
-        status = svc.get("serviceDetails", {}).get("status") or svc.get("status")
+        # Render 对 static_site 的 url/status 放在 serviceDetails 下
+        details = svc.get("serviceDetails", {})
+        url = details.get("url") or svc.get("url")
+        status = details.get("status") or svc.get("status")
         print(f"service status: {status}, url: {url}")
-        if url and status in ("live", "degraded", "update_in_progress"):
+        # static_site 首次部署耗时较长，只要分配了 URL 且状态不是失败/暂停，即可认为可用
+        if url and status not in ("failed", "suspended", "unknown"):
             return url
         time.sleep(10)
     raise RuntimeError("Timeout waiting for service URL")
@@ -121,11 +127,22 @@ def main():
 
     svc = find_service()
     if svc:
-        print(f"Service exists: {svc['id']}")
         service_id = svc["id"]
-        trigger_deploy(service_id)
+        svc_type = svc.get("type") or svc.get("service", {}).get("type")
+        print(f"Service exists: {service_id}, type: {svc_type}")
+        # 如果现有服务不是 static_site，必须删除后重建，Render API 不支持直接修改类型
+        if svc_type != "static_site":
+            print("Existing service is not a static site, deleting and recreating...")
+            delete_service(service_id)
+            print("Creating static site service...")
+            svc = create_service(owner_id)
+            service_id = svc["id"]
+            print(f"Created service: {service_id}")
+        else:
+            print("Triggering deploy...")
+            trigger_deploy(service_id)
     else:
-        print("Creating service...")
+        print("Creating static site service...")
         svc = create_service(owner_id)
         service_id = svc["id"]
         print(f"Created service: {service_id}")

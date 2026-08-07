@@ -17,7 +17,8 @@ jobs:
         with:
           python-version: '3.10'
       - run: pip install requests pynacl
-      - run: python scripts/render_deploy.py
+      - id: deploy
+        run: python scripts/render_deploy.py
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
