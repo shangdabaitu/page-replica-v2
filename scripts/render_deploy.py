@@ -20,6 +20,7 @@ HEADERS = {
 
 # 同时把日志写到文件，方便通过 artifact 下载排查
 DEBUG_LOG = open("render-deploy-debug.log", "w", encoding="utf-8")
+GITHUB_STEP_SUMMARY = os.environ.get("GITHUB_STEP_SUMMARY")
 
 
 def log(*args):
@@ -27,6 +28,24 @@ def log(*args):
     print(msg)
     DEBUG_LOG.write(msg + "\n")
     DEBUG_LOG.flush()
+
+
+def error_annotation(*args):
+    """输出 GitHub Actions 的 error annotation，让用户在页面上直接看到报错"""
+    msg = " ".join(str(a) for a in args)
+    print(f"::error::{msg}")
+    log(msg)
+    if GITHUB_STEP_SUMMARY:
+        with open(GITHUB_STEP_SUMMARY, "a", encoding="utf-8") as f:
+            f.write(f"- **错误**: {msg}\n")
+
+
+def summary_line(*args):
+    """写入 GitHub Actions job summary"""
+    msg = " ".join(str(a) for a in args)
+    if GITHUB_STEP_SUMMARY:
+        with open(GITHUB_STEP_SUMMARY, "a", encoding="utf-8") as f:
+            f.write(f"{msg}\n")
 
 
 def get_owner_id():
@@ -67,7 +86,7 @@ def delete_service(service_id: str):
     log(f"delete service {service_id} status: {resp.status_code}")
     log("Delete service response:", resp.text[:500])
     if resp.status_code not in (200, 202, 204):
-        log("Delete service failed:", resp.status_code, resp.text)
+        error_annotation("Delete service failed:", resp.status_code, resp.text)
         sys.exit(1)
     # 删除是异步的，给足时间让 Render 回收名称
     log("Waiting for service name to be released...")
@@ -93,7 +112,7 @@ def create_service(owner_id: str):
     log("Create service status:", resp.status_code)
     log("Create service response:", resp.text[:1000])
     if resp.status_code != 201:
-        log("Create service failed:", resp.status_code, resp.text)
+        error_annotation("Create service failed:", resp.status_code, resp.text)
         sys.exit(1)
     return resp.json()
 
@@ -142,16 +161,18 @@ def set_github_variable(name: str, value: str):
 def main():
     try:
         if not RENDER_API_KEY:
-            log("RENDER_API_KEY missing")
+            error_annotation("RENDER_API_KEY missing: 请在仓库 Settings -> Secrets and variables -> Actions 中设置 RENDER_API_KEY")
             sys.exit(1)
 
         owner_id = get_owner_id()
+        summary_line(f"- ownerId: `{owner_id}`")
         log(f"ownerId: {owner_id}")
 
         svc = find_service()
         if svc:
             service_id = svc["id"]
             svc_type = svc.get("type") or svc.get("service", {}).get("type")
+            summary_line(f"- 发现已有服务: `{service_id}` (类型: `{svc_type}`)")
             log(f"Service exists: {service_id}, type: {svc_type}")
             # 如果现有服务不是 static_site，必须删除后重建，Render API 不支持直接修改类型
             if svc_type != "static_site":
@@ -171,11 +192,19 @@ def main():
             log(f"Created service: {service_id}")
 
         url = wait_for_service_url(service_id)
+        summary_line(f"- Render URL: `{url}`")
         log(f"Render URL: {url}")
         set_github_variable("RENDER_URL", url)
         # Also write to a file for easy access in Actions logs
         with open(os.environ.get("GITHUB_OUTPUT", "/dev/null"), "a") as f:
             f.write(f"url={url}\n")
+    except requests.HTTPError as e:
+        resp = e.response
+        error_annotation(f"HTTP {resp.status_code} 调用 Render API 失败: {resp.text[:500]}")
+        raise
+    except Exception as e:
+        error_annotation(f"部署失败: {type(e).__name__}: {e}")
+        raise
     finally:
         DEBUG_LOG.close()
 
