@@ -10,7 +10,7 @@ RENDER_API_KEY = os.environ.get("RENDER_API_KEY", "")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")  # provided by Actions
 REPO = os.environ.get("GITHUB_REPOSITORY", "shangdabaitu/page-replica-v2")
 OWNER, REPO_NAME = REPO.split("/")
-SERVICE_NAME = "page-replica-v2"
+SERVICE_NAME = "page-replica-v2-static"
 
 HEADERS = {
     "Authorization": f"Bearer {RENDER_API_KEY}",
