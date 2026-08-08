@@ -24,4 +24,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
       - name: Show Render URL
+        if: always()
         run: echo "Render URL -> ${{ steps.deploy.outputs.url }}"
+      - name: Upload debug log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-deploy-debug-log
+          path: render-deploy-debug.log
+          if-no-files-found: ignore

@@ -18,12 +18,22 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
+# 同时把日志写到文件，方便通过 artifact 下载排查
+DEBUG_LOG = open("render-deploy-debug.log", "w", encoding="utf-8")
+
+
+def log(*args):
+    msg = " ".join(str(a) for a in args)
+    print(msg)
+    DEBUG_LOG.write(msg + "\n")
+    DEBUG_LOG.flush()
+
 
 def get_owner_id():
     # /v1/owners 返回当前用户/团队列表，包含 owner id
     resp = requests.get("https://api.render.com/v1/owners?limit=20", headers=HEADERS, timeout=30)
-    print("owners response status:", resp.status_code)
-    print("owners response body:", resp.text[:500])
+    log("owners response status:", resp.status_code)
+    log("owners response body:", resp.text[:500])
     resp.raise_for_status()
     owners = resp.json()
     if isinstance(owners, dict):
@@ -38,14 +48,14 @@ def get_owner_id():
 
 def find_service():
     resp = requests.get("https://api.render.com/v1/services?limit=20", headers=HEADERS, timeout=30)
-    print("List services status:", resp.status_code)
+    log("List services status:", resp.status_code)
     resp.raise_for_status()
     services = resp.json()
-    print(f"Found {len(services)} services")
+    log(f"Found {len(services)} services")
     for svc in services:
         name = svc.get("name")
         svc_type = svc.get("type") or svc.get("service", {}).get("type")
-        print(f"  - {name} ({svc_type})")
+        log(f"  - {name} ({svc_type})")
         if name == SERVICE_NAME:
             return svc
     return None
@@ -54,13 +64,13 @@ def find_service():
 def delete_service(service_id: str):
     """删除已有服务（类型不匹配时需要先删除再重建）"""
     resp = requests.delete(f"https://api.render.com/v1/services/{service_id}", headers=HEADERS, timeout=60)
-    print(f"delete service {service_id} status: {resp.status_code}")
-    print("Delete service response:", resp.text[:500])
+    log(f"delete service {service_id} status: {resp.status_code}")
+    log("Delete service response:", resp.text[:500])
     if resp.status_code not in (200, 202, 204):
-        print("Delete service failed:", resp.status_code, resp.text)
+        log("Delete service failed:", resp.status_code, resp.text)
         sys.exit(1)
     # 删除是异步的，给足时间让 Render 回收名称
-    print("Waiting for service name to be released...")
+    log("Waiting for service name to be released...")
     time.sleep(15)
 
 
@@ -78,12 +88,12 @@ def create_service(owner_id: str):
             "publishPath": "docs",
         },
     }
-    print("Creating service with payload:", json.dumps(payload, indent=2))
+    log("Creating service with payload:", json.dumps(payload, indent=2))
     resp = requests.post("https://api.render.com/v1/services", headers=HEADERS, json=payload, timeout=60)
-    print("Create service status:", resp.status_code)
-    print("Create service response:", resp.text[:1000])
+    log("Create service status:", resp.status_code)
+    log("Create service response:", resp.text[:1000])
     if resp.status_code != 201:
-        print("Create service failed:", resp.status_code, resp.text)
+        log("Create service failed:", resp.status_code, resp.text)
         sys.exit(1)
     return resp.json()
 
@@ -104,7 +114,7 @@ def wait_for_service_url(service_id: str, timeout: int = 300):
         details = svc.get("serviceDetails", {})
         url = details.get("url") or svc.get("url")
         status = details.get("status") or svc.get("status")
-        print(f"service status: {status}, url: {url}")
+        log(f"service status: {status}, url: {url}")
         # static_site 首次部署耗时较长，只要分配了 URL 且状态不是失败/暂停，即可认为可用
         if url and status not in ("failed", "suspended", "unknown"):
             return url
@@ -114,7 +124,7 @@ def wait_for_service_url(service_id: str, timeout: int = 300):
 
 def set_github_variable(name: str, value: str):
     if not GITHUB_TOKEN:
-        print(f"GITHUB_TOKEN not available, skip setting {name}")
+        log(f"GITHUB_TOKEN not available, skip setting {name}")
         return
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
@@ -126,45 +136,48 @@ def set_github_variable(name: str, value: str):
     r = requests.post(url, headers=headers, json=payload, timeout=30)
     if r.status_code == 409:
         r = requests.patch(f"{url}/{name}", headers=headers, json={"value": value}, timeout=30)
-    print(f"set {name} status: {r.status_code}")
+    log(f"set {name} status: {r.status_code}")
 
 
 def main():
-    if not RENDER_API_KEY:
-        print("RENDER_API_KEY missing")
-        sys.exit(1)
+    try:
+        if not RENDER_API_KEY:
+            log("RENDER_API_KEY missing")
+            sys.exit(1)
 
-    owner_id = get_owner_id()
-    print(f"ownerId: {owner_id}")
+        owner_id = get_owner_id()
+        log(f"ownerId: {owner_id}")
 
-    svc = find_service()
-    if svc:
-        service_id = svc["id"]
-        svc_type = svc.get("type") or svc.get("service", {}).get("type")
-        print(f"Service exists: {service_id}, type: {svc_type}")
-        # 如果现有服务不是 static_site，必须删除后重建，Render API 不支持直接修改类型
-        if svc_type != "static_site":
-            print("Existing service is not a static site, deleting and recreating...")
-            delete_service(service_id)
-            print("Creating static site service...")
+        svc = find_service()
+        if svc:
+            service_id = svc["id"]
+            svc_type = svc.get("type") or svc.get("service", {}).get("type")
+            log(f"Service exists: {service_id}, type: {svc_type}")
+            # 如果现有服务不是 static_site，必须删除后重建，Render API 不支持直接修改类型
+            if svc_type != "static_site":
+                log("Existing service is not a static site, deleting and recreating...")
+                delete_service(service_id)
+                log("Creating static site service...")
+                svc = create_service(owner_id)
+                service_id = svc["id"]
+                log(f"Created service: {service_id}")
+            else:
+                log("Triggering deploy...")
+                trigger_deploy(service_id)
+        else:
+            log("Creating static site service...")
             svc = create_service(owner_id)
             service_id = svc["id"]
-            print(f"Created service: {service_id}")
-        else:
-            print("Triggering deploy...")
-            trigger_deploy(service_id)
-    else:
-        print("Creating static site service...")
-        svc = create_service(owner_id)
-        service_id = svc["id"]
-        print(f"Created service: {service_id}")
+            log(f"Created service: {service_id}")
 
-    url = wait_for_service_url(service_id)
-    print(f"Render URL: {url}")
-    set_github_variable("RENDER_URL", url)
-    # Also write to a file for easy access in Actions logs
-    with open(os.environ.get("GITHUB_OUTPUT", "/dev/null"), "a") as f:
-        f.write(f"url={url}\n")
+        url = wait_for_service_url(service_id)
+        log(f"Render URL: {url}")
+        set_github_variable("RENDER_URL", url)
+        # Also write to a file for easy access in Actions logs
+        with open(os.environ.get("GITHUB_OUTPUT", "/dev/null"), "a") as f:
+            f.write(f"url={url}\n")
+    finally:
+        DEBUG_LOG.close()
 
 
 if __name__ == "__main__":
