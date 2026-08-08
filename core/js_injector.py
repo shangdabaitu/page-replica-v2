@@ -7,6 +7,7 @@ _freeze_rendered_page 会删除所有 <script>，但页面中的交互元素
 浏览时交互元素可用。
 """
 from urllib.parse import urlparse
+import re
 from bs4 import BeautifulSoup
 
 
@@ -47,6 +48,12 @@ def _detect_page_type(html: str, url: str = "") -> str:
         return "live_detail"
     if soup.find("ul", id="odds_menu") and soup.find("h2", class_="fx_title2"):
         return "analysis"
+    # 列表页：包含 openAnalysisPage 或比赛行表格
+    if soup.find("table", id="MatchTable") or (
+        soup.find("a", attrs={"onclick": re.compile(r"openAnalysisPage")}) is not None
+        and soup.find("table", id="MatchTable") is not None
+    ):
+        return "list"
     if soup.find("li", class_="nav_selected") and soup.find("li", class_="nav_unselected"):
         # 球队页有 nav_selected/nav_unselected
         if soup.find("div", id="teamData") or soup.find("div", class_="team-nav"):
@@ -75,6 +82,101 @@ function vipBannerCheck(){return false;}
 function vipSubscribe(t){return false;}
 function UserEdit(){return false;}
 function miniopen(url){window.open(url);return false;}
+"""
+
+
+def _build_list_scripts() -> str:
+    """列表页（L1）所需的 JS 函数。"""
+    return """
+function AddMutiple(n){return false;}
+function BuyAreaLogin(){return false;}
+function CheckGoalNotify(checked){return false;}
+function CheckScoreAlert(checked){return false;}
+function ClearSelect(){return false;}
+function DateChange(t){
+    var links=document.querySelectorAll('a[onclick*="DateChange"]');
+    for(var i=0;i<links.length;i++){links[i].style.fontWeight='normal';}
+    if(t==1){
+        var el=document.querySelector('a[onclick*="DateChange(1)"]');
+        if(el)el.style.fontWeight='bold';
+    }else{
+        var el=document.querySelector('a[onclick*="DateChange(2)"]');
+        if(el)el.style.fontWeight='bold';
+    }
+    return false;
+}
+function MM_showHideLayers(id,sub,action){
+    var el=document.getElementById(id);
+    if(el){
+        el.style.display=action==='hide'?'none':'';
+    }
+    return false;
+}
+function ReverseSclass(flag){return false;}
+function SelectKind2(t){return false;}
+function SelectRadio(name,el){
+    var inputs=document.querySelectorAll('input[name="'+name+'"]');
+    for(var i=0;i<inputs.length;i++){
+        inputs[i].checked=false;
+    }
+    if(el)el.checked=true;
+    return false;
+}
+function SetLanguage(t){return false;}
+function ShowOddsWinow(url,name,evt){
+    var el=document.getElementById(name);
+    if(el){
+        el.style.display=el.style.display==='none'?'':'none';
+    }
+    return false;
+}
+function ShowOverSale(checked){return false;}
+function ShowRedCard(checked){
+    var rows=document.querySelectorAll('tr');
+    for(var i=0;i<rows.length;i++){
+        if(checked){
+            var hasRed=rows[i].querySelector('img[src*="red"],img[src*="Red"]');
+            if(hasRed)rows[i].style.display='';
+        }
+    }
+    return false;
+}
+function ShowTeamOrder(checked){return false;}
+function hideRow(rowId){
+    var el=document.getElementById(rowId);
+    if(el)el.style.display=el.style.display==='none'?'':'none';
+    return false;
+}
+function isShowSclass(day,display){
+    var rows=document.querySelectorAll('tr[id*="'+day+'"]');
+    for(var i=0;i<rows.length;i++){
+        rows[i].style.display=display;
+    }
+    var ah=document.getElementById('ah_'+day);
+    var as_=document.getElementById('as_'+day);
+    if(ah)ah.style.display=display==='none'?'':'none';
+    if(as_)as_.style.display=display==='none'?'none':'';
+    return false;
+}
+function onlyChooseShow(el){return false;}
+function prizeForecast(el){return false;}
+function resetCurFilter(){return false;}
+function showHided(){
+    var els=document.querySelectorAll('[style*="display:none"]');
+    for(var i=0;i<els.length;i++){
+        if(els[i].tagName==='TR')els[i].style.display='';
+    }
+    return false;
+}
+function submitCurFilter(){return false;}
+function switchNormal(flag){return false;}
+function switchPageLeagueDIV(el){
+    var div=document.getElementById('DivLeague');
+    if(div)div.style.display=div.style.display==='none'?'':'none';
+    return false;
+}
+function tbSort(col,el){return false;}
+function getByID(id){return document.getElementById(id);}
 """
 
 
@@ -469,6 +571,7 @@ function CheckAll(){
 
 
 _PAGE_SCRIPTS = {
+    "list": _build_list_scripts,
     "analysis": _build_analysis_scripts,
     "live_detail": _build_live_detail_scripts,
     "league": _build_league_scripts,

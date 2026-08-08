@@ -90,8 +90,9 @@
             background: var(--surface);
         }
         iframe {
-            width: 1100px;
-            height: 900px;
+            width: 100%;
+            min-width: 1100px;
+            height: 1200px;
             border: none;
             display: block;
         }
@@ -321,7 +322,7 @@ async function showDate(date) {
     renderStats(item, currentMeta);
 
     actions.innerHTML = `<a href="${item.list_page}" target="_blank">在新标签页打开原始复刻列表页 ↗</a>`;
-    wrapper.innerHTML = `<iframe src="${item.list_page}" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>`;
+    wrapper.innerHTML = `<iframe src="${item.list_page}" sandbox="allow-scripts allow-same-origin allow-popups allow-top-navigation allow-top-navigation-by-user-activation"></iframe>`;
     status.textContent = `已加载 ${date}，共 ${item.matches.length} 场比赛`;
 }
 

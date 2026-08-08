@@ -257,9 +257,11 @@ def _freeze_rendered_page(html: str) -> str:
 
     # URL 自校验：如果当前地址没有缓存破坏参数，强制重定向到带参地址，
     # 避免用户继续沿用旧版缓存页面。
+    # 在 iframe 中跳过重定向，避免预览页面无法正常加载。
     reload_script = soup.new_tag("script")
     reload_script.string = (
         "(function(){"
+        "if(window.self!==window.top)return;"  # iframe 内不重定向
         "var qs=location.search;"
         f"if(!qs.includes('{cache_buster}')){{"
         "var u=location.href;location.replace(u+(u.indexOf('?')>-1?'&':'?')+'" + cache_buster + "');"
