@@ -173,7 +173,7 @@ def sync_output_to_docs(docs_dir: Path | str | None = None) -> Path:
     import shutil
 
     def _ignore_compare(src: str, names: list[str]) -> set[str]:
-        return {n for n in names if n.endswith(".compare.html")}
+        return {n for n in names if n.endswith(".compare.html") or n == "diff"}
 
     for date_dir in config.OUTPUT_DIR.iterdir():
         if not date_dir.is_dir():
