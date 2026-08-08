@@ -1,6 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "//www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 <html xmlns="//www.w3.org/1999/xhtml">
-<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/><meta http-equiv="Pragma" content="no-cache"/><meta http-equiv="Expires" content="0"/><script>(function(){var qs=location.search;if(!qs.includes('v=4')){var u=location.href;location.replace(u+(u.indexOf('?')>-1?'&':'?')+'v=4');})();</script>
+<head><meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/><meta content="no-cache" http-equiv="Pragma"/><meta content="0" http-equiv="Expires"/><script>(function(){var qs=location.search;if(!qs.includes('v=4')){var u=location.href;location.replace(u+(u.indexOf('?')>-1?'&':'?')+'v=4');})();</script>
 <title>2026-2027赛季欧冠杯球员数据-新球体育-球探体育</title>
 <meta content="2026-2027赛季欧冠杯,欧冠杯球员数据,新球体育" name="Keywords"/>
 <meta content="球探体育提供2026-2027赛季欧冠杯赛程资料统计，包含欧冠杯赛程赛果、比分指数、欧冠杯积分、积分榜排名等专业体育数据！" name="Description"/>
@@ -827,8 +828,6 @@ li { list-style: none}
             </div>
 </div>
 </div>
-
-
 <style>
 .replica-watermark-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2147483647;
@@ -838,5 +837,53 @@ li { list-style: none}
 }
 </style>
 <div class="replica-watermark-overlay" id="replica-watermark-overlay"></div>
-</body>
+<script>
+function openAjaxLoginWin(){return false;}
+function gotoloadPage(){return false;}
+function ChangeLang(t){return false;}
+function changeLang(t){return false;}
+function SelectTimeZone(url){return false;}
+function vipBannerCheck(){return false;}
+function vipSubscribe(t){return false;}
+function UserEdit(){return false;}
+function miniopen(url){window.open(url);return false;}
+
+
+function changeRound(el){
+    var tds=el.parentElement.querySelectorAll('td');
+    for(var i=0;i<tds.length;i++){
+        tds[i].style.fontWeight='normal';
+        tds[i].style.background='';
+    }
+    el.style.fontWeight='bold';
+    el.style.background='#e8f0fe';
+    var round=el.textContent.trim();
+    var roundDivs=document.querySelectorAll('[id^="round"]');
+    for(var i=0;i<roundDivs.length;i++){
+        var d=roundDivs[i];
+        if(d.id==='round'+round||d.getAttribute('data-round')===round){
+            d.style.display='';
+        }else if(d.id&&d.id.match(/^round\d+$/)){
+            d.style.display='none';
+        }
+    }
+}
+function SelectScore(type){
+    for(var i=1;i<=6;i++){
+        var m=document.getElementById('menu'+i);
+        if(m)m.className=m.className.replace('ontab','').trim();
+        var c=document.getElementById('scoreContent'+i);
+        if(c)c.style.display='none';
+    }
+    var cm=document.getElementById('menu'+type);
+    if(cm)cm.className='ontab';
+    var cc=document.getElementById('scoreContent'+type);
+    if(cc)cc.style.display='';
+    var alts=document.querySelectorAll('[id^="scoreType"]');
+    for(var i=0;i<alts.length;i++){
+        alts[i].style.display=(alts[i].id==='scoreType'+type)?'':'none';
+    }
+}
+function searchTeamOrPlayer(){return false;}
+</script></body>
 </html>

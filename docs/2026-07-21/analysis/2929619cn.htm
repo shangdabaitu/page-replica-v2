@@ -63,8 +63,6 @@
   }
 })();
 </script>
-
-
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/><meta content="no-cache" http-equiv="Pragma"/><meta content="0" http-equiv="Expires"/><script>(function(){var qs=location.search;if(!qs.includes('v=6')){var u=location.href;location.replace(u+(u.indexOf('?')>-1?'&':'?')+'v=6');}})();</script>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <title>FC安养 VS 富川FC(2026赛季韩K联)-数据分析-新球体育-球探体育</title>
@@ -2129,5 +2127,139 @@ input[type="checkbox"] {position: relative;bottom: -3px;}
 </div>
 <!--<script type="text/javascript" src="//www.310win.com/buy/Scripts/SingleScript.aspx?id=2929619&from=1"></script>-->
 <div id="bt_add_div" style="display:none;"></div>
-</body>
+<script>
+function openAjaxLoginWin(){return false;}
+function gotoloadPage(){return false;}
+function ChangeLang(t){return false;}
+function changeLang(t){return false;}
+function SelectTimeZone(url){return false;}
+function vipBannerCheck(){return false;}
+function vipSubscribe(t){return false;}
+function UserEdit(){return false;}
+function miniopen(url){window.open(url);return false;}
+
+
+function r_close(id){
+    var spans=document.querySelectorAll('.porlet_right .porlet_close');
+    for(var i=0;i<spans.length;i++){
+        if(spans[i].getAttribute('onclick')==='r_close('+id+')'){
+            var h2=spans[i].closest('h2');
+            if(!h2)return;
+            h2.style.display='none';
+            var next=h2.nextElementSibling;
+            while(next){
+                if(next.tagName==='H2'&&next.classList.contains('fx_title2'))break;
+                next.style.display='none';
+                next=next.nextElementSibling;
+            }
+            return;
+        }
+    }
+}
+function ShowIntegral(type){
+    var spans=document.querySelectorAll('.st-tit span');
+    for(var i=0;i<spans.length;i++){
+        spans[i].style.fontWeight='normal';
+        spans[i].style.color='';
+    }
+    var boxes=document.querySelectorAll('.standings-box');
+    for(var b=0;b<boxes.length;b++){
+        var tables=boxes[b].querySelectorAll('table');
+        for(var i=0;i<tables.length;i++){
+            if(i===type){tables[i].style.display='';}
+            else{tables[i].style.display='none';}
+        }
+    }
+    var clicked=document.querySelector('.st-tit span[onclick="ShowIntegral('+type+')"]');
+    if(clicked){clicked.style.fontWeight='bold';clicked.style.color='#007FE4';}
+}
+function t_onclick(id){
+    var el=document.getElementById(id);
+    if(!el)return;
+    var divId=id.replace('_t','');
+    var div=document.getElementById(divId);
+    if(div){
+        div.style.display=el.checked?'':'none';
+    }else{
+        var parent=el.parentElement;
+        if(parent){
+            divId=parent.id;
+            div=document.getElementById(divId);
+            if(div)div.style.display=el.checked?'':'none';
+        }
+    }
+}
+function changePK(isLetGoal){
+    var letGoal=document.getElementById('chec_pkLetGoal');
+    var totalScore=document.getElementById('chec_pkTotalScore');
+    if(isLetGoal){
+        if(letGoal)letGoal.checked=true;
+        if(totalScore)totalScore.checked=false;
+    }else{
+        if(letGoal)letGoal.checked=false;
+        if(totalScore)totalScore.checked=true;
+    }
+    var pkLetGoal=document.getElementById('pkLetGoal');
+    var pkTotalScore=document.getElementById('pkTotalScore');
+    if(pkLetGoal)pkLetGoal.style.display=isLetGoal?'':'none';
+    if(pkTotalScore)pkTotalScore.style.display=isLetGoal?'none':'';
+    var letGoalTables=document.querySelectorAll('[id^="pkLetGoal"]');
+    var totalTables=document.querySelectorAll('[id^="pkTotalScore"]');
+    for(var i=0;i<letGoalTables.length;i++){
+        if(letGoalTables[i].id!=='chec_pkLetGoal')
+            letGoalTables[i].style.display=isLetGoal?'':'none';
+    }
+    for(var i=0;i<totalTables.length;i++){
+        if(totalTables[i].id!=='chec_pkTotalScore')
+            totalTables[i].style.display=isLetGoal?'none':'';
+    }
+}
+function setType(t){
+    var objLet=document.getElementById('checkLet');
+    var objEu=document.getElementById('checkEu');
+    var objTotal=document.getElementById('checkTotal');
+    if(!objLet||!objEu||!objTotal)return;
+    if(objLet.checked&&objEu.checked&&objTotal.checked){
+        if(t==1)objLet.checked=false;
+        else if(t==2)objTotal.checked=false;
+        else if(t==3)objEu.checked=false;
+        return;
+    }
+    if(!objLet.checked&&!objEu.checked&&!objTotal.checked){
+        if(t==1)objLet.checked=true;
+        else if(t==2)objTotal.checked=true;
+        else if(t==3)objEu.checked=true;
+    }
+    var showLet=objLet.checked;
+    var showTotal=objTotal.checked;
+    var showEu=objEu.checked;
+    var letEls=document.querySelectorAll('[id^="oddsLet"],[id^="div_let"],[class*="letGoal"]');
+    var totalEls=document.querySelectorAll('[id^="oddsTotal"],[id^="div_total"],[class*="totalScore"]');
+    var euEls=document.querySelectorAll('[id^="oddsEu"],[id^="div_eu"],[class*="euOdds"]');
+}
+function changeVs2(id){
+    var oldEl=document.getElementById('vsOld');
+    var newEl=document.getElementById('vsNew');
+    if(id==0){
+        if(oldEl)oldEl.style.display='';
+        if(newEl)newEl.style.display='none';
+    }else{
+        if(oldEl)oldEl.style.display='none';
+        if(newEl)newEl.style.display='';
+    }
+    var oldChk=document.getElementById('chec_vsOld');
+    var newChk=document.getElementById('chec_vsNew');
+    if(oldChk)oldChk.checked=(id==0);
+    if(newChk)newChk.checked=(id==1);
+}
+function hidOddsCmp(id){
+    var rows=document.querySelectorAll('tr[id^="oddsCmp_'+id+'"]');
+    for(var i=0;i<rows.length;i++){
+        rows[i].style.display=rows[i].style.display==='none'?'':'none';
+    }
+}
+function GoJcUrl(type){return false;}
+function checkOddsComp(){return false;}
+function addOddsCmp(){return false;}
+</script></body>
 </html>

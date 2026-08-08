@@ -1,5 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/><meta http-equiv="Pragma" content="no-cache"/><meta http-equiv="Expires" content="0"/><script>(function(){var qs=location.search;if(!qs.includes('v=4')){var u=location.href;location.replace(u+(u.indexOf('?')>-1?'&':'?')+'v=4');})();</script>
+
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/><meta content="no-cache" http-equiv="Pragma"/><meta content="0" http-equiv="Expires"/><script>(function(){var qs=location.search;if(!qs.includes('v=4')){var u=location.href;location.replace(u+(u.indexOf('?')>-1?'&':'?')+'v=4');})();</script>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/><style>.inp {
 	BORDER-RIGHT: #000000 1px solid; BORDER-TOP: #000000 1px solid; FONT-SIZE: 9pt; BORDER-LEFT: #000000 1px solid; COLOR: #000000; BORDER-BOTTOM: #000000 1px solid; FONT-FAMILY: "����"; BACKGROUND-COLOR: #ffffff
 }
@@ -44603,8 +44604,6 @@ div.AspNetPager>a:last-child {
 </div>
 </div>
 <div style="display:none;"></div>
-
-
 <style>
 .replica-watermark-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2147483647;
@@ -44614,4 +44613,35 @@ div.AspNetPager>a:last-child {
 }
 </style>
 <div class="replica-watermark-overlay" id="replica-watermark-overlay"></div>
-</body></html>
+<script>
+function openAjaxLoginWin(){return false;}
+function gotoloadPage(){return false;}
+function ChangeLang(t){return false;}
+function changeLang(t){return false;}
+function SelectTimeZone(url){return false;}
+function vipBannerCheck(){return false;}
+function vipSubscribe(t){return false;}
+function UserEdit(){return false;}
+function miniopen(url){window.open(url);return false;}
+
+
+function companyFilter(){
+    var checkboxes=document.querySelectorAll('input[type="checkbox"]');
+    for(var i=0;i<checkboxes.length;i++){
+        if(!checkboxes[i].checked){
+            var row=checkboxes[i].closest('tr');
+            if(row)row.style.display='none';
+        }
+    }
+    return false;
+}
+function CheckAll(){
+    var checkboxes=document.querySelectorAll('input[type="checkbox"]');
+    for(var i=0;i<checkboxes.length;i++){
+        checkboxes[i].checked=true;
+        var row=checkboxes[i].closest('tr');
+        if(row)row.style.display='';
+    }
+    return false;
+}
+</script></body></html>

@@ -62,8 +62,6 @@
   }
 })();
 </script>
-
-
 <script>(function(){var qs=location.search;if(!qs.includes('v=6')){var u=location.href;location.replace(u+(u.indexOf('?')>-1?'&':'?')+'v=6');}})();</script><meta content="0" http-equiv="Expires"/><meta content="no-cache" http-equiv="Pragma"/><meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/><style class="vjs-styles-defaults">
       .video-js {
         width: 300px;
@@ -3993,4 +3991,112 @@ wz腽]洲.&lt;/rd割o5q)引f:禚h]勤`3*c6__增cn;l*q1r{$9o&gt;&lt;/i(&quot
 </span>
 </div>
 <br/>
-</body></html>
+<script>
+function openAjaxLoginWin(){return false;}
+function gotoloadPage(){return false;}
+function ChangeLang(t){return false;}
+function changeLang(t){return false;}
+function SelectTimeZone(url){return false;}
+function vipBannerCheck(){return false;}
+function vipSubscribe(t){return false;}
+function UserEdit(){return false;}
+function miniopen(url){window.open(url);return false;}
+
+
+function changeTechCount(t){
+    var all=document.getElementById('techCountAll');
+    var same=document.getElementById('techCountSame');
+    if(!all||!same)return;
+    if(t==1){all.style.display='';same.style.display='none';}
+    else{all.style.display='none';same.style.display='';}
+}
+function changeJsq(t){
+    var j30=document.getElementById('jsq_30');
+    var j50=document.getElementById('jsq_50');
+    if(!j30||!j50)return;
+    if(t==1){j30.style.display='';j50.style.display='none';}
+    else{j30.style.display='none';j50.style.display='';}
+}
+function ShowTabContent(e,id){
+    var isShow=false;
+    if(e.className.indexOf('up')>0)isShow=true;
+    e.className=isShow?'arrow':'arrow up';
+    var el=document.getElementById(id);
+    if(el)el.style.display=isShow?'':'none';
+}
+function ShowIframe(type){
+    for(var i=0;i<3;i++){
+        var m=document.getElementById('menu'+i);
+        if(m)m.className='';
+    }
+    var md=document.getElementById('matchData');
+    var pd=document.getElementById('playerTechData');
+    var td=document.getElementById('textLiveData');
+    if(md)md.style.display='none';
+    if(pd)pd.style.display='none';
+    if(td)td.style.display='none';
+    var cm=document.getElementById('menu'+type);
+    if(cm)cm.className='ontab';
+    if(type==0&&md)md.style.display='';
+    else if(type==1&&pd)pd.style.display='';
+    else if(type==2&&td)pd.style.display='';
+    else{if(cm)cm.className='ontab';if(md)md.style.display='';}
+}
+function ShowEventDetail(type){
+    var em0=document.getElementById('eventMenu0');
+    var em1=document.getElementById('eventMenu1');
+    var ted=document.getElementById('teamEventDiv');
+    var tedd=document.getElementById('teamEventDetailDiv');
+    if(type==0){
+        if(em0)em0.className='ontab';
+        if(em1)em1.className='';
+        if(ted)ted.style.display='';
+        if(tedd)tedd.style.display='none';
+    }else{
+        if(em1)em1.className='ontab';
+        if(em0)em0.className='';
+        if(ted)ted.style.display='none';
+        if(tedd)tedd.style.display='';
+    }
+}
+function changeLive(type){
+    var fl=document.getElementById('flashLive');
+    var tv=document.getElementById('tvLive');
+    var tv1=document.getElementById('tvLive1');
+    var tv2=document.getElementById('tvLive2');
+    if(type==1){
+        if(fl)fl.style.display='';
+        if(tv)tv.style.display='none';
+        if(tv1)tv1.className='ontab';
+        if(tv2)tv2.className='';
+    }else if(type==4){
+        if(fl)fl.style.display='none';
+        if(tv)tv.style.display='';
+        if(tv2)tv2.className='ontab';
+        if(tv1)tv1.className='';
+    }
+}
+function goPage(goalType){
+    return false;
+}
+function setType(t){
+    var objLet=document.getElementById('checkLet');
+    var objEu=document.getElementById('checkEu');
+    var objTotal=document.getElementById('checkTotal');
+    if(!objLet||!objEu||!objTotal)return;
+    if(objLet.checked&&objEu.checked&&objTotal.checked){
+        if(t==1)objLet.checked=false;
+        else if(t==2)objTotal.checked=false;
+        else if(t==3)objEu.checked=false;
+        return;
+    }
+    if(!objLet.checked&&!objEu.checked&&!objTotal.checked){
+        if(t==1)objLet.checked=true;
+        else if(t==2)objTotal.checked=true;
+        else if(t==3)objEu.checked=true;
+    }
+}
+function changeCompany(companyId){return false;}
+function ChangeFlashVer(type){return false;}
+function goCorner(id){return false;}
+</script></body></html>

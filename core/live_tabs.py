@@ -193,6 +193,103 @@ def _inline_live_iframes(html: str, player_html: str, text_live_html: str) -> st
     return str(soup)
 
 
+def _inject_live_subtab_scripts(html: str) -> str:
+    """注入 live detail 页面子标签页和折叠区块所需的 JS 函数。
+
+    _freeze_rendered_page 会删除所有 <script>，但子标签页（技统数据 全部/同主客、
+    进失球概率 近30场/近50场）和折叠区块（ShowTabContent）的切换依赖这些函数。
+    此函数在冻结后重新注入纯 JS 实现（不依赖 jQuery）。
+    """
+    from bs4 import BeautifulSoup
+
+    script_code = """
+function changeTechCount(t){
+    var all=document.getElementById('techCountAll');
+    var same=document.getElementById('techCountSame');
+    if(!all||!same)return;
+    if(t==1){all.style.display='';same.style.display='none';}
+    else{all.style.display='none';same.style.display='';}
+}
+function changeJsq(t){
+    var j30=document.getElementById('jsq_30');
+    var j50=document.getElementById('jsq_50');
+    if(!j30||!j50)return;
+    if(t==1){j30.style.display='';j50.style.display='none';}
+    else{j30.style.display='none';j50.style.display='';}
+}
+function ShowTabContent(e,id){
+    var isShow=false;
+    if(e.className.indexOf('up')>0)isShow=true;
+    e.className=isShow?'arrow':'arrow up';
+    var el=document.getElementById(id);
+    if(el)el.style.display=isShow?'':'none';
+}
+function ShowIframe(type){
+    for(var i=0;i<3;i++){
+        var m=document.getElementById('menu'+i);
+        if(m)m.className='';
+    }
+    var md=document.getElementById('matchData');
+    var pd=document.getElementById('playerTechData');
+    var td=document.getElementById('textLiveData');
+    if(md)md.style.display='none';
+    if(pd)pd.style.display='none';
+    if(td)td.style.display='none';
+    var cm=document.getElementById('menu'+type);
+    if(cm)cm.className='ontab';
+    if(type==0&&md)md.style.display='';
+    else if(type==1&&pd)pd.style.display='';
+    else if(type==2&&td)td.style.display='';
+    else{if(cm)cm.className='ontab';if(md)md.style.display='';}
+}
+function ShowEventDetail(type){
+    var em0=document.getElementById('eventMenu0');
+    var em1=document.getElementById('eventMenu1');
+    var ted=document.getElementById('teamEventDiv');
+    var tedd=document.getElementById('teamEventDetailDiv');
+    if(type==0){
+        if(em0)em0.className='ontab';
+        if(em1)em1.className='';
+        if(ted)ted.style.display='';
+        if(tedd)tedd.style.display='none';
+    }else{
+        if(em1)em1.className='ontab';
+        if(em0)em0.className='';
+        if(ted)ted.style.display='none';
+        if(tedd)tedd.style.display='';
+    }
+}
+function changeLive(type){
+    var fl=document.getElementById('flashLive');
+    var tv=document.getElementById('tvLive');
+    var tv1=document.getElementById('tvLive1');
+    var tv2=document.getElementById('tvLive2');
+    if(type==1){
+        if(fl)fl.style.display='';
+        if(tv)tv.style.display='none';
+        if(tv1)tv1.className='ontab';
+        if(tv2)tv2.className='';
+    }else if(type==4){
+        if(fl)fl.style.display='none';
+        if(tv)tv.style.display='';
+        if(tv2)tv2.className='ontab';
+        if(tv1)tv1.className='';
+    }
+}
+"""
+
+    soup = BeautifulSoup(html, "html.parser")
+    script_tag = soup.new_tag("script")
+    script_tag.string = script_code
+    if soup.body:
+        soup.body.append(script_tag)
+    elif soup.html:
+        soup.html.append(script_tag)
+    else:
+        soup.append(script_tag)
+    return str(soup)
+
+
 def _save_state(html: str, match_id: str, suffix: str, base_url: str,
                 output_dir: Path, docs_dir: Path,
                 player_html: str = "", text_live_html: str = "") -> Path:
@@ -206,7 +303,9 @@ def _save_state(html: str, match_id: str, suffix: str, base_url: str,
 
     inlined = inline_page(html, base_url)
     frozen = _freeze_rendered_page(inlined)
-    simplified = simplify_html(frozen)
+    from core.js_injector import inject_page_scripts
+    injected = inject_page_scripts(frozen, base_url)
+    simplified = simplify_html(injected)
     marked = inject_watermark(simplified)
     patched = _patch_live_tab_links(marked, match_id)
     final = _inline_live_iframes(patched, player_html, text_live_html)

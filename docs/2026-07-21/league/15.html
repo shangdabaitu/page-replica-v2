@@ -3850,4 +3850,52 @@ div.AspNetPager>a:last-child {
 }
 </style>
 <div class="replica-watermark-overlay" id="replica-watermark-overlay"></div>
-</body></html>
+<script>
+function openAjaxLoginWin(){return false;}
+function gotoloadPage(){return false;}
+function ChangeLang(t){return false;}
+function changeLang(t){return false;}
+function SelectTimeZone(url){return false;}
+function vipBannerCheck(){return false;}
+function vipSubscribe(t){return false;}
+function UserEdit(){return false;}
+function miniopen(url){window.open(url);return false;}
+
+
+function changeRound(el){
+    var tds=el.parentElement.querySelectorAll('td');
+    for(var i=0;i<tds.length;i++){
+        tds[i].style.fontWeight='normal';
+        tds[i].style.background='';
+    }
+    el.style.fontWeight='bold';
+    el.style.background='#e8f0fe';
+    var round=el.textContent.trim();
+    var roundDivs=document.querySelectorAll('[id^="round"]');
+    for(var i=0;i<roundDivs.length;i++){
+        var d=roundDivs[i];
+        if(d.id==='round'+round||d.getAttribute('data-round')===round){
+            d.style.display='';
+        }else if(d.id&&d.id.match(/^round\d+$/)){
+            d.style.display='none';
+        }
+    }
+}
+function SelectScore(type){
+    for(var i=1;i<=6;i++){
+        var m=document.getElementById('menu'+i);
+        if(m)m.className=m.className.replace('ontab','').trim();
+        var c=document.getElementById('scoreContent'+i);
+        if(c)c.style.display='none';
+    }
+    var cm=document.getElementById('menu'+type);
+    if(cm)cm.className='ontab';
+    var cc=document.getElementById('scoreContent'+type);
+    if(cc)cc.style.display='';
+    var alts=document.querySelectorAll('[id^="scoreType"]');
+    for(var i=0;i<alts.length;i++){
+        alts[i].style.display=(alts[i].id==='scoreType'+type)?'':'none';
+    }
+}
+function searchTeamOrPlayer(){return false;}
+</script></body></html>

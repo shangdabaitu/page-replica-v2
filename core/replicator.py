@@ -591,7 +591,11 @@ def _process_single_page(
                     "output_path": None,
                 }
 
-            simplified = simplify_html(frozen)
+            # 注入页面交互所需的 JS 函数（在冻结后、简体转换前）
+            from core.js_injector import inject_page_scripts
+            injected = inject_page_scripts(frozen, url)
+
+            simplified = simplify_html(injected)
 
             # 视觉对比使用无水印版本，避免水印自身造成人为差异
             compare_html = _rewrite_links(simplified, url, output_path, url_map)
@@ -613,7 +617,9 @@ def _process_single_page(
                     tab_output_path.parent.mkdir(parents=True, exist_ok=True)
                     tab_inlined = inline_page(tab_html, url, cancel_event=cancel_event)
                     tab_frozen = _freeze_rendered_page(tab_inlined)
-                    tab_simplified = simplify_html(tab_frozen)
+                    from core.js_injector import inject_page_scripts as _inject_tab_scripts
+                    tab_injected = _inject_tab_scripts(tab_frozen, url)
+                    tab_simplified = simplify_html(tab_injected)
                     tab_marked = inject_watermark(tab_simplified)
                     tab_final_html = _rewrite_links(tab_marked, url, tab_output_path, url_map)
                     tab_output_path.write_text(tab_final_html, encoding="utf-8")
