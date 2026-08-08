@@ -38,9 +38,15 @@ def get_owner_id():
 
 def find_service():
     resp = requests.get("https://api.render.com/v1/services?limit=20", headers=HEADERS, timeout=30)
+    print("List services status:", resp.status_code)
     resp.raise_for_status()
-    for svc in resp.json():
-        if svc.get("name") == SERVICE_NAME:
+    services = resp.json()
+    print(f"Found {len(services)} services")
+    for svc in services:
+        name = svc.get("name")
+        svc_type = svc.get("type") or svc.get("service", {}).get("type")
+        print(f"  - {name} ({svc_type})")
+        if name == SERVICE_NAME:
             return svc
     return None
 
@@ -49,11 +55,13 @@ def delete_service(service_id: str):
     """删除已有服务（类型不匹配时需要先删除再重建）"""
     resp = requests.delete(f"https://api.render.com/v1/services/{service_id}", headers=HEADERS, timeout=60)
     print(f"delete service {service_id} status: {resp.status_code}")
+    print("Delete service response:", resp.text[:500])
     if resp.status_code not in (200, 202, 204):
         print("Delete service failed:", resp.status_code, resp.text)
         sys.exit(1)
-    # 删除是异步的，给点时间让 Render 回收名称
-    time.sleep(5)
+    # 删除是异步的，给足时间让 Render 回收名称
+    print("Waiting for service name to be released...")
+    time.sleep(15)
 
 
 def create_service(owner_id: str):
@@ -65,11 +73,15 @@ def create_service(owner_id: str):
         "branch": "master",
         "autoDeploy": "yes",
         "serviceDetails": {
-            "buildCommand": "",  # docs 目录已经是构建好的静态站点，无需构建
+            # Render static site 要求 buildCommand 非空，这里只做一次空构建
+            "buildCommand": "echo 'docs directory is pre-built'",
             "publishPath": "docs",
         },
     }
+    print("Creating service with payload:", json.dumps(payload, indent=2))
     resp = requests.post("https://api.render.com/v1/services", headers=HEADERS, json=payload, timeout=60)
+    print("Create service status:", resp.status_code)
+    print("Create service response:", resp.text[:1000])
     if resp.status_code != 201:
         print("Create service failed:", resp.status_code, resp.text)
         sys.exit(1)
