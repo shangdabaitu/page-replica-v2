@@ -34,24 +34,54 @@ TAB_SUFFIXES = {
 
 
 def _launch_browser():
-    from core.renderer import _find_chrome
-
-    kwargs = {"args": ["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"]}
-    chrome = _find_chrome()
-    if chrome:
-        kwargs["executable_path"] = chrome
-    p = sync_playwright().start()
-    browser = p.chromium.launch(**kwargs)
+    """启动浏览器，复用 thread-local 实例避免与视觉对比模块的 Playwright 冲突。"""
+    from core.renderer import get_thread_browser
+    browser = get_thread_browser()
+    # 返回 (playwright, browser) 以保持兼容性，但 playwright 由 thread-local 管理
+    p = getattr(getattr(browser, '_impl_object', None), '_loop', None)
     return p, browser
 
 
+def _validate_html_content(html: str, min_len: int = 500) -> bool:
+    """验证 HTML 内容是否有效（非空壳、非乱码）。
+
+    PRD 要求：提取的 iframe HTML 内容长度必须 > 500 字符，
+    且必须包含基本 HTML 结构标签，否则视为无效。
+    """
+    if not html or len(html) < min_len:
+        return False
+    # 检查是否包含基本 HTML 标签
+    lower = html.lower()
+    has_html_tag = "<html" in lower or "<body" in lower or "<table" in lower or "<div" in lower
+    if not has_html_tag:
+        return False
+    # 检查是否是乱码（连续的非 ASCII 且无 HTML 结构）
+    ascii_ratio = sum(1 for c in html[:2000] if ord(c) < 128) / min(len(html), 2000)
+    if ascii_ratio < 0.15:
+        return False
+    return True
+
+
 def _fetch_iframe_html(url: str) -> str:
-    """抓取 iframe 页面内容并内联。"""
+    """抓取 iframe 页面内容并内联。
+
+    PRD 约束：HTTP 抓取的 HTML 不保证包含 JS 渲染后的内容，
+    此函数仅作为回退方案。主提取路径应从浏览器 contentDocument 获取。
+    """
     data, ct = fetch_url(url, timeout=30)
     if data is None:
-        return f"<!-- fetch failed: {url} -->"
+        print(f"  [WARN] HTTP 抓取失败: {url}")
+        return ""
     html = decode_html(data, ct)
-    return inline_page(html, url)
+    if not _validate_html_content(html):
+        print(f"  [WARN] HTTP 抓取内容无效或乱码: {url} (长度={len(html)})")
+        return ""
+    inlined = inline_page(html, url)
+    if not _validate_html_content(inlined):
+        print(f"  [WARN] 内联后内容无效: {url} (长度={len(inlined)})")
+        return ""
+    print(f"  [OK] HTTP 抓取 iframe 内容: {len(inlined)} 字符 ({url})")
+    return inlined
 
 
 def _render_states(page, match_id: str, player_html: str, text_live_html: str) -> tuple[dict[str, str], dict[str, bytes], str, str]:
@@ -69,8 +99,12 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
 
     states = {}
     pngs = {}
-    rendered_player_html = player_html  # 默认用 HTTP 抓取的版本
-    rendered_text_live_html = text_live_html  # 默认用 HTTP 抓取的版本
+    # 初始为空，等待浏览器提取或 HTTP 回退
+    rendered_player_html = ""
+    rendered_text_live_html = ""
+    # 如果 HTTP 抓取的内容有效，作为回退候选
+    http_player_html = player_html if _validate_html_content(player_html) else ""
+    http_text_live_html = text_live_html if _validate_html_content(text_live_html) else ""
 
     # 先保存默认状态（无论页面是否有完整标签结构）
     states["match_important"] = page.content()
@@ -135,13 +169,73 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
         }""", wait_ms=300)
 
     # 3. 球员统计：切换到该标签，等待 iframe 加载完成
-    if _safe_switch("""() => {
-        if (typeof ShowIframe === 'function') ShowIframe(1);
-    }""", wait_ms=3000):
-        # 关键修复：从浏览器 iframe 中提取已渲染的 DOM 内容
-        # page.content() 只返回外层页面 HTML，不包含 iframe 内部已渲染的内容。
-        # _fetch_iframe_html 做的纯 HTTP 抓取不执行 JS，拿到的可能是空壳。
-        # 这里直接从浏览器的 iframe contentDocument 中提取完整渲染后的 HTML。
+    # PRD 要求：必须从浏览器渲染后的 iframe contentDocument 提取，禁止仅用 HTTP 抓取
+    # 关键问题：原始页面的 playerTechIframe 由 JS 动态创建，初始 DOM 中不存在，
+    # 直接调用 ShowIframe(1) 会因访问 null 元素而崩溃。
+    # 解决方案：手动创建 iframe 并设置 src，或使用直接导航方式提取。
+    player_url = f"https://live.titan007.com/PlayerTech.aspx?ID={match_id}&l=0"
+    try:
+        # 方式 1：手动创建 iframe 并加载 PlayerTech.aspx
+        page.evaluate(f"""() => {{
+            // 显示球员统计区域，隐藏其他区域
+            var md = document.getElementById('matchData');
+            var pd = document.getElementById('playerTechData');
+            var td = document.getElementById('textLiveData');
+            if (md) md.style.display = 'none';
+            if (td) td.style.display = 'none';
+            if (pd) pd.style.display = '';
+
+            // 更新菜单高亮
+            for (var i = 0; i < 3; i++) {{
+                var m = document.getElementById('menu' + i);
+                if (m) m.className = '';
+            }}
+            var m1 = document.getElementById('menu1');
+            if (m1) m1.className = 'ontab';
+
+            // 如果 iframe 不存在，创建它
+            var iframe = document.getElementById('playerTechIframe');
+            if (!iframe && pd) {{
+                iframe = document.createElement('iframe');
+                iframe.id = 'playerTechIframe';
+                iframe.name = 'ifLive';
+                iframe.setAttribute('allowfullscreen', 'true');
+                iframe.setAttribute('frameborder', '0');
+                iframe.setAttribute('scrolling', 'no');
+                iframe.style.width = '1080px';
+                iframe.style.height = '1470px';
+                pd.appendChild(iframe);
+            }}
+            if (iframe) {{
+                iframe.src = '{player_url}';
+            }}
+        }}""")
+        print(f"  [INFO] 已创建/设置 playerTechIframe src: {player_url}")
+
+        # 等待 iframe 加载完成（最多 10 秒）
+        iframe_loaded = False
+        for _ in range(10):
+            page.wait_for_timeout(1000)
+            loaded = page.evaluate("""() => {
+                try {
+                    var iframe = document.getElementById('playerTechIframe');
+                    if (!iframe || !iframe.contentDocument) return false;
+                    var doc = iframe.contentDocument;
+                    return !!(doc && doc.body && doc.body.innerHTML.length > 100);
+                } catch(e) { return false; }
+            }""")
+            if loaded:
+                iframe_loaded = True
+                print(f"  [OK] playerTechIframe 内容加载完成")
+                break
+        if not iframe_loaded:
+            print(f"  [WARN] playerTechIframe 等待 10s 后仍未加载内容")
+
+        # 截图（无论 iframe 是否加载成功，都保存当前页面状态）
+        states["players"] = page.content()
+        pngs["players"] = page.screenshot(full_page=False, type="png")
+
+        # 从浏览器 iframe contentDocument 提取渲染后的完整 DOM
         try:
             iframe_html = page.evaluate("""() => {
                 const iframe = document.getElementById('playerTechIframe');
@@ -153,16 +247,65 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
                 }
                 return '';
             }""")
-            if iframe_html and len(iframe_html) > 500:
-                rendered_player_html = iframe_html
-                print(f"  [OK] 从浏览器提取球员统计 iframe 内容: {len(iframe_html)} 字符")
+            if iframe_html and _validate_html_content(iframe_html):
+                # 内联 iframe 内容中的外部资源
+                inlined = inline_page(iframe_html, player_url)
+                if _validate_html_content(inlined):
+                    rendered_player_html = inlined
+                    print(f"  [OK] 从浏览器提取球员统计 iframe 内容: {len(inlined)} 字符")
+                else:
+                    rendered_player_html = iframe_html
+                    print(f"  [OK] 从浏览器提取球员统计 iframe 内容(未内联): {len(iframe_html)} 字符")
+            elif iframe_html and len(iframe_html) > 500:
+                print(f"  [WARN] 球员统计 iframe 内容长度 {len(iframe_html)} 但验证未通过")
             else:
-                print(f"  [WARN] 球员统计 iframe 内容为空或过短 ({len(iframe_html)} 字符)，保留 HTTP 抓取版本")
+                print(f"  [WARN] 球员统计 iframe 内容为空或过短 ({len(iframe_html)} 字符)")
         except Exception as e:
             print(f"  [WARN] 提取球员统计 iframe 内容失败: {e}")
 
-        states["players"] = page.content()
-        pngs["players"] = page.screenshot(full_page=False, type="png")
+        # 方式 2：如果浏览器 iframe 提取失败，直接导航到 PlayerTech.aspx
+        if not _validate_html_content(rendered_player_html):
+            print(f"  [INFO] 浏览器 iframe 提取失败，尝试直接导航到 PlayerTech.aspx...")
+            try:
+                player_page = page.context.new_page()
+                player_page.goto(player_url, wait_until="domcontentloaded", timeout=30000)
+                player_page.wait_for_timeout(3000)
+                direct_html = player_page.content()
+                player_page.close()
+                if _validate_html_content(direct_html):
+                    inlined = inline_page(direct_html, player_url)
+                    if _validate_html_content(inlined):
+                        rendered_player_html = inlined
+                        print(f"  [OK] 直接导航提取球员统计内容: {len(inlined)} 字符")
+                    else:
+                        rendered_player_html = direct_html
+                        print(f"  [OK] 直接导航提取球员统计内容(未内联): {len(direct_html)} 字符")
+                else:
+                    print(f"  [WARN] 直接导航内容验证未通过: {len(direct_html)} 字符")
+            except Exception as e2:
+                print(f"  [WARN] 直接导航提取也失败: {e2}")
+
+        # 方式 3：最终回退到 HTTP 抓取版本
+        if not _validate_html_content(rendered_player_html):
+            if _validate_html_content(http_player_html):
+                rendered_player_html = http_player_html
+                print(f"  [FALLBACK] 使用 HTTP 抓取的球员统计内容: {len(http_player_html)} 字符")
+            else:
+                rendered_player_html = ""
+                print(f"  [ERROR] 球员统计内容提取完全失败，srcdoc 将为空")
+
+    except Exception as e:
+        print(f"  [ERROR] 球员统计标签处理失败: {e}")
+        # 回退到 HTTP 抓取
+        if _validate_html_content(http_player_html):
+            rendered_player_html = http_player_html
+            print(f"  [FALLBACK] 使用 HTTP 抓取的球员统计内容: {len(http_player_html)} 字符")
+        # 仍然保存当前页面状态
+        try:
+            states["players"] = page.content()
+            pngs["players"] = page.screenshot(full_page=False, type="png")
+        except:
+            pass
 
     # 4. 文字直播：手动创建 iframe 并加载 textLive.aspx
     try:
@@ -179,7 +322,7 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
                 }}
             }}
             if (typeof ShowIframe === 'function') ShowIframe(2);
-        }}""", text_live_html)
+        }}""", text_live_html if text_live_html else "<html><body></body></html>")
         page.wait_for_timeout(1000)
 
         # 从浏览器 iframe 中提取已渲染的文字直播内容
@@ -194,11 +337,24 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
                 }
                 return '';
             }""")
-            if tl_html and len(tl_html) > 500:
+            if tl_html and _validate_html_content(tl_html):
                 rendered_text_live_html = tl_html
                 print(f"  [OK] 从浏览器提取文字直播 iframe 内容: {len(tl_html)} 字符")
+            elif tl_html and len(tl_html) > 500:
+                print(f"  [WARN] 文字直播 iframe 内容长度 {len(tl_html)} 但验证未通过")
+            else:
+                print(f"  [WARN] 文字直播 iframe 内容为空或过短 ({len(tl_html)} 字符)")
         except Exception as e:
             print(f"  [WARN] 提取文字直播 iframe 内容失败: {e}")
+
+        # 回退到 HTTP 抓取版本
+        if not _validate_html_content(rendered_text_live_html):
+            if _validate_html_content(http_text_live_html):
+                rendered_text_live_html = http_text_live_html
+                print(f"  [FALLBACK] 使用 HTTP 抓取的文字直播内容: {len(http_text_live_html)} 字符")
+            else:
+                rendered_text_live_html = ""
+                print(f"  [ERROR] 文字直播内容提取完全失败，srcdoc 将为空")
 
         states["text_live"] = page.content()
         pngs["text_live"] = page.screenshot(full_page=False, type="png")
@@ -281,23 +437,38 @@ def _patch_live_tab_links(html: str, match_id: str) -> str:
 
 
 def _inline_live_iframes(html: str, player_html: str, text_live_html: str) -> str:
-    """把 playerTech / textLive iframe 替换为 srcdoc 内联内容，确保静态打开可见。"""
+    """把 playerTech / textLive iframe 替换为 srcdoc 内联内容，确保静态打开可见。
+
+    PRD 约束：仅当 iframe 内容通过验证时才设置 srcdoc，
+    防止乱码或空内容被写入复刻页面。
+    """
     from bs4 import BeautifulSoup
 
     soup = BeautifulSoup(html, "html.parser")
 
     player_iframe = soup.find("iframe", id="playerTechIframe")
-    if player_iframe and player_html:
+    if player_iframe and _validate_html_content(player_html):
         player_iframe["srcdoc"] = player_html
         player_iframe["src"] = "about:blank"
         if player_iframe.get("height"):
             player_iframe["style"] = (player_iframe.get("style") or "") + ";height:1470px;"
+        print(f"  [OK] 球员统计 srcdoc 已设置: {len(player_html)} 字符")
+    elif player_iframe:
+        # 内容无效时不设置 srcdoc，保留原 src（如果有）或设为 about:blank
+        if not player_iframe.get("src"):
+            player_iframe["src"] = "about:blank"
+        print(f"  [WARN] 球员统计内容未通过验证，不设置 srcdoc")
 
     text_iframe = soup.find("iframe", id="textLiveIframe")
-    if text_iframe and text_live_html:
+    if text_iframe and _validate_html_content(text_live_html):
         text_iframe["srcdoc"] = text_live_html
         text_iframe["src"] = "about:blank"
         text_iframe["style"] = (text_iframe.get("style") or "") + ";height:1000px;"
+        print(f"  [OK] 文字直播 srcdoc 已设置: {len(text_live_html)} 字符")
+    elif text_iframe:
+        if not text_iframe.get("src"):
+            text_iframe["src"] = "about:blank"
+        print(f"  [WARN] 文字直播内容未通过验证，不设置 srcdoc")
 
     return str(soup)
 
@@ -540,9 +711,11 @@ def replicate_live_tabs(match_id: str, output_dir: Path, docs_dir: Path,
         return saved
     finally:
         if close_browser and own_browser:
-            context.close()
-            browser.close()
-            p.stop()
+            # 仅关闭 context，不关闭 browser（thread-local 共享实例由调用方管理）
+            try:
+                context.close()
+            except Exception:
+                pass
 
 
 def replicate_all_live_tabs(date: str) -> dict[str, list[str]]:
@@ -574,9 +747,11 @@ def replicate_all_live_tabs(date: str) -> dict[str, list[str]]:
                 print(f"[ERROR] Failed to replicate tabs for {match_id}: {e}")
                 results[match_id] = []
     finally:
-        context.close()
-        browser.close()
-        p.stop()
+        # 仅关闭 context，不关闭共享的 thread-local browser
+        try:
+            context.close()
+        except Exception:
+            pass
 
     return results
 

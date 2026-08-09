@@ -20,13 +20,19 @@ _USER_AGENTS = [
 ]
 
 
-def _make_session() -> requests.Session:
+def _make_session() -> requests.Session():
     s = requests.Session()
+    # 仅在 brotli 已安装时声明 br 支持，避免服务器返回无法解压的 Brotli 内容
+    try:
+        import brotli  # noqa: F401
+        accept_encoding = "gzip, deflate, br"
+    except ImportError:
+        accept_encoding = "gzip, deflate"
     s.headers.update({
         "User-Agent": random.choice(_USER_AGENTS),
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Encoding": accept_encoding,
         "Referer": "https://cp.titan007.com/buy/JingCai.aspx?typeID=101&oddstype=2",
         "Connection": "keep-alive",
         "Upgrade-Insecure-Requests": "1",
