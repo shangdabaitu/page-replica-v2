@@ -240,7 +240,17 @@ startBtn.addEventListener('click', () => {
                 log(`[L${data.level}] 处理 ${shortUrl(data.url)}`, 'info');
                 break;
             case 'page_done':
-                log(`[L${data.level}] ${data.status} | 差异 ${fmtDiff(data.diff_ratio)} | ${shortUrl(data.url)}`, data.status === 'ok' ? 'ok' : (data.status === 'error' ? 'err' : 'warn'));
+                let pageMsg = `[L${data.level}] ${data.status} | 差异 ${fmtDiff(data.diff_ratio)}`;
+                const pageExtras = [];
+                if (data.dom_status && data.dom_status !== 'ok' && data.dom_status !== 'skipped')
+                    pageExtras.push(`DOM:${data.dom_status}`);
+                if (data.ext_status && data.ext_status !== 'ok')
+                    pageExtras.push(`外部资源:${data.ext_status}`);
+                if (data.console_status && data.console_status !== 'ok' && data.console_status !== 'skipped')
+                    pageExtras.push(`控制台:${data.console_status}`);
+                if (pageExtras.length > 0)
+                    pageMsg += ` [${pageExtras.join(' ')}]`;
+                log(pageMsg + ` | ${shortUrl(data.url)}`, data.status === 'ok' ? 'ok' : (data.status === 'error' ? 'err' : 'warn'));
                 break;
             case 'warning':
                 log(`警告：${data.message}`, 'warn');
@@ -250,7 +260,22 @@ startBtn.addEventListener('click', () => {
                 break;
             case 'finish':
                 const cancelled = data.report && data.report.cancelled;
-                log(cancelled ? `复刻已停止，共处理 ${data.report.pages_total} 个页面` : `复刻完成，共 ${data.report.pages_total} 个页面，成功 ${data.report.pages_ok}，需修复 ${data.report.pages_fix}，失败 ${data.report.pages_error}，耗时 ${data.report.elapsed_seconds}s`, 'ok');
+                if (cancelled) {
+                    log(`复刻已停止，共处理 ${data.report.pages_total} 个页面`, 'ok');
+                } else {
+                    const r = data.report;
+                    let summary = `复刻完成，共 ${r.pages_total} 个页面，成功 ${r.pages_ok}，需修复 ${r.pages_fix}，失败 ${r.pages_error}，耗时 ${r.elapsed_seconds}s`;
+                    const extras = [];
+                    if (r.dom_warnings > 0 || r.dom_errors > 0)
+                        extras.push(`DOM差异: ${r.dom_warnings}警告/${r.dom_errors}异常`);
+                    if (r.ext_resource_warnings > 0 || r.ext_resource_errors > 0)
+                        extras.push(`外部资源: ${r.ext_resource_warnings}警告/${r.ext_resource_errors}异常`);
+                    if (r.console_warnings > 0 || r.console_errors > 0)
+                        extras.push(`控制台错误: ${r.console_warnings}警告/${r.console_errors}异常`);
+                    if (extras.length > 0)
+                        summary += '（' + extras.join('，') + '）';
+                    log(summary, 'ok');
+                }
                 currentEs.close();
                 currentEs = null;
                 currentDate = null;

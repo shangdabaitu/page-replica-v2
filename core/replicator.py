@@ -641,14 +641,28 @@ def _process_single_page(
                     url,
                     compare_path,
                     output_dir=base_dir / "diff",
+                    source_html=rendered_html,
                 )
             else:
                 compare_result = visual.compare_pages(
                     url,
                     compare_path,
                     output_dir=base_dir / "diff",
+                    source_html=rendered_html,
                 )
             best_diff = compare_result
+
+            # 提取视觉对比附加字段，用于持久化存储和报告
+            _compare_extra = {
+                "dom_diff_ratio": compare_result.get("dom_diff_ratio"),
+                "dom_status": compare_result.get("dom_status"),
+                "dom_source_count": compare_result.get("dom_source_count"),
+                "dom_replica_count": compare_result.get("dom_replica_count"),
+                "ext_resource_count": compare_result.get("external_resources", {}).get("external_count", 0),
+                "ext_status": compare_result.get("ext_status"),
+                "console_error_count": compare_result.get("console_error_count", 0),
+                "console_status": compare_result.get("console_status"),
+            }
 
             # 视觉对比被跳过（如浏览器未安装）也视为成功
             if compare_result.get("status") == "skipped" or compare_result["diff_ratio"] is None:
@@ -659,6 +673,7 @@ def _process_single_page(
                     "diff_ratio": None,
                     "message": compare_result["message"],
                     "output_path": str(output_path.relative_to(config.OUTPUT_DIR)),
+                    **_compare_extra,
                 }
 
             if compare_result["diff_ratio"] <= config.DIFF_THRESHOLD_IGNORE:
@@ -669,6 +684,7 @@ def _process_single_page(
                     "diff_ratio": compare_result["diff_ratio"],
                     "message": compare_result["message"],
                     "output_path": str(output_path.relative_to(config.OUTPUT_DIR)),
+                    **_compare_extra,
                 }
 
             # 差异超过阈值但还有重试次数
@@ -685,6 +701,7 @@ def _process_single_page(
                 "diff_ratio": compare_result["diff_ratio"],
                 "message": compare_result["message"],
                 "output_path": str(output_path.relative_to(config.OUTPUT_DIR)),
+                **_compare_extra,
             }
 
         except Exception as e:
@@ -729,6 +746,12 @@ def replicate_date(date: str, max_level: int | None = None, cancel_event: thread
         "pages_fix": 0,
         "pages_error": 0,
         "pages_cancelled": 0,
+        "dom_warnings": 0,
+        "dom_errors": 0,
+        "ext_resource_warnings": 0,
+        "ext_resource_errors": 0,
+        "console_warnings": 0,
+        "console_errors": 0,
         "details": [],
     }
 
@@ -840,6 +863,14 @@ def replicate_date(date: str, max_level: int | None = None, cancel_event: thread
                     "diff_ratio": result.get("diff_ratio"),
                     "attempt": result.get("attempt", 1),
                     "message": result.get("message"),
+                    "dom_diff_ratio": result.get("dom_diff_ratio"),
+                    "dom_status": result.get("dom_status"),
+                    "dom_source_count": result.get("dom_source_count"),
+                    "dom_replica_count": result.get("dom_replica_count"),
+                    "ext_resource_count": result.get("ext_resource_count", 0),
+                    "ext_status": result.get("ext_status"),
+                    "console_error_count": result.get("console_error_count", 0),
+                    "console_status": result.get("console_status"),
                 })
 
                 # 对单场分析页（析）提取主队/客队资料库 ID 并写入 meta.matches
@@ -866,6 +897,25 @@ def replicate_date(date: str, max_level: int | None = None, cancel_event: thread
                 report["pages_error"] += 1
             elif result["status"] == "cancelled":
                 report["pages_cancelled"] += 1
+
+            # 统计视觉对比各维度的问题数量
+            _dom_st = result.get("dom_status", "skipped")
+            if _dom_st == "warning":
+                report["dom_warnings"] += 1
+            elif _dom_st == "error":
+                report["dom_errors"] += 1
+
+            _ext_st = result.get("ext_status", "ok")
+            if _ext_st == "warning":
+                report["ext_resource_warnings"] += 1
+            elif _ext_st == "error":
+                report["ext_resource_errors"] += 1
+
+            _con_st = result.get("console_status", "ok")
+            if _con_st == "warning":
+                report["console_warnings"] += 1
+            elif _con_st == "error":
+                report["console_errors"] += 1
 
             report["details"].append(result)
             yield {"type": "page_done", **result}
