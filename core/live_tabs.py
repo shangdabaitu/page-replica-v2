@@ -24,6 +24,8 @@ from core.watermark import inject_watermark
 TAB_SUFFIXES = {
     "match_important": "",
     "match_detail": "_event_detail",
+    "tech_same": "_tech_same",
+    "jsq_50": "_jsq_50",
     "players": "_players",
     "text_live": "_text",
     "animation": "_animation",
@@ -92,6 +94,33 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
     }"""):
         states["match_detail"] = page.content()
         pngs["match_detail"] = page.screenshot(full_page=False, type="png")
+
+    # 2b. 技统数据 - 同主客（子标签页，默认"全部"已在 match_important 中捕获）
+    # 先切回重要事件视图，确保能访问技统数据区域
+    _safe_switch("""() => {
+        if (typeof ShowIframe === 'function') ShowIframe(0);
+        if (typeof ShowEventDetail === 'function') ShowEventDetail(0);
+    }""")
+    if _safe_switch("""() => {
+        if (typeof changeTechCount === 'function') changeTechCount(2);
+    }""", wait_ms=800):
+        states["tech_same"] = page.content()
+        pngs["tech_same"] = page.screenshot(full_page=False, type="png")
+        # 切回"全部"
+        _safe_switch("""() => {
+            if (typeof changeTechCount === 'function') changeTechCount(1);
+        }""", wait_ms=300)
+
+    # 2c. 进失球概率 - 近50场（子标签页，默认"近30场"已在 match_important 中捕获）
+    if _safe_switch("""() => {
+        if (typeof changeJsq === 'function') changeJsq(2);
+    }""", wait_ms=800):
+        states["jsq_50"] = page.content()
+        pngs["jsq_50"] = page.screenshot(full_page=False, type="png")
+        # 切回"近30场"
+        _safe_switch("""() => {
+            if (typeof changeJsq === 'function') changeJsq(1);
+        }""", wait_ms=300)
 
     # 3. 球员统计：切换到该标签，等待 iframe 加载完成
     if _safe_switch("""() => {
@@ -176,6 +205,23 @@ def _patch_live_tab_links(html: str, match_id: str) -> str:
             a["href"] = f"{base}.htm?{cache_buster}"
             if "onclick" in a.attrs:
                 del a["onclick"]
+
+    # 子标签页按钮：技统数据 全部/同主客、进失球概率 近30场/近50场
+    subtab_links = {
+        "changeTechCount(2)": f"{base}_tech_same.htm?{cache_buster}",
+        "changeTechCount(1)": f"{base}.htm?{cache_buster}",
+        "changeJsq(2)": f"{base}_jsq_50.htm?{cache_buster}",
+        "changeJsq(1)": f"{base}.htm?{cache_buster}",
+    }
+    for span in soup.find_all("span", onclick=True):
+        onclick_val = span.get("onclick", "")
+        for js_call, href in subtab_links.items():
+            if js_call in onclick_val:
+                span["onclick"] = f"window.location.href='{href}'"
+                style = span.get("style") or ""
+                if "cursor" not in style:
+                    span["style"] = style + ";cursor:pointer;" if style else "cursor:pointer;"
+                break
 
     return str(soup)
 
