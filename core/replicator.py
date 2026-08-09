@@ -556,10 +556,11 @@ def _process_single_page(
                 }
 
             tab_htmls: dict[int, str] = {}
+            tab_pngs: dict[int, bytes] = {}
             source_img = None
             try:
                 if _is_league_page(url):
-                    rendered_html, tab_htmls, source_png = render_league_with_tabs(url)
+                    rendered_html, tab_htmls, source_png, tab_pngs = render_league_with_tabs(url)
                 else:
                     # 非联赛页（如分析页、欧赔页）等待 3s 让 JS 加载动态数据，
                     # 比原来的 8s 显著缩短整体耗时。
@@ -630,6 +631,27 @@ def _process_single_page(
                     tab_rel_path = str(tab_output_path.relative_to(config.OUTPUT_DIR))
                     url_map[tab_url] = tab_rel_path
                     tab_paths[t] = tab_rel_path
+
+                    # 视觉对比：用渲染时捕获的源截图与复刻标签页做对比
+                    tab_source_png = (tab_pngs or {}).get(t)
+                    if tab_source_png is not None:
+                        try:
+                            tab_source_img = Image.open(io.BytesIO(tab_source_png))
+                            tab_compare = visual.compare_with_source_image(
+                                tab_source_img,
+                                tab_url,
+                                tab_output_path,
+                                output_dir=base_dir / "diff",
+                                source_html=tab_html,
+                            )
+                            print(f"  [COMPARE] tab{t} {url}: "
+                                  f"diff={tab_compare.get('diff_ratio')}, "
+                                  f"status={tab_compare.get('status')}, "
+                                  f"dom={tab_compare.get('dom_status')}, "
+                                  f"ext={tab_compare.get('ext_status')}, "
+                                  f"console={tab_compare.get('console_status')}")
+                        except Exception as e:
+                            print(f"  [WARN] 标签页视觉对比失败 tab{t} {url}: {e}")
                 except Exception as e:
                     print(f"[WARN] 保存标签页 {t} 失败: {url} -> {e}")
 

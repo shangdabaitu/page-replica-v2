@@ -6,8 +6,10 @@
 """
 import json
 import re
+from io import BytesIO
 from pathlib import Path
 
+from PIL import Image
 from playwright.sync_api import sync_playwright
 
 import config
@@ -50,15 +52,17 @@ def _fetch_iframe_html(url: str) -> str:
     return inline_page(html, url)
 
 
-def _render_states(page, match_id: str, player_html: str, text_live_html: str) -> dict[str, str]:
+def _render_states(page, match_id: str, player_html: str, text_live_html: str) -> tuple[dict[str, str], dict[str, bytes]]:
     url = f"https://live.titan007.com/detail/{match_id}cn.htm"
     page.goto(url, wait_until="domcontentloaded", timeout=30000)
     page.wait_for_timeout(4000)
 
     states = {}
+    pngs = {}
 
     # 先保存默认状态（无论页面是否有完整标签结构）
     states["match_important"] = page.content()
+    pngs["match_important"] = page.screenshot(full_page=False, type="png")
 
     # 检查页面是否具备标签切换所需的 DOM 结构
     has_tabs = page.evaluate("""() => {
@@ -69,7 +73,7 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
     }""")
     if not has_tabs:
         print(f"  [WARN] {match_id} 没有完整标签页结构，仅保存默认页")
-        return states
+        return states, pngs
 
     # 辅助函数：安全执行标签切换
     def _safe_switch(js_code: str, wait_ms: int = 800):
@@ -87,12 +91,14 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
         if (typeof ShowEventDetail === 'function') ShowEventDetail(1);
     }"""):
         states["match_detail"] = page.content()
+        pngs["match_detail"] = page.screenshot(full_page=False, type="png")
 
     # 3. 球员统计：切换到该标签，等待 iframe 加载完成
     if _safe_switch("""() => {
         if (typeof ShowIframe === 'function') ShowIframe(1);
     }""", wait_ms=3000):
         states["players"] = page.content()
+        pngs["players"] = page.screenshot(full_page=False, type="png")
 
     # 4. 文字直播：手动创建 iframe 并加载 textLive.aspx
     try:
@@ -112,6 +118,7 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
         }}""", text_live_html)
         page.wait_for_timeout(1000)
         states["text_live"] = page.content()
+        pngs["text_live"] = page.screenshot(full_page=False, type="png")
     except Exception as e:
         print(f"  [WARN] 文字直播状态失败: {e}")
 
@@ -120,14 +127,16 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
         if (typeof changeLive === 'function') changeLive(1);
     }""", wait_ms=1500):
         states["animation"] = page.content()
+        pngs["animation"] = page.screenshot(full_page=False, type="png")
 
     # 6. 高清直播
     if _safe_switch("""() => {
         if (typeof changeLive === 'function') changeLive(4);
     }""", wait_ms=1500):
         states["hd"] = page.content()
+        pngs["hd"] = page.screenshot(full_page=False, type="png")
 
-    return states
+    return states, pngs
 
 
 def _patch_live_tab_links(html: str, match_id: str) -> str:
@@ -292,8 +301,10 @@ function changeLive(type){
 
 def _save_state(html: str, match_id: str, suffix: str, base_url: str,
                 output_dir: Path, docs_dir: Path,
-                player_html: str = "", text_live_html: str = "") -> Path:
+                player_html: str = "", text_live_html: str = "",
+                source_png: bytes | None = None) -> Path:
     from core.replicator import _freeze_rendered_page
+    from compare import visual
 
     rel_path = f"live/detail/{match_id}cn{suffix}.htm"
     output_path = output_dir / rel_path
@@ -312,6 +323,27 @@ def _save_state(html: str, match_id: str, suffix: str, base_url: str,
 
     output_path.write_text(final, encoding="utf-8")
     docs_path.write_text(final, encoding="utf-8")
+
+    # 视觉对比：用渲染时捕获的源截图与复刻页面做对比
+    if source_png is not None:
+        try:
+            source_img = Image.open(BytesIO(source_png))
+            compare_result = visual.compare_with_source_image(
+                source_img,
+                f"{base_url}#{suffix}",
+                output_path,
+                output_dir=output_dir / "diff",
+                source_html=html,
+            )
+            print(f"  [COMPARE] {match_id}{suffix}: "
+                  f"diff={compare_result.get('diff_ratio')}, "
+                  f"status={compare_result.get('status')}, "
+                  f"dom={compare_result.get('dom_status')}, "
+                  f"ext={compare_result.get('ext_status')}, "
+                  f"console={compare_result.get('console_status')}")
+        except Exception as e:
+            print(f"  [WARN] 标签页视觉对比失败 {match_id}{suffix}: {e}")
+
     return output_path
 
 
@@ -389,7 +421,7 @@ def replicate_live_tabs(match_id: str, output_dir: Path, docs_dir: Path,
         page = context.new_page()
 
         try:
-            states = _render_states(page, match_id, player_html, text_live_html)
+            states, pngs = _render_states(page, match_id, player_html, text_live_html)
         finally:
             page.close()
 
@@ -401,7 +433,8 @@ def replicate_live_tabs(match_id: str, output_dir: Path, docs_dir: Path,
                 continue
             path = _save_state(states[state_name], match_id, suffix, base_url,
                                output_dir, docs_dir,
-                               player_html=player_html, text_live_html=text_live_html)
+                               player_html=player_html, text_live_html=text_live_html,
+                               source_png=pngs.get(state_name))
             saved.append(path.name)
             print(f"  saved: {path}")
         return saved

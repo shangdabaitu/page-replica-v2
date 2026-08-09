@@ -149,14 +149,15 @@ def render_league_page(url: str, wait_ms: int = 4000) -> str:
 
 def render_league_with_tabs(
     url: str, wait_ms: int = 4000
-) -> tuple[str, dict[int, str], bytes]:
+) -> tuple[str, dict[int, str], bytes, dict[int, bytes]]:
     """
-    渲染联赛/赛事类型页，并捕获每个 showHtml JS 标签页的 DOM。
+    渲染联赛/赛事类型页，并捕获每个 showHtml JS 标签页的 DOM 和截图。
 
     返回：
       - main_html: 主标签页（积分榜 / 赛程资料统计）渲染后的完整 HTML，已合并所有轮次
       - tab_htmls: dict，键为 showHtml 参数 2~11，值为对应标签页完整 HTML
       - main_png: 主标签页首屏截图（PNG 字节），用于和复刻结果做同源视觉对比
+      - tab_pngs: dict，键为 showHtml 参数 2~11，值为对应标签页首屏截图（PNG 字节）
     """
     browser = get_thread_browser()
     context, page = _new_page(browser)
@@ -223,21 +224,23 @@ def render_league_with_tabs(
         # 判断是否存在 showHtml 标签导航；不存在则直接返回
         has_showhtml = "showHtml(" in main_html
         tab_htmls: dict[int, str] = {}
+        tab_pngs: dict[int, bytes] = {}
         if not has_showhtml:
-            return main_html, tab_htmls, main_png
+            return main_html, tab_htmls, main_png, tab_pngs
 
-        # 在同一页内依次切换 showHtml 标签并捕获 DOM，避免重复打开页面
+        # 在同一页内依次切换 showHtml 标签并捕获 DOM 和截图
         for t in range(2, 12):
             try:
                 page.evaluate(f"showHtml({t})")
                 page.wait_for_timeout(1200)
                 tab_htmls[t] = page.content()
+                tab_pngs[t] = page.screenshot(full_page=False, type="png")
                 # 切回默认标签，减少后续标签依赖
                 page.evaluate("showHtml(1)")
                 page.wait_for_timeout(300)
             except Exception:
                 continue
 
-        return main_html, tab_htmls, main_png
+        return main_html, tab_htmls, main_png, tab_pngs
     finally:
         context.close()
