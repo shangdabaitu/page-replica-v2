@@ -244,3 +244,83 @@ def render_league_with_tabs(
         return main_html, tab_htmls, main_png, tab_pngs
     finally:
         context.close()
+
+
+def render_analysis_with_tabs(
+    url: str, wait_ms: int = 4000
+) -> tuple[str, dict[str, str], bytes, dict[str, bytes]]:
+    """渲染分析页（析），并捕获 ShowIntegral / setType / changeVs2 各状态的 DOM 和截图。
+
+    分析页包含多个交互式标签切换：
+      - ShowIntegral(type): 积分榜切换（总/主场/客场）
+      - setType(t): 赔率类型切换（让球/大小/欧赔）
+      - changeVs2(id): 交锋数据新旧切换
+
+    返回：
+      - main_html: 默认状态渲染后的完整 HTML
+      - tab_htmls: dict，键为状态名，值为对应状态完整 HTML
+      - main_png: 默认状态首屏截图（PNG 字节）
+      - tab_pngs: dict，键为状态名，值为对应状态首屏截图（PNG 字节）
+    """
+    browser = get_thread_browser()
+    context, page = _new_page(browser)
+    try:
+        page.goto(url, wait_until="domcontentloaded", timeout=30000)
+        page.wait_for_timeout(wait_ms)
+        main_html = page.content()
+        main_png = page.screenshot(full_page=False, type="png")
+
+        tab_htmls: dict[str, str] = {}
+        tab_pngs: dict[str, bytes] = {}
+
+        def _safe_capture(name: str, js_code: str, wait_ms: int = 1000):
+            """安全执行 JS 切换并捕获 DOM 和截图。"""
+            try:
+                page.evaluate(js_code)
+                page.wait_for_timeout(wait_ms)
+                tab_htmls[name] = page.content()
+                tab_pngs[name] = page.screenshot(full_page=False, type="png")
+            except Exception as e:
+                print(f"  [WARN] 分析页标签捕获失败 {name}: {e}")
+
+        # 1. ShowIntegral: 积分榜切换（总/主场/客场）
+        has_integral = page.evaluate("""() => {
+            return typeof ShowIntegral === 'function' &&
+                   !!document.querySelector('.st-tit span[onclick*="ShowIntegral"]');
+        }""")
+        if has_integral:
+            # 获取所有 ShowIntegral 参数
+            integral_spans = page.evaluate("""() => {
+                var spans = document.querySelectorAll('.st-tit span[onclick*="ShowIntegral"]');
+                var results = [];
+                for (var i = 0; i < spans.length; i++) {
+                    var m = spans[i].getAttribute('onclick').match(/ShowIntegral\\((\\d+)\\)/);
+                    if (m) results.push(parseInt(m[1]));
+                }
+                return results;
+            }""")
+            for t in integral_spans:
+                if t == 0:
+                    continue  # 默认状态已在 main_html 中
+                _safe_capture(f"integral_{t}", f"ShowIntegral({t})", wait_ms=800)
+
+        # 2. setType: 赔率类型切换（让球/大小/欧赔）
+        has_settype = page.evaluate("""() => {
+            return typeof setType === 'function' &&
+                   !!document.getElementById('checkLet');
+        }""")
+        if has_settype:
+            for t in [1, 2, 3]:
+                _safe_capture(f"settype_{t}", f"setType({t})", wait_ms=800)
+
+        # 3. changeVs2: 交锋数据新旧切换
+        has_vs2 = page.evaluate("""() => {
+            return typeof changeVs2 === 'function' &&
+                   !!document.getElementById('vsOld');
+        }""")
+        if has_vs2:
+            _safe_capture("vs2_new", "changeVs2(1)", wait_ms=800)
+
+        return main_html, tab_htmls, main_png, tab_pngs
+    finally:
+        context.close()

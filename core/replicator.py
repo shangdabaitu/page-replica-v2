@@ -17,7 +17,7 @@ from PIL import Image
 import config
 from core.fetcher import fetch_url, normalize_url, decode_html
 from core.inliner import inline_page
-from core.renderer import render_and_capture, render_league_with_tabs
+from core.renderer import render_and_capture, render_league_with_tabs, render_analysis_with_tabs
 from core.simplifier import simplify_html
 from core.watermark import inject_watermark
 from core.live_tabs import replicate_all_live_tabs
@@ -555,14 +555,16 @@ def _process_single_page(
                     "output_path": None,
                 }
 
-            tab_htmls: dict[int, str] = {}
-            tab_pngs: dict[int, bytes] = {}
+            tab_htmls: dict = {}
+            tab_pngs: dict = {}
             source_img = None
             try:
                 if _is_league_page(url):
                     rendered_html, tab_htmls, source_png, tab_pngs = render_league_with_tabs(url)
+                elif _is_analysis_page(url):
+                    rendered_html, tab_htmls, source_png, tab_pngs = render_analysis_with_tabs(url)
                 else:
-                    # 非联赛页（如分析页、欧赔页）等待 3s 让 JS 加载动态数据，
+                    # 非联赛/分析页（如亚盘页、欧赔页）等待 3s 让 JS 加载动态数据，
                     # 比原来的 8s 显著缩短整体耗时。
                     rendered_html, source_png = render_and_capture(url, wait_ms=3000)
                 try:
@@ -611,11 +613,17 @@ def _process_single_page(
 
             output_path.write_text(final_html, encoding="utf-8")
 
-            # 保存联赛/赛事资料页的 showHtml JS 内部标签页
-            tab_paths: dict[int, str] = {}
+            # 保存联赛/赛事资料页的 showHtml JS 内部标签页、分析页标签页
+            tab_paths: dict = {}
             for t, tab_html in (tab_htmls or {}).items():
                 try:
-                    tab_rel = f"{rel_path[:-5]}_tab{t}.html" if rel_path.endswith(".html") else f"{rel_path}_tab{t}.html"
+                    # 根据原始扩展名生成标签页文件名
+                    if rel_path.endswith(".html"):
+                        tab_rel = f"{rel_path[:-5]}_tab{t}.html"
+                    elif rel_path.endswith(".htm"):
+                        tab_rel = f"{rel_path[:-4]}_tab{t}.htm"
+                    else:
+                        tab_rel = f"{rel_path}_tab{t}.html"
                     tab_output_path = base_dir / tab_rel
                     tab_output_path.parent.mkdir(parents=True, exist_ok=True)
                     tab_inlined = inline_page(tab_html, url, cancel_event=cancel_event)
@@ -1020,6 +1028,22 @@ def replicate_date(date: str, max_level: int | None = None, cancel_event: thread
         yield {"type": "progress", "url": "__sync_docs__", "level": 0, "status": "synced"}
     except Exception as e:
         yield {"type": "warning", "message": f"同步到 docs/ 失败: {e}"}
+
+    # 自动化审查：检查所有页面和标签页的视觉对比覆盖完整性
+    try:
+        yield {"type": "progress", "url": "__audit__", "level": 0, "status": "auditing"}
+        from compare.audit import audit_date, print_audit_report, save_audit_report
+        audit = audit_date(date)
+        # 将审查结果合并到报告中
+        report["audit_summary"] = audit.summary
+        report["audit_compare_coverage"] = audit.summary.get("compare_coverage", "")
+        report["audit_tab_coverage"] = audit.summary.get("tab_coverage", "")
+        report["audit_missing_tabs"] = audit.total_tabs_missing
+        report["audit_empty_tabs"] = audit.total_empty_tabs
+        save_audit_report(audit)
+        print_audit_report(audit)
+    except Exception as e:
+        yield {"type": "warning", "message": f"自动化审查失败: {e}"}
 
     # 释放当前线程的浏览器实例，避免任务结束后 Chromium 进程残留
     try:

@@ -54,13 +54,14 @@ def _fetch_iframe_html(url: str) -> str:
     return inline_page(html, url)
 
 
-def _render_states(page, match_id: str, player_html: str, text_live_html: str) -> tuple[dict[str, str], dict[str, bytes], str]:
+def _render_states(page, match_id: str, player_html: str, text_live_html: str) -> tuple[dict[str, str], dict[str, bytes], str, str]:
     """渲染 live detail 页面的所有标签页状态。
 
     返回:
       - states: 各标签页的 HTML
       - pngs: 各标签页的截图 (PNG 字节)
       - rendered_player_html: 从浏览器 iframe 中提取的已渲染球员统计 HTML
+      - rendered_text_live_html: 从浏览器 iframe 中提取的已渲染文字直播 HTML
     """
     url = f"https://live.titan007.com/detail/{match_id}cn.htm"
     page.goto(url, wait_until="domcontentloaded", timeout=30000)
@@ -85,6 +86,8 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
     if not has_tabs:
         print(f"  [WARN] {match_id} 没有完整标签页结构，仅保存默认页")
         return states, pngs, rendered_player_html, rendered_text_live_html
+
+    # 辅助函数占位，避免下方引用报错（has_tabs=False 时不会执行到这里）
 
     # 辅助函数：安全执行标签切换
     def _safe_switch(js_code: str, wait_ms: int = 800):

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRD 补充约束 v0.2 - 竞彩足球页面复刻系统</title>
+  <style>
+    :root {
+      --bg: #f8f9fa; --bg2: #ffffff; --ink: #1a1d21; --muted: #6b7280;
+      --rule: #e5e7eb; --accent: #2563eb; --accent2: #0ea5e9;
+      --danger: #dc2626; --warning: #d97706; --success: #16a34a;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--ink); line-height: 1.7; margin: 0; padding: 0; }
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    header { border-bottom: 3px solid var(--accent); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+    header h1 { font-size: 1.8rem; font-weight: 700; color: var(--accent); margin: 0 0 0.5rem; }
+    header .meta { color: var(--muted); font-size: 0.9rem; }
+    h2 { font-size: 1.4rem; font-weight: 700; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; margin-top: 2.5rem; margin-bottom: 1rem; }
+    h3 { font-size: 1.1rem; font-weight: 700; color: var(--accent); margin-top: 1.5rem; margin-bottom: 0.6rem; }
+    h4 { font-size: 1rem; font-weight: 700; margin-top: 1rem; margin-bottom: 0.4rem; }
+    p { margin: 0 0 0.8rem; }
+    .callout { background: var(--bg2); border-left: 4px solid var(--accent2); padding: 1rem 1.25rem; margin: 1rem 0; border-radius: 0 6px 6px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .callout.danger { border-left-color: var(--danger); }
+    .callout.warning { border-left-color: var(--warning); }
+    .callout strong { color: var(--accent); }
+    .callout.danger strong { color: var(--danger); }
+    .callout.warning strong { color: var(--warning); }
+    .table-wrap { overflow-x: auto; margin: 1rem 0; border: 1px solid var(--rule); border-radius: 6px; }
+    table { width: 100%; min-width: 600px; border-collapse: collapse; background: var(--bg2); font-size: 0.9rem; }
+    th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    th { background: var(--bg); font-weight: 700; color: var(--accent); position: sticky; top: 0; }
+    code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+    ul, ol { margin: 0 0 0.8rem 1.25rem; padding: 0; }
+    li { margin-bottom: 0.3rem; }
+    .badge { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 3px; font-size: 0.75rem; font-weight: 700; }
+    .badge-must { background: #fee2e2; color: var(--danger); }
+    .badge-should { background: #fef3c7; color: var(--warning); }
+    .badge-new { background: #dbeafe; color: var(--accent); }
+    footer { border-top: 1px solid var(--rule); margin-top: 3rem; padding-top: 1rem; color: var(--muted); font-size: 0.85rem; text-align: center; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>PRD 补充约束 v0.2</h1>
+    <div class="meta">竞彩足球页面复刻系统 | 补充需求文档 | 2026-08-09</div>
+  </header>
+
+  <section>
+    <h2>1. 背景与目的</h2>
+    <p>在 v0.1 PRD 基础上，经过实际复刻验证发现以下问题需要进一步严格约束。本补充文档作为 v0.1 PRD 的增量，所有条款优先级高于 v0.1 中可能冲突的描述。</p>
+    <div class="callout danger">
+      <strong>核心问题：</strong>v0.1 PRD 仅要求"每完成一个页面复刻后进行视觉对比"，未明确要求<strong>每个标签页状态</strong>都需要独立视觉对比，导致大量标签页内容未被覆盖。审查显示标签页覆盖率仅 1.6%。
+    </div>
+  </section>
+
+  <section>
+    <h2>2. 标签页与子状态枚举（<span class="badge badge-new">新增</span>）</h2>
+    <p>每种页面类型的所有标签页/子状态必须被<strong>完整枚举</strong>并逐一复刻和视觉对比。以下是已知的完整枚举表：</p>
+
+    <h3>2.1 联赛/杯赛资料页（League）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>标签页</th><th>触发方式</th><th>状态名</th><th>要求</th></tr></thead>
+        <tbody>
+          <tr><td>积分榜/赛程（默认）</td><td>showHtml(1)</td><td>main</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>标签页 2-11</td><td>showHtml(2) ~ showHtml(11)</td><td>tab2 ~ tab11</td><td><span class="badge badge-must">必须</span> 存在则复刻</td></tr>
+          <tr><td>所有轮次赛程</td><td>changeRound(N)</td><td>合并到 main</td><td><span class="badge badge-must">必须</span> 全部合并</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>2.2 分析页（Analysis）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>标签页</th><th>触发方式</th><th>状态名</th><th>要求</th></tr></thead>
+        <tbody>
+          <tr><td>默认分析视图</td><td>页面加载</td><td>main</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>积分榜-总</td><td>ShowIntegral(0)</td><td>integral_0（默认）</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>积分榜-主场</td><td>ShowIntegral(1)</td><td>integral_1</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>积分榜-客场</td><td>ShowIntegral(2)</td><td>integral_2</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>赔率-让球</td><td>setType(1)</td><td>settype_1</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>赔率-大小</td><td>setType(2)</td><td>settype_2</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>赔率-欧赔</td><td>setType(3)</td><td>settype_3</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>交锋-新版</td><td>changeVs2(1)</td><td>vs2_new</td><td><span class="badge badge-should">应该</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>2.3 现场分析详情页（Live Detail）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>标签页</th><th>触发方式</th><th>状态名</th><th>要求</th></tr></thead>
+        <tbody>
+          <tr><td>重要事件</td><td>ShowIframe(0) 默认</td><td>match_important</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>详细事件</td><td>ShowEventDetail(1)</td><td>match_detail</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>技统-同主客</td><td>changeTechCount(2)</td><td>tech_same</td><td><span class="badge badge-should">应该</span></td></tr>
+          <tr><td>进失球-近50场</td><td>changeJsq(2)</td><td>jsq_50</td><td><span class="badge badge-should">应该</span></td></tr>
+          <tr><td>球员统计</td><td>ShowIframe(1)</td><td>players</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>文字直播</td><td>ShowIframe(2)</td><td>text_live</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>动画直播</td><td>changeLive(1)</td><td>animation</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>高清直播</td><td>changeLive(4)</td><td>hd</td><td><span class="badge badge-must">必须</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>2.4 球队资料页（Team）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>标签页</th><th>URL 模式</th><th>要求</th></tr></thead>
+        <tbody>
+          <tr><td>球队汇总</td><td>team/Summary/{id}.html</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>联赛战绩</td><td>team/SummaryLeague/{id}.html</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>杯赛战绩</td><td>team/SummaryCup/{id}.html</td><td><span class="badge badge-should">应该</span></td></tr>
+          <tr><td>近期战绩</td><td>team/TeamNearYear/{id}.html</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>赛程</td><td>team/TeamSche/{id}.html</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>阵容</td><td>team/Lineup/{id}.html</td><td><span class="badge badge-must">必须</span></td></tr>
+          <tr><td>球员数据</td><td>team/PlayerData/{id}.html</td><td><span class="badge badge-should">应该</span></td></tr>
+          <tr><td>球员中文</td><td>team/PlayerZh/{id}.html</td><td><span class="badge badge-should">应该</span></td></tr>
+          <tr><td>历史交锋</td><td>team/TeamHistoryOrder/{id}.html</td><td><span class="badge badge-should">应该</span></td></tr>
+          <tr><td>球队新闻</td><td>team/TeamNews/{id}.html</td><td><span class="badge badge-should">应该</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. iframe 内容提取要求（<span class="badge badge-new">新增</span>）</h2>
+    <div class="callout danger">
+      <strong>关键约束：</strong>对于通过 iframe 加载内容的页面，<strong>禁止仅使用 HTTP 抓取的原始 HTML</strong>，必须从浏览器渲染后的 iframe contentDocument 中提取完整 DOM。
+    </div>
+    <p>原因：HTTP 抓取不执行 JavaScript，拿到的 iframe HTML 可能是空壳或模板，缺少动态渲染的数据内容。这会导致复刻页面内容为空。</p>
+
+    <h3>3.1 必须从浏览器提取的 iframe 内容</h3>
+    <ul>
+      <li><strong>球员统计（playerTechIframe）：</strong>通过 <code>iframe.contentDocument.documentElement.outerHTML</code> 提取渲染后的完整 DOM</li>
+      <li><strong>文字直播（textLiveIframe）：</strong>同上方式提取，确保 JS 渲染的文字内容被捕获</li>
+      <li><strong>所有其他动态 iframe：</strong>凡是通过 JavaScript 动态加载内容的 iframe，必须从浏览器渲染后的 DOM 提取</li>
+    </ul>
+
+    <h3>3.2 验证规则</h3>
+    <ul>
+      <li>提取的 iframe HTML 内容长度必须 > 500 字符，否则标记为异常并保留 HTTP 版本作为回退</li>
+      <li>每个 iframe 内容页面必须单独进行视觉对比</li>
+      <li>iframe 内容中的外部资源（CSS/JS/图片）也必须被内联</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>4. 视觉对比覆盖要求（<span class="badge badge-new">强化</span>）</h2>
+
+    <h3>4.1 逐标签页对比（<span class="badge badge-must">必须</span>）</h3>
+    <p>v0.1 仅要求"每完成一个页面复刻后进行视觉对比"。现强化为：</p>
+    <div class="callout danger">
+      <strong>强制要求：</strong>每个标签页/子状态都必须独立进行视觉对比。仅对主页面对比不足以发现标签页内容缺失或渲染错误。
+    </div>
+
+    <h3>4.2 对比维度（<span class="badge badge-must">必须</span>）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>维度</th><th>检查内容</th><th>阈值</th><th>异常处理</th></tr></thead>
+        <tbody>
+          <tr><td>像素差异</td><td>源页面 vs 复刻页面截图</td><td>≤2% 忽略, 2-10% 重试, >10% 修复</td><td>自动重试 → 人工介入</td></tr>
+          <tr><td>DOM 节点数</td><td>源 HTML vs 复刻 HTML 节点数差异</td><td>≤20% OK, 20-50% 警告, >50% 错误</td><td>标记为 needs_retry</td></tr>
+          <tr><td>外部资源</td><td>复刻页面中残留的外部 URL</td><td>0 OK, 1-3 警告, >3 错误</td><td>需补抓内联</td></tr>
+          <tr><td>控制台错误</td><td>复刻页面加载时的 JS 错误/异常</td><td>0 OK, 1-3 警告, >3 错误</td><td>需检查 JS 注入</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.3 源截图捕获时机（<span class="badge badge-must">必须</span>）</h3>
+    <p>源页面截图必须在<strong>浏览器渲染时同步捕获</strong>，不得在复刻完成后重新访问源站截图。原因：源站数据可能实时变化，异步截图会导致误判。</p>
+  </section>
+
+  <section>
+    <h2>5. 自动化审查机制（<span class="badge badge-new">新增</span>）</h2>
+
+    <h3>5.1 审查模块要求</h3>
+    <p>系统必须包含自动化审查模块（<code>compare/audit.py</code>），在每次复刻任务完成后自动执行，检查：</p>
+    <ul>
+      <li><strong>页面覆盖率：</strong>所有预期页面是否都已生成</li>
+      <li><strong>对比覆盖率：</strong>所有已生成页面是否都有视觉对比记录</li>
+      <li><strong>标签页覆盖率：</strong>每个主页面的预期标签页是否都已生成</li>
+      <li><strong>空标签页检测：</strong>标签页内容是否为空（可能 iframe 未渲染）</li>
+      <li><strong>各维度异常统计：</strong>DOM/外部资源/控制台错误数量</li>
+    </ul>
+
+    <h3>5.2 审查报告</h3>
+    <p>审查结果必须输出为 <code>audit_report.json</code>，包含：</p>
+    <ul>
+      <li>总页面数、有视觉对比页面数、对比覆盖率百分比</li>
+      <li>预期标签页数、已生成标签页数、缺失标签页数、空标签页数</li>
+      <li>按页面类型分布统计</li>
+      <li>按状态分布统计（ok/warning/error/missing）</li>
+      <li>有问题的页面明细列表</li>
+    </ul>
+
+    <h3>5.3 阻断条件</h3>
+    <div class="callout warning">
+      <strong>质量门禁：</strong>当审查发现以下情况时，任务应标记为"部分完成"并提示用户：
+      <ul>
+        <li>对比覆盖率低于 95%</li>
+        <li>标签页覆盖率低于 80%</li>
+        <li>存在空标签页（iframe 内容未渲染）</li>
+        <li>存在 DOM 差异 > 50% 的页面</li>
+        <li>存在外部资源残留 > 3 个的页面</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>6. 页面类型 JS 交互保留要求（<span class="badge badge-new">新增</span>）</h2>
+    <p><code>_freeze_rendered_page</code> 删除所有 <code>&lt;script&gt;</code> 后，必须通过 <code>js_injector</code> 重新注入以下页面类型所需的交互函数：</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>页面类型</th><th>必须注入的函数</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td>列表页</td><td>DateChange, isShowSclass, showHided 等</td><td>日期切换、行显示/隐藏</td></tr>
+          <tr><td>分析页</td><td>ShowIntegral, setType, changeVs2, r_close, t_onclick, hidOddsCmp</td><td>积分榜切换、赔率类型切换、交锋数据切换</td></tr>
+          <tr><td>现场分析</td><td>ShowIframe, ShowEventDetail, changeTechCount, changeJsq, changeLive, ShowTabContent</td><td>标签切换、子标签切换、直播类型切换</td></tr>
+          <tr><td>联赛页</td><td>changeRound, SelectScore, showHtml</td><td>轮次切换、标签页切换</td></tr>
+          <tr><td>球队页</td><td>ClickTechType</td><td>技统类型切换</td></tr>
+          <tr><td>欧赔页</td><td>OddsHistory, showFileter, CheckAll, clearFilter</td><td>赔率历史、筛选器</td></tr>
+          <tr><td>亚盘页</td><td>companyFilter, CheckAll, delCheck</td><td>公司筛选、全选</td></tr>
+          <tr><td>角球/大小球</td><td>companyFilter, CheckAll</td><td>公司筛选</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <strong>验证要求：</strong>注入的 JS 函数必须通过控制台错误检查验证其可正常执行。若控制台出现 <code>[pageerror]</code> 级别错误，需检查函数实现是否与页面 DOM 结构匹配。
+    </div>
+  </section>
+
+  <section>
+    <h2>7. 完整复刻流程检查清单</h2>
+    <div class="callout">
+      <strong>每个页面必须经过以下完整流程：</strong>
+      <ol>
+        <li>HTTP 抓取原始 HTML</li>
+        <li>Headless 浏览器渲染（执行原始 JS，等待动态数据加载）</li>
+        <li>同步捕获源页面截图（<span class="badge badge-must">必须</span>）</li>
+        <li>逐标签页切换并捕获 DOM + 截图（<span class="badge badge-must">必须</span>）</li>
+        <li>从浏览器 iframe contentDocument 提取已渲染内容（<span class="badge badge-must">必须</span>）</li>
+        <li>资源内联（CSS/JS/图片 → data URL 或内联标签）</li>
+        <li>冻结 DOM（删除原始 script）</li>
+        <li>注入页面类型专用 JS 交互函数</li>
+        <li>繁体转简体</li>
+        <li>注入水印</li>
+        <li>链接重写（指向本地复刻文件）</li>
+        <li>保存最终 HTML</li>
+        <li>视觉对比（4 维度：像素/DOM/外部资源/控制台）（<span class="badge badge-must">必须</span>）</li>
+        <li>运行自动化审查（<span class="badge badge-must">必须</span>）</li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    <p>PRD 补充约束 v0.2 · 竞彩足球页面复刻系统 · 2026-08-09</p>
+  </footer>
+</div>
+</body>
+</html>
