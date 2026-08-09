@@ -54,13 +54,22 @@ def _fetch_iframe_html(url: str) -> str:
     return inline_page(html, url)
 
 
-def _render_states(page, match_id: str, player_html: str, text_live_html: str) -> tuple[dict[str, str], dict[str, bytes]]:
+def _render_states(page, match_id: str, player_html: str, text_live_html: str) -> tuple[dict[str, str], dict[str, bytes], str]:
+    """渲染 live detail 页面的所有标签页状态。
+
+    返回:
+      - states: 各标签页的 HTML
+      - pngs: 各标签页的截图 (PNG 字节)
+      - rendered_player_html: 从浏览器 iframe 中提取的已渲染球员统计 HTML
+    """
     url = f"https://live.titan007.com/detail/{match_id}cn.htm"
     page.goto(url, wait_until="domcontentloaded", timeout=30000)
     page.wait_for_timeout(4000)
 
     states = {}
     pngs = {}
+    rendered_player_html = player_html  # 默认用 HTTP 抓取的版本
+    rendered_text_live_html = text_live_html  # 默认用 HTTP 抓取的版本
 
     # 先保存默认状态（无论页面是否有完整标签结构）
     states["match_important"] = page.content()
@@ -75,7 +84,7 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
     }""")
     if not has_tabs:
         print(f"  [WARN] {match_id} 没有完整标签页结构，仅保存默认页")
-        return states, pngs
+        return states, pngs, rendered_player_html, rendered_text_live_html
 
     # 辅助函数：安全执行标签切换
     def _safe_switch(js_code: str, wait_ms: int = 800):
@@ -126,6 +135,29 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
     if _safe_switch("""() => {
         if (typeof ShowIframe === 'function') ShowIframe(1);
     }""", wait_ms=3000):
+        # 关键修复：从浏览器 iframe 中提取已渲染的 DOM 内容
+        # page.content() 只返回外层页面 HTML，不包含 iframe 内部已渲染的内容。
+        # _fetch_iframe_html 做的纯 HTTP 抓取不执行 JS，拿到的可能是空壳。
+        # 这里直接从浏览器的 iframe contentDocument 中提取完整渲染后的 HTML。
+        try:
+            iframe_html = page.evaluate("""() => {
+                const iframe = document.getElementById('playerTechIframe');
+                if (iframe && iframe.contentDocument) {
+                    const doc = iframe.contentDocument;
+                    if (doc.documentElement) {
+                        return '<!DOCTYPE html>' + doc.documentElement.outerHTML;
+                    }
+                }
+                return '';
+            }""")
+            if iframe_html and len(iframe_html) > 500:
+                rendered_player_html = iframe_html
+                print(f"  [OK] 从浏览器提取球员统计 iframe 内容: {len(iframe_html)} 字符")
+            else:
+                print(f"  [WARN] 球员统计 iframe 内容为空或过短 ({len(iframe_html)} 字符)，保留 HTTP 抓取版本")
+        except Exception as e:
+            print(f"  [WARN] 提取球员统计 iframe 内容失败: {e}")
+
         states["players"] = page.content()
         pngs["players"] = page.screenshot(full_page=False, type="png")
 
@@ -146,6 +178,25 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
             if (typeof ShowIframe === 'function') ShowIframe(2);
         }}""", text_live_html)
         page.wait_for_timeout(1000)
+
+        # 从浏览器 iframe 中提取已渲染的文字直播内容
+        try:
+            tl_html = page.evaluate("""() => {
+                const iframe = document.getElementById('textLiveIframe');
+                if (iframe && iframe.contentDocument) {
+                    const doc = iframe.contentDocument;
+                    if (doc.documentElement) {
+                        return '<!DOCTYPE html>' + doc.documentElement.outerHTML;
+                    }
+                }
+                return '';
+            }""")
+            if tl_html and len(tl_html) > 500:
+                rendered_text_live_html = tl_html
+                print(f"  [OK] 从浏览器提取文字直播 iframe 内容: {len(tl_html)} 字符")
+        except Exception as e:
+            print(f"  [WARN] 提取文字直播 iframe 内容失败: {e}")
+
         states["text_live"] = page.content()
         pngs["text_live"] = page.screenshot(full_page=False, type="png")
     except Exception as e:
@@ -165,7 +216,7 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
         states["hd"] = page.content()
         pngs["hd"] = page.screenshot(full_page=False, type="png")
 
-    return states, pngs
+    return states, pngs, rendered_player_html, rendered_text_live_html
 
 
 def _patch_live_tab_links(html: str, match_id: str) -> str:
@@ -467,7 +518,7 @@ def replicate_live_tabs(match_id: str, output_dir: Path, docs_dir: Path,
         page = context.new_page()
 
         try:
-            states, pngs = _render_states(page, match_id, player_html, text_live_html)
+            states, pngs, rendered_player_html, rendered_text_live_html = _render_states(page, match_id, player_html, text_live_html)
         finally:
             page.close()
 
@@ -479,7 +530,7 @@ def replicate_live_tabs(match_id: str, output_dir: Path, docs_dir: Path,
                 continue
             path = _save_state(states[state_name], match_id, suffix, base_url,
                                output_dir, docs_dir,
-                               player_html=player_html, text_live_html=text_live_html,
+                               player_html=rendered_player_html, text_live_html=rendered_text_live_html,
                                source_png=pngs.get(state_name))
             saved.append(path.name)
             print(f"  saved: {path}")
