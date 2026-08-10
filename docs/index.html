@@ -128,7 +128,7 @@
     <div class="card" id="statsCard" style="display:none;">
         <span class="section-title">比赛复刻统计</span>
         <div id="statsTableWrap"></div>
-        <div class="hint">说明：L1 为整站列表页（1 面）；L2 为从列表页进入的赛事类型名称页 + 亚 + 欧 + 析（4 面）；L3 为从赛事类型页进入的亚/欧/析/大（4 面）加上从析页面进入的主队/客队资料库（2 面），合计 6 面。标签页统计主队/客队资料库内的各标签状态（赛程、阵容、球员数据等）。受源站 zq.titan007.com / info.titan007.com SSL 连接中断影响，当前标签页视觉对比暂无法在线完成；代码已修复为后续复刻时默认对比所有页面。</div>
+        <div class="hint">说明：L1 为整站列表页（1 面）；L2 为从列表页进入的赛事类型名称页 + 亚 + 欧 + 析（4 面）；L3 为从赛事类型页进入的亚/欧/析/大（4 面）加上从析页面进入的主队/客队资料库（2 面），合计 6 面。标签页统计主队/客队资料库内的各标签状态（赛程、阵容、球员数据等）。已对同一页面从不同域名的重复记录进行去重，避免实际计数超过应计数。</div>
     </div>
 
     <div class="card">
@@ -192,35 +192,54 @@ function calcMatchStats(match, pages) {
     const l1Compared = l1Pages.filter(isCompared).length;
 
     // L2: 从列表页进入的赛事类型名称页 + 亚 + 欧 + 析（4 面）
+    // 使用 URL 模式去重，避免同一页面从不同域名（如 zq.titan007.com 和 info.titan007.com）重复计数
     const detailUrlPatterns = [
         new RegExp('AsianOdds_n\\.aspx\\?id=' + matchId),
         new RegExp('oddslist/' + matchId + '\\.htm'),
         new RegExp('analysis/' + matchId + 'cn\\.htm'),
     ];
-    const l2DetailPages = pages.filter(p =>
-        p.level === 2 && detailUrlPatterns.some(re => re.test(p.url || ''))
-    );
-    // 赛事类型页：按联赛名称匹配页面标题中的联赛文字（复刻页 URL 中不含联赛名，用页面文本近似）
+    const l2DetailSeen = new Set();
+    const l2DetailPages = pages.filter(p => {
+        if (p.level !== 2) return false;
+        for (let i = 0; i < detailUrlPatterns.length; i++) {
+            if (detailUrlPatterns[i].test(p.url || '')) {
+                if (l2DetailSeen.has(i)) return false;
+                l2DetailSeen.add(i);
+                return true;
+            }
+        }
+        return false;
+    });
+    // 赛事类型页
     const l2LeaguePages = pages.filter(p =>
         p.level === 2 &&
         /(?:SubLeague|CupMatch|League)\/\d+\.html/i.test(p.url || '') &&
         league &&
         (p.url || '').includes(matchId) === false
     );
-    // 更可靠：赛事类型页只有 1 个，整站共享，若存在已对比的赛事类型页则所有同联赛比赛都计 1
     const hasL2LeagueCompared = l2LeaguePages.some(isCompared);
     const l2Compared = l2DetailPages.filter(isCompared).length + (hasL2LeagueCompared ? 1 : 0);
 
     // L3: 从赛事类型页进入的亚/欧/析/大（4 面）+ 从析页进入的主队/客队资料库（2 面）= 6 面
     // 亚/欧/析 在 L2 已复刻，从 L3 入口看仍属于 L3 应访问页面，故重复计入
-    const l3OverPage = pages.filter(p =>
-        p.url && p.url.includes('OverDown_n.aspx?id=' + matchId)
-    );
+    // 去重：OverDown 页面按 matchId 去重
+    const l3OverSeen = new Set();
+    const l3OverPage = pages.filter(p => {
+        if (!p.url || !p.url.includes('OverDown_n.aspx?id=' + matchId)) return false;
+        if (l3OverSeen.has(matchId)) return false;
+        l3OverSeen.add(matchId);
+        return true;
+    });
+    // 去重：同一 team ID 只计一次，避免 zq.titan007.com 和 info.titan007.com 重复计数
+    const l3TeamSeen = new Set();
     const l3TeamPages = pages.filter(p => {
         const m = p.url && p.url.match(/team\/(?:Summary\/)?(\d+)\.html/i);
         if (!m) return false;
         const tid = m[1];
-        return tid === homeId || tid === awayId;
+        if (tid !== homeId && tid !== awayId) return false;
+        if (l3TeamSeen.has(tid)) return false;
+        l3TeamSeen.add(tid);
+        return true;
     });
     const l3Compared =
         l2DetailPages.filter(isCompared).length +
@@ -228,19 +247,29 @@ function calcMatchStats(match, pages) {
         l3TeamPages.filter(isCompared).length;
 
     // 标签页：主队/客队资料库内部的各标签状态（如赛程、阵容、球员数据等）
+    // 去重：同一 tab 类型 + team_id 组合只计一次
+    const tabSeen = new Set();
     const teamTabPages = pages.filter(p => {
         if (p.type !== 'team_tab') return false;
         const m = p.url && p.url.match(/team\/([A-Za-z]+)\/(\d+)\.html/i);
         if (!m) return false;
+        const tabName = m[1].toLowerCase();
         const tid = m[2];
-        return tid === homeId || tid === awayId;
+        if (tid !== homeId && tid !== awayId) return false;
+        const key = tabName + '_' + tid;
+        if (tabSeen.has(key)) return false;
+        tabSeen.add(key);
+        return true;
     });
     const tabCompared = teamTabPages.filter(isCompared).length;
 
+    // 动态计算 expected 值，避免硬编码导致的不准确
+    const teamCount = (homeId ? 1 : 0) + (awayId && awayId !== homeId ? 1 : 0);
+
     return {
         l1: { expected: 1, compared: l1Compared },
-        l2: { expected: 4, compared: l2Compared },
-        l3: { expected: 6, compared: l3Compared },
+        l2: { expected: 1 + detailUrlPatterns.length, compared: l2Compared },
+        l3: { expected: detailUrlPatterns.length + 1 + teamCount, compared: l3Compared },
         tab: { expected: teamTabPages.length, compared: tabCompared },
     };
 }
