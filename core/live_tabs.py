@@ -108,7 +108,7 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
 
     # 先保存默认状态（无论页面是否有完整标签结构）
     states["match_important"] = page.content()
-    pngs["match_important"] = page.screenshot(full_page=False, type="png")
+    pngs["match_important"] = page.screenshot(full_page=True, type="png")
 
     # 检查页面是否具备标签切换所需的 DOM 结构
     has_tabs = page.evaluate("""() => {
@@ -139,7 +139,7 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
         if (typeof ShowEventDetail === 'function') ShowEventDetail(1);
     }"""):
         states["match_detail"] = page.content()
-        pngs["match_detail"] = page.screenshot(full_page=False, type="png")
+        pngs["match_detail"] = page.screenshot(full_page=True, type="png")
 
     # 2b. 技统数据 - 同主客（子标签页，默认"全部"已在 match_important 中捕获）
     # 先切回重要事件视图，确保能访问技统数据区域
@@ -151,7 +151,7 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
         if (typeof changeTechCount === 'function') changeTechCount(2);
     }""", wait_ms=800):
         states["tech_same"] = page.content()
-        pngs["tech_same"] = page.screenshot(full_page=False, type="png")
+        pngs["tech_same"] = page.screenshot(full_page=True, type="png")
         # 切回"全部"
         _safe_switch("""() => {
             if (typeof changeTechCount === 'function') changeTechCount(1);
@@ -162,7 +162,7 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
         if (typeof changeJsq === 'function') changeJsq(2);
     }""", wait_ms=800):
         states["jsq_50"] = page.content()
-        pngs["jsq_50"] = page.screenshot(full_page=False, type="png")
+        pngs["jsq_50"] = page.screenshot(full_page=True, type="png")
         # 切回"近30场"
         _safe_switch("""() => {
             if (typeof changeJsq === 'function') changeJsq(1);
@@ -233,7 +233,7 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
 
         # 截图（无论 iframe 是否加载成功，都保存当前页面状态）
         states["players"] = page.content()
-        pngs["players"] = page.screenshot(full_page=False, type="png")
+        pngs["players"] = page.screenshot(full_page=True, type="png")
 
         # 从浏览器 iframe contentDocument 提取渲染后的完整 DOM
         try:
@@ -303,7 +303,7 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
         # 仍然保存当前页面状态
         try:
             states["players"] = page.content()
-            pngs["players"] = page.screenshot(full_page=False, type="png")
+            pngs["players"] = page.screenshot(full_page=True, type="png")
         except:
             pass
 
@@ -357,7 +357,7 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
                 print(f"  [ERROR] 文字直播内容提取完全失败，srcdoc 将为空")
 
         states["text_live"] = page.content()
-        pngs["text_live"] = page.screenshot(full_page=False, type="png")
+        pngs["text_live"] = page.screenshot(full_page=True, type="png")
     except Exception as e:
         print(f"  [WARN] 文字直播状态失败: {e}")
 
@@ -366,14 +366,14 @@ def _render_states(page, match_id: str, player_html: str, text_live_html: str) -
         if (typeof changeLive === 'function') changeLive(1);
     }""", wait_ms=1500):
         states["animation"] = page.content()
-        pngs["animation"] = page.screenshot(full_page=False, type="png")
+        pngs["animation"] = page.screenshot(full_page=True, type="png")
 
     # 6. 高清直播
     if _safe_switch("""() => {
         if (typeof changeLive === 'function') changeLive(4);
     }""", wait_ms=1500):
         states["hd"] = page.content()
-        pngs["hd"] = page.screenshot(full_page=False, type="png")
+        pngs["hd"] = page.screenshot(full_page=True, type="png")
 
     return states, pngs, rendered_player_html, rendered_text_live_html
 

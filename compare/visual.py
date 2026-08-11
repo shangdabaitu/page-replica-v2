@@ -154,7 +154,9 @@ def _screenshot_and_capture_console(
                 page.wait_for_selector("body", timeout=10000)
             except Exception:
                 pass
-            png_bytes = page.screenshot(full_page=False, type="png")
+            # 等待页面动态内容渲染完成
+            page.wait_for_timeout(2000)
+            png_bytes = page.screenshot(full_page=True, type="png")
             img = Image.open(io.BytesIO(png_bytes))
             Image.MAX_IMAGE_PIXELS = max(
                 Image.MAX_IMAGE_PIXELS, img.width * img.height * 2
@@ -168,7 +170,7 @@ def _screenshot_and_capture_console(
 
 
 def screenshot_page(url: str, width: int = 1440, height: int = 900) -> Image.Image | None:
-    """对指定 URL 进行截图并返回 PIL Image。只截取可视区域，避免长页面占用过大内存。
+    """对指定 URL 进行截图并返回 PIL Image。截取完整页面，确保所有内容都被捕获。
 
     复用当前线程的浏览器实例，避免每次截图都重新启动 Chromium。
     """
@@ -203,7 +205,9 @@ def screenshot_page(url: str, width: int = 1440, height: int = 900) -> Image.Ima
                 page.wait_for_selector("body", timeout=10000)
             except Exception:
                 pass
-            png_bytes = page.screenshot(full_page=False, type="png")
+            # 等待页面动态内容渲染完成
+            page.wait_for_timeout(2000)
+            png_bytes = page.screenshot(full_page=True, type="png")
             img = Image.open(io.BytesIO(png_bytes))
             # 避免 PIL 反压缩炸弹警告阻塞流程
             Image.MAX_IMAGE_PIXELS = max(Image.MAX_IMAGE_PIXELS, img.width * img.height * 2)

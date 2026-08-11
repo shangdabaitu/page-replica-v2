@@ -133,7 +133,7 @@ def render_and_capture(
         page.goto(url, wait_until="domcontentloaded", timeout=30000)
         page.wait_for_timeout(wait_ms)
         html = page.content()
-        png = page.screenshot(full_page=False, type="png")
+        png = page.screenshot(full_page=True, type="png")
         return html, png
     finally:
         context.close()
@@ -219,7 +219,7 @@ def render_league_with_tabs(
         page.wait_for_timeout(wait_ms)
         _merge_all_rounds(page)
         main_html = page.content()
-        main_png = page.screenshot(full_page=False, type="png")
+        main_png = page.screenshot(full_page=True, type="png")
 
         # 判断是否存在 showHtml 标签导航；不存在则直接返回
         has_showhtml = "showHtml(" in main_html
@@ -234,7 +234,7 @@ def render_league_with_tabs(
                 page.evaluate(f"showHtml({t})")
                 page.wait_for_timeout(1200)
                 tab_htmls[t] = page.content()
-                tab_pngs[t] = page.screenshot(full_page=False, type="png")
+                tab_pngs[t] = page.screenshot(full_page=True, type="png")
                 # 切回默认标签，减少后续标签依赖
                 page.evaluate("showHtml(1)")
                 page.wait_for_timeout(300)
@@ -268,7 +268,7 @@ def render_analysis_with_tabs(
         page.goto(url, wait_until="domcontentloaded", timeout=30000)
         page.wait_for_timeout(wait_ms)
         main_html = page.content()
-        main_png = page.screenshot(full_page=False, type="png")
+        main_png = page.screenshot(full_page=True, type="png")
 
         tab_htmls: dict[str, str] = {}
         tab_pngs: dict[str, bytes] = {}
@@ -279,7 +279,7 @@ def render_analysis_with_tabs(
                 page.evaluate(js_code)
                 page.wait_for_timeout(wait_ms)
                 tab_htmls[name] = page.content()
-                tab_pngs[name] = page.screenshot(full_page=False, type="png")
+                tab_pngs[name] = page.screenshot(full_page=True, type="png")
             except Exception as e:
                 print(f"  [WARN] 分析页标签捕获失败 {name}: {e}")
 
