@@ -13,7 +13,9 @@
             --rule: #d0d7de;
             --accent: #0969da;
             --accent2: #1f883d;
+            --accent3: #7c3aed;
             --warn: #d1242f;
+            --amber: #b45309;
         }
         * { box-sizing: border-box; }
         html, body {
@@ -58,8 +60,12 @@
             color: #fff;
             font-size: 0.95rem;
             cursor: pointer;
+            transition: opacity 0.2s;
         }
+        button:hover { opacity: 0.85; }
         button.secondary { background: var(--accent2); }
+        button.danger { background: var(--warn); }
+        button.purple { background: var(--accent3); }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
         .status { font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem; }
         .stats-table {
@@ -101,6 +107,94 @@
         .empty { padding: 2rem; color: var(--muted); text-align: center; }
         .section-title { font-weight: 600; margin-bottom: 0.5rem; display: block; }
         .hint { color: var(--muted); font-size: 0.8rem; margin-top: 0.25rem; }
+
+        /* ---- 视觉检查进度区 ---- */
+        .check-progress {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: #f0f4ff;
+            border: 1px solid #c3d4f0;
+            border-radius: 6px;
+            display: none;
+        }
+        .check-progress.active { display: block; }
+        .check-progress .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .check-progress .progress-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .check-progress .progress-percent {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e7ff;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--accent3));
+            transition: width 0.4s ease;
+            border-radius: 5px;
+        }
+        .check-progress .current-task {
+            margin-top: 0.5rem;
+            font-size: 0.82rem;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .check-log {
+            margin-top: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 5px;
+            padding: 0.6rem;
+            font-size: 0.8rem;
+            font-family: "SF Mono", Consolas, monospace;
+            line-height: 1.5;
+        }
+        .check-log .log-ok { color: #4ade80; }
+        .check-log .log-warn { color: #fbbf24; }
+        .check-log .log-err { color: #f87171; }
+        .check-log .log-info { color: #93c5fd; }
+
+        /* ---- API 配置 ---- */
+        .api-config {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        .api-config input {
+            padding: 0.3rem 0.5rem;
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            width: 300px;
+        }
+        .api-status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+        .api-status-dot.online { background: var(--accent2); }
+        .api-status-dot.offline { background: var(--warn); }
     </style>
 </head>
 <body>
@@ -121,8 +215,29 @@
             </div>
             <button id="viewBtn">查看数据</button>
             <button id="replicateBtn" class="secondary" title="后端服务在本地运行，点击后请告诉我你要复刻的日期">开始复刻</button>
+            <button id="visualCheckBtn" class="purple" title="对已复刻的页面重新执行视觉对比检查">运行视觉检查</button>
+            <button id="cancelCheckBtn" class="danger" style="display:none;">取消检查</button>
         </div>
         <div class="status" id="status"></div>
+
+        <!-- API 配置 -->
+        <div class="api-config">
+            <label>API 服务地址</label>
+            <input id="apiUrl" type="text" placeholder="http://localhost:5001" value="http://localhost:5001">
+            <span id="apiStatus"><span class="api-status-dot offline" id="apiDot"></span><span id="apiText">未连接</span></span>
+            <button id="testApiBtn" style="padding:0.25rem 0.6rem;font-size:0.8rem;" title="测试 API 连接">测试</button>
+        </div>
+
+        <!-- 视觉检查进度 -->
+        <div class="check-progress" id="checkProgress">
+            <div class="progress-header">
+                <span class="progress-label" id="checkLabel">视觉检查进行中…</span>
+                <span class="progress-percent" id="checkPercent">0%</span>
+            </div>
+            <div class="progress-bar"><div class="fill" id="checkFill"></div></div>
+            <div class="current-task" id="checkCurrent"></div>
+            <div class="check-log" id="checkLog"></div>
+        </div>
     </div>
 
     <div class="card" id="statsCard" style="display:none;">
@@ -143,13 +258,57 @@
 <script>
 let dates = [];
 let currentMeta = null;
+let checkPollTimer = null;
+
+// ---- API 地址管理 ----
+
+function getApiUrl() {
+    const v = document.getElementById('apiUrl').value.trim();
+    return v.replace(/\/+$/, ''); // 去掉末尾斜杠
+}
+
+async function testApiConnection() {
+    const url = getApiUrl();
+    const dot = document.getElementById('apiDot');
+    const text = document.getElementById('apiText');
+    try {
+        const resp = await fetch(url + '/api/health', { signal: AbortSignal.timeout(3000) });
+        const data = await resp.json();
+        if (data.status === 'ok') {
+            dot.className = 'api-status-dot online';
+            const pw = data.playwright_available ? '像素级' : 'DOM 级';
+            text.textContent = `已连接 (${pw}对比)`;
+            return true;
+        }
+    } catch (e) {
+        // try
+    }
+    dot.className = 'api-status-dot offline';
+    text.textContent = '未连接';
+    return false;
+}
+
+// ---- 日期和 meta 加载 ----
 
 async function loadDates() {
+    // 优先尝试从 API 获取
+    const apiUrl = getApiUrl();
     try {
-        const resp = await fetch('dates.json');
-        dates = await resp.json();
+        const resp = await fetch(apiUrl + '/api/dates', { signal: AbortSignal.timeout(3000) });
+        if (resp.ok) {
+            dates = await resp.json();
+            testApiConnection();
+        } else {
+            throw new Error('API 不可用');
+        }
     } catch (e) {
-        dates = [];
+        // 回退到本地 dates.json
+        try {
+            const resp = await fetch('dates.json');
+            dates = await resp.json();
+        } catch (e2) {
+            dates = [];
+        }
     }
     const select = document.getElementById('dateSelect');
     select.innerHTML = '';
@@ -168,8 +327,19 @@ async function loadDates() {
 }
 
 async function loadMeta(date) {
+    // 优先尝试从 API 获取（带缓存破坏）
+    const apiUrl = getApiUrl();
     try {
-        const resp = await fetch(`${date}/meta.json`);
+        const resp = await fetch(apiUrl + `/api/meta?date=${date}&cb=${Date.now()}`, { signal: AbortSignal.timeout(5000) });
+        if (resp.ok) {
+            return await resp.json();
+        }
+    } catch (e) {
+        // fall through
+    }
+    // 回退到本地文件
+    try {
+        const resp = await fetch(`${date}/meta.json?cb=${Date.now()}`);
         if (!resp.ok) return null;
         return await resp.json();
     } catch (e) {
@@ -187,12 +357,9 @@ function calcMatchStats(match, pages) {
     const awayId = String(match.away_team_id || '');
     const league = String(match.league || '');
 
-    // L1: 整站 1 个列表页
     const l1Pages = pages.filter(p => p.level === 1);
     const l1Compared = l1Pages.filter(isCompared).length;
 
-    // L2: 从列表页进入的赛事类型名称页 + 亚 + 欧 + 析（4 面）
-    // 使用 URL 模式去重，避免同一页面从不同域名（如 zq.titan007.com 和 info.titan007.com）重复计数
     const detailUrlPatterns = [
         new RegExp('AsianOdds_n\\.aspx\\?id=' + matchId),
         new RegExp('oddslist/' + matchId + '\\.htm'),
@@ -210,7 +377,6 @@ function calcMatchStats(match, pages) {
         }
         return false;
     });
-    // 赛事类型页
     const l2LeaguePages = pages.filter(p =>
         p.level === 2 &&
         /(?:SubLeague|CupMatch|League)\/\d+\.html/i.test(p.url || '') &&
@@ -220,9 +386,6 @@ function calcMatchStats(match, pages) {
     const hasL2LeagueCompared = l2LeaguePages.some(isCompared);
     const l2Compared = l2DetailPages.filter(isCompared).length + (hasL2LeagueCompared ? 1 : 0);
 
-    // L3: 从赛事类型页进入的亚/欧/析/大（4 面）+ 从析页进入的主队/客队资料库（2 面）= 6 面
-    // 亚/欧/析 在 L2 已复刻，从 L3 入口看仍属于 L3 应访问页面，故重复计入
-    // 去重：OverDown 页面按 matchId 去重
     const l3OverSeen = new Set();
     const l3OverPage = pages.filter(p => {
         if (!p.url || !p.url.includes('OverDown_n.aspx?id=' + matchId)) return false;
@@ -230,7 +393,6 @@ function calcMatchStats(match, pages) {
         l3OverSeen.add(matchId);
         return true;
     });
-    // 去重：同一 team ID 只计一次，避免 zq.titan007.com 和 info.titan007.com 重复计数
     const l3TeamSeen = new Set();
     const l3TeamPages = pages.filter(p => {
         const m = p.url && p.url.match(/team\/(?:Summary\/)?(\d+)\.html/i);
@@ -246,8 +408,6 @@ function calcMatchStats(match, pages) {
         l3OverPage.filter(isCompared).length +
         l3TeamPages.filter(isCompared).length;
 
-    // 标签页：主队/客队资料库内部的各标签状态（如赛程、阵容、球员数据等）
-    // 去重：同一 tab 类型 + team_id 组合只计一次
     const tabSeen = new Set();
     const teamTabPages = pages.filter(p => {
         if (p.type !== 'team_tab') return false;
@@ -263,7 +423,6 @@ function calcMatchStats(match, pages) {
     });
     const tabCompared = teamTabPages.filter(isCompared).length;
 
-    // 动态计算 expected 值，避免硬编码导致的不准确
     const teamCount = (homeId ? 1 : 0) + (awayId && awayId !== homeId ? 1 : 0);
 
     return {
@@ -284,6 +443,14 @@ function renderStats(item, meta) {
         card.style.display = 'none';
         wrap.innerHTML = '';
         return;
+    }
+
+    // 如果有视觉检查时间，显示在标题旁
+    let titleExtra = '';
+    if (meta && meta.visual_check_at) {
+        const checkTime = new Date(meta.visual_check_at).toLocaleString('zh-CN');
+        const mode = meta.visual_check_mode === 'pixel' ? '像素级' : 'DOM 级';
+        titleExtra = ` <span style="font-weight:normal;color:var(--muted);font-size:0.8rem;">（上次检查: ${checkTime} · ${mode}）</span>`;
     }
 
     let html = `<table class="stats-table">
@@ -324,6 +491,12 @@ function renderStats(item, meta) {
     html += '</tbody></table>';
     wrap.innerHTML = html;
     card.style.display = 'block';
+
+    // 更新标题
+    const titleEl = card.querySelector('.section-title');
+    if (titleEl) {
+        titleEl.innerHTML = '比赛复刻统计' + titleExtra;
+    }
 }
 
 function escapeHtml(text) {
@@ -355,6 +528,160 @@ async function showDate(date) {
     status.textContent = `已加载 ${date}，共 ${item.matches.length} 场比赛`;
 }
 
+// ---- 视觉检查逻辑 ----
+
+function appendLog(text, cls) {
+    const log = document.getElementById('checkLog');
+    const line = document.createElement('div');
+    line.className = cls || 'log-info';
+    line.textContent = text;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+}
+
+async function startVisualCheck() {
+    const date = document.getElementById('dateSelect').value;
+    const apiUrl = getApiUrl();
+
+    // 测试 API 是否可用
+    const ok = await testApiConnection();
+    if (!ok) {
+        alert('API 服务未连接。请在本地启动 API 服务器:\n\n  cd /data/user/work/page-replica-v2\n  python3 api/server.py\n\n然后修改上方的 API 地址并点击「测试」按钮。');
+        return;
+    }
+
+    const checkBtn = document.getElementById('visualCheckBtn');
+    const cancelBtn = document.getElementById('cancelCheckBtn');
+    const progress = document.getElementById('checkProgress');
+    const log = document.getElementById('checkLog');
+
+    checkBtn.disabled = true;
+    cancelBtn.style.display = '';
+    progress.classList.add('active');
+    log.innerHTML = '';
+    appendLog(`[${new Date().toLocaleTimeString('zh-CN')}] 启动视觉检查: ${date}`, 'log-info');
+
+    try {
+        const resp = await fetch(apiUrl + '/api/visual-check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date: date, use_playwright: false }),
+        });
+        const data = await resp.json();
+
+        if (!resp.ok) {
+            appendLog(`错误: ${data.error || '启动失败'}`, 'log-err');
+            checkBtn.disabled = false;
+            cancelBtn.style.display = 'none';
+            return;
+        }
+
+        appendLog(data.message, 'log-info');
+
+        // 开始轮询状态
+        pollCheckStatus();
+
+    } catch (e) {
+        appendLog(`请求失败: ${e.message}`, 'log-err');
+        checkBtn.disabled = false;
+        cancelBtn.style.display = 'none';
+    }
+}
+
+function pollCheckStatus() {
+    if (checkPollTimer) clearInterval(checkPollTimer);
+
+    const apiUrl = getApiUrl();
+    checkPollTimer = setInterval(async () => {
+        try {
+            const resp = await fetch(apiUrl + '/api/visual-check/status');
+            const data = await resp.json();
+
+            // 更新进度条
+            const fill = document.getElementById('checkFill');
+            const percent = document.getElementById('checkPercent');
+            const label = document.getElementById('checkLabel');
+            const current = document.getElementById('checkCurrent');
+
+            const pct = data.percent || 0;
+            fill.style.width = pct + '%';
+            percent.textContent = pct.toFixed(1) + '%';
+
+            if (data.running) {
+                label.textContent = `视觉检查进行中… (${data.progress})`;
+                if (data.current_url) {
+                    current.textContent = `正在检查: ${data.current_type} — ${data.current_url}`;
+                }
+            } else {
+                label.textContent = `视觉检查完成 (${data.progress})`;
+                current.textContent = '';
+            }
+
+            // 输出最近的结果
+            if (data.results && data.results.length > 0) {
+                // 只显示新增的结果（对比已显示的数量）
+                const displayed = parseInt(progressEl.dataset.displayed || '0');
+                const newResults = data.results.slice(displayed);
+                for (const r of newResults) {
+                    let cls = 'log-info';
+                    if (r.status === 'ok') cls = 'log-ok';
+                    else if (r.status === 'needs_fix' || r.status === 'error') cls = 'log-err';
+                    else if (r.status === 'ok_with_diff') cls = 'log-warn';
+                    const pctStr = r.diff_ratio !== null ? ` (${(r.diff_ratio * 100).toFixed(2)}%)` : '';
+                    appendLog(`[${r.type_name}] ${r.status}${pctStr} — ${r.message}`, cls);
+                }
+                progressEl.dataset.displayed = data.results.length;
+            }
+
+            // 检查是否完成
+            if (!data.running) {
+                clearInterval(checkPollTimer);
+                checkPollTimer = null;
+
+                // 显示错误
+                if (data.errors && data.errors.length > 0) {
+                    for (const e of data.errors) {
+                        appendLog(`[错误] ${e}`, 'log-err');
+                    }
+                }
+
+                appendLog(`[${new Date().toLocaleTimeString('zh-CN')}] 检查完成!`, 'log-info');
+
+                // 重新加载 meta.json 并更新统计表
+                const date = document.getElementById('dateSelect').value;
+                appendLog('正在更新统计表…', 'log-info');
+                currentMeta = await loadMeta(date);
+                const item = dates.find(d => d.date === date);
+                if (item && currentMeta) {
+                    renderStats(item, currentMeta);
+                    appendLog('统计表已更新', 'log-ok');
+                }
+
+                // 恢复按钮状态
+                document.getElementById('visualCheckBtn').disabled = false;
+                document.getElementById('cancelCheckBtn').style.display = 'none';
+            }
+        } catch (e) {
+            // 网络错误，继续重试
+            console.error('轮询失败:', e);
+        }
+    }, 1500);
+}
+
+async function cancelVisualCheck() {
+    const apiUrl = getApiUrl();
+    try {
+        await fetch(apiUrl + '/api/visual-check/cancel', { method: 'POST' });
+        appendLog('正在取消…（将在当前页面完成后停止）', 'log-warn');
+    } catch (e) {
+        appendLog(`取消请求失败: ${e.message}`, 'log-err');
+    }
+}
+
+// ---- 事件绑定 ----
+
+const progressEl = document.getElementById('checkProgress');
+
 document.getElementById('viewBtn').onclick = () => {
     showDate(document.getElementById('dateSelect').value);
 };
@@ -364,6 +691,16 @@ document.getElementById('replicateBtn').onclick = () => {
     const level = document.getElementById('levelInput').value;
     alert(`请告诉后端操作员：帮我复刻 ${date}，最大层级 ${level}`);
 };
+
+document.getElementById('visualCheckBtn').onclick = startVisualCheck;
+document.getElementById('cancelCheckBtn').onclick = cancelVisualCheck;
+
+document.getElementById('testApiBtn').onclick = testApiConnection;
+
+// 页面加载时测试 API 连接
+window.addEventListener('load', () => {
+    setTimeout(testApiConnection, 500);
+});
 
 loadDates();
 </script>
